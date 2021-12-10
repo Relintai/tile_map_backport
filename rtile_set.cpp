@@ -205,7 +205,7 @@ bool RTileMapPattern::_get(const StringName &p_name, Variant &r_ret) const {
 }
 
 void RTileMapPattern::_get_property_list(List<PropertyInfo> *p_list) const {
-	p_list->push_back(PropertyInfo(Variant::OBJECT, "tile_data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR | PROPERTY_USAGE_INTERNAL));
+	p_list->push_back(PropertyInfo(Variant::OBJECT, "tile_data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 }
 
 void RTileMapPattern::_bind_methods() {
@@ -342,7 +342,7 @@ void RTileSet::set_tile_shape(RTileSet::TileShape p_shape) {
 
 	terrain_bits_meshes_dirty = true;
 	tile_meshes_dirty = true;
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 RTileSet::TileShape RTileSet::get_tile_shape() const {
@@ -360,7 +360,7 @@ RTileSet::TileLayout RTileSet::get_tile_layout() const {
 void RTileSet::set_tile_offset_axis(RTileSet::TileOffsetAxis p_alignment) {
 	tile_offset_axis = p_alignment;
 
-	for (const Map<int, RTileSetSource>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
 		E_source->value()->notify_tile_data_properties_should_change();
 	}
 
@@ -405,7 +405,7 @@ void RTileSet::_update_terrains_cache() {
 						int alternative_id = source->get_alternative_tile_id(tile_id, alternative_index);
 
 						// Executed for each tile_data.
-						TileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(tile_id, alternative_id));
+						RTileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(tile_id, alternative_id));
 						int terrain_set = tile_data->get_terrain_set();
 						if (terrain_set >= 0) {
 							RTileMapCell cell;
@@ -458,12 +458,12 @@ int RTileSet::add_source(Ref<RTileSetSource> p_tile_set_source, int p_atlas_sour
 
 	int new_source_id = p_atlas_source_id_override >= 0 ? p_atlas_source_id_override : next_source_id;
 	sources[new_source_id] = p_tile_set_source;
-	source_ids.append(new_source_id);
+	source_ids.push_back(new_source_id);
 	source_ids.sort();
 	p_tile_set_source->set_tile_set(this);
 	_compute_next_source_id();
 
-	sources[new_source_id]->connect(CoreStringNames::get_singleton()->changed, callable_mp(this, &RTileSet::_source_changed));
+	sources[new_source_id]->connect(CoreStringNames::get_singleton()->changed, this, "_source_changed");
 
 	terrains_cache_dirty = true;
 	emit_changed();
@@ -474,7 +474,7 @@ int RTileSet::add_source(Ref<RTileSetSource> p_tile_set_source, int p_atlas_sour
 void RTileSet::remove_source(int p_source_id) {
 	ERR_FAIL_COND_MSG(!sources.has(p_source_id), vformat("Cannot remove TileSet atlas source. No tileset atlas source with id %d.", p_source_id));
 
-	sources[p_source_id]->disconnect(CoreStringNames::get_singleton()->changed, callable_mp(this, &RTileSet::_source_changed));
+	sources[p_source_id]->disconnect(CoreStringNames::get_singleton()->changed, this, "_source_changed");
 
 	sources[p_source_id]->set_tile_set(nullptr);
 	sources.erase(p_source_id);
@@ -550,11 +550,11 @@ void RTileSet::add_occlusion_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, occlusion_layers.size() + 1);
 	occlusion_layers.insert(p_index, OcclusionLayer());
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->add_occlusion_layer(p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -562,23 +562,23 @@ void RTileSet::move_occlusion_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, occlusion_layers.size());
 	ERR_FAIL_INDEX(p_to_pos, occlusion_layers.size() + 1);
 	occlusion_layers.insert(p_to_pos, occlusion_layers[p_from_index]);
-	occlusion_layers.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	occlusion_layers.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->move_occlusion_layer(p_from_index, p_to_pos);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
 void RTileSet::remove_occlusion_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, occlusion_layers.size());
-	occlusion_layers.remove_at(p_index);
+	occlusion_layers.remove(p_index);
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->remove_occlusion_layer(p_index);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -615,11 +615,12 @@ void RTileSet::add_physics_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, physics_layers.size() + 1);
 	physics_layers.insert(p_index, PhysicsLayer());
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->add_physics_layer(p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
+
 	emit_changed();
 }
 
@@ -627,23 +628,24 @@ void RTileSet::move_physics_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, physics_layers.size());
 	ERR_FAIL_INDEX(p_to_pos, physics_layers.size() + 1);
 	physics_layers.insert(p_to_pos, physics_layers[p_from_index]);
-	physics_layers.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	physics_layers.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->move_physics_layer(p_from_index, p_to_pos);
 	}
-	notify_property_list_changed();
+
+	property_list_changed_notify();
 	emit_changed();
 }
 
 void RTileSet::remove_physics_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, physics_layers.size());
-	physics_layers.remove_at(p_index);
+	physics_layers.remove(p_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->remove_physics_layer(p_index);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -691,11 +693,11 @@ void RTileSet::add_terrain_set(int p_index) {
 	ERR_FAIL_INDEX(p_index, terrain_sets.size() + 1);
 	terrain_sets.insert(p_index, TerrainSet());
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->add_terrain_set(p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
@@ -704,26 +706,26 @@ void RTileSet::move_terrain_set(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, terrain_sets.size());
 	ERR_FAIL_INDEX(p_to_pos, terrain_sets.size() + 1);
 	terrain_sets.insert(p_to_pos, terrain_sets[p_from_index]);
-	terrain_sets.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	terrain_sets.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->move_terrain_set(p_from_index, p_to_pos);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
 
 void RTileSet::remove_terrain_set(int p_index) {
 	ERR_FAIL_INDEX(p_index, terrain_sets.size());
-	terrain_sets.remove_at(p_index);
+	terrain_sets.remove(p_index);
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->remove_terrain_set(p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
@@ -732,11 +734,11 @@ void RTileSet::set_terrain_set_mode(int p_terrain_set, TerrainMode p_terrain_mod
 	ERR_FAIL_INDEX(p_terrain_set, terrain_sets.size());
 	terrain_sets.write[p_terrain_set].mode = p_terrain_mode;
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
 		E_source->value()->notify_tile_data_properties_should_change();
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
@@ -767,11 +769,11 @@ void RTileSet::add_terrain(int p_terrain_set, int p_index) {
 	terrains.write[p_index].color = c;
 	terrains.write[p_index].name = String(vformat("Terrain %d", p_index));
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->add_terrain(p_terrain_set, p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
@@ -783,12 +785,12 @@ void RTileSet::move_terrain(int p_terrain_set, int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, terrains.size());
 	ERR_FAIL_INDEX(p_to_pos, terrains.size() + 1);
 	terrains.insert(p_to_pos, terrains[p_from_index]);
-	terrains.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	terrains.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->move_terrain(p_terrain_set, p_from_index, p_to_pos);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
@@ -798,12 +800,12 @@ void RTileSet::remove_terrain(int p_terrain_set, int p_index) {
 	Vector<Terrain> &terrains = terrain_sets.write[p_terrain_set].terrains;
 
 	ERR_FAIL_INDEX(p_index, terrains.size());
-	terrains.remove_at(p_index);
+	terrains.remove(p_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->remove_terrain(p_terrain_set, p_index);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	terrains_cache_dirty = true;
 	emit_changed();
 }
@@ -942,11 +944,11 @@ void RTileSet::add_navigation_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, navigation_layers.size() + 1);
 	navigation_layers.insert(p_index, NavigationLayer());
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->add_navigation_layer(p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -954,23 +956,23 @@ void RTileSet::move_navigation_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, navigation_layers.size());
 	ERR_FAIL_INDEX(p_to_pos, navigation_layers.size() + 1);
 	navigation_layers.insert(p_to_pos, navigation_layers[p_from_index]);
-	navigation_layers.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	navigation_layers.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->move_navigation_layer(p_from_index, p_to_pos);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
 void RTileSet::remove_navigation_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, navigation_layers.size());
-	navigation_layers.remove_at(p_index);
+	navigation_layers.remove(p_index);
 	
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->remove_navigation_layer(p_index);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -997,11 +999,11 @@ void RTileSet::add_custom_data_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, custom_data_layers.size() + 1);
 	custom_data_layers.insert(p_index, CustomDataLayer());
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->add_custom_data_layer(p_index);
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -1009,18 +1011,18 @@ void RTileSet::move_custom_data_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, custom_data_layers.size());
 	ERR_FAIL_INDEX(p_to_pos, custom_data_layers.size() + 1);
 	custom_data_layers.insert(p_to_pos, custom_data_layers[p_from_index]);
-	custom_data_layers.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	custom_data_layers.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->move_custom_data_layer(p_from_index, p_to_pos);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
 void RTileSet::remove_custom_data_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, custom_data_layers.size());
-	custom_data_layers.remove_at(p_index);
+	custom_data_layers.remove(p_index);
 
 	for (const Map<String, int>::Element *E = custom_data_layers_by_name.front(); E; E = E->next()) {
 		if (E->value() == p_index) {
@@ -1029,10 +1031,10 @@ void RTileSet::remove_custom_data_layer(int p_index) {
 		}
 	}
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *source = sources.front(); source; source = source->next()) {
 		source->value()->remove_custom_data_layer(p_index);
 	}
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_changed();
 }
 
@@ -1075,7 +1077,7 @@ void RTileSet::set_custom_data_type(int p_layer_id, Variant::Type p_value) {
 	ERR_FAIL_INDEX(p_layer_id, custom_data_layers.size());
 	custom_data_layers.write[p_layer_id].type = p_value;
 
-	for (const Map<int, Ref<RTileSetSource>>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
+	for (Map<int, Ref<RTileSetSource>>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
 		E_source->value()->notify_tile_data_properties_should_change();
 	}
 
@@ -1217,8 +1219,8 @@ Array RTileSet::get_source_level_tile_proxies() const {
 
 	for (const Map<int, int>::Element *E = source_level_proxies.front(); E; E = E->next()) {
 		Array proxy;
-		proxy.push_back(E.key);
-		proxy.push_back(E.value);
+		proxy.push_back(E->key());
+		proxy.push_back(E->value());
 		output.push_back(proxy);
 	}
 	return output;
@@ -1256,7 +1258,7 @@ Array RTileSet::map_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_
 
 	// Check if the tile is valid, and if so, don't map the tile and return the input.
 	if (has_source(p_source_from)) {
-		Ref<TileSetSource> source = get_source(p_source_from);
+		Ref<RTileSetSource> source = get_source(p_source_from);
 		if (source->has_tile(p_coords_from) && source->has_alternative_tile(p_coords_from, p_alternative_from)) {
 			return from;
 		}
@@ -1297,7 +1299,7 @@ void RTileSet::cleanup_invalid_tile_proxies() {
 
 	for (const Map<int, int>::Element *E = source_level_proxies.front(); E; E = E->next()) {
 		if (has_source(E->key())) {
-			source_to_remove.append(E->key());
+			source_to_remove.push_back(E->key());
 		}
 	}
 	for (int i = 0; i < source_to_remove.size(); i++) {
@@ -1362,7 +1364,7 @@ Ref<RTileMapPattern> RTileSet::get_pattern(int p_index) {
 
 void RTileSet::remove_pattern(int p_index) {
 	ERR_FAIL_INDEX(p_index, (int)patterns.size());
-	patterns.remove_at(p_index);
+	patterns.remove(p_index);
 	emit_changed();
 }
 
@@ -1397,8 +1399,8 @@ RTileMapCell RTileSet::get_random_tile_from_terrains_pattern(int p_terrain_set, 
 	Set<RTileMapCell> set = per_terrain_pattern_tiles[p_terrain_set][p_terrain_tile_pattern];
 	for (Set<RTileMapCell>::Element *E = set.front(); E; E = E->next()) {
 		if (E->get().source_id >= 0) {
-			Ref<TileSetSource> source = sources[E->get().source_id];
-			Ref<TileSetAtlasSource> atlas_source = source;
+			Ref<RTileSetSource> source = sources[E->get().source_id];
+			Ref<RTileSetAtlasSource> atlas_source = source;
 			if (atlas_source.is_valid()) {
 				RTileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(E->get().get_atlas_coords(), E->get().alternative_tile));
 				sum += tile_data->get_probability();
@@ -1417,9 +1419,9 @@ RTileMapCell RTileSet::get_random_tile_from_terrains_pattern(int p_terrain_set, 
 	// Pick the tile.
 	for (Set<RTileMapCell>::Element *E = set.front(); E; E = E->next()) {
 		if (E->get().source_id >= 0) {
-			Ref<TileSetSource> source = sources[E->get().source_id];
+			Ref<RTileSetSource> source = sources[E->get().source_id];
 
-			Ref<TileSetAtlasSource> atlas_source = source;
+			Ref<RTileSetAtlasSource> atlas_source = source;
 			if (atlas_source.is_valid()) {
 				RTileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(E->get().get_atlas_coords(), E->get().alternative_tile));
 				count += tile_data->get_probability();
@@ -1693,7 +1695,7 @@ Vector<Vector<Ref<Texture>>> RTileSet::generate_terrains_icons(Size2i p_size) {
 				for (int alternative_index = 0; alternative_index < source->get_alternative_tiles_count(tile_id); alternative_index++) {
 					int alternative_id = source->get_alternative_tile_id(tile_id, alternative_index);
 
-					TileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(tile_id, alternative_id));
+					RTileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(tile_id, alternative_id));
 					int terrain_set = tile_data->get_terrain_set();
 					if (terrain_set >= 0) {
 						ERR_FAIL_INDEX_V(terrain_set, get_terrain_sets_count(), Vector<Vector<Ref<Texture>>>());
@@ -1735,20 +1737,20 @@ Vector<Vector<Ref<Texture>>> RTileSet::generate_terrains_icons(Size2i p_size) {
 	for (int terrain_set = 0; terrain_set < get_terrain_sets_count(); terrain_set++) {
 		for (int terrain = 0; terrain < get_terrains_count(terrain_set); terrain++) {
 			Ref<Image> image;
-			image.instantiate();
+			image.instance();
 			if (counts[terrain_set][terrain].count > 0) {
 				// Get the best tile.
 				Ref<Texture> texture = counts[terrain_set][terrain].texture;
 				Rect2 region = counts[terrain_set][terrain].region;
 				image->create(region.size.x, region.size.y, false, Image::FORMAT_RGBA8);
-				image->blit_rect(texture->get_image(), region, Point2());
+				image->blit_rect(texture->get_data(), region, Point2());
 				image->resize(p_size.x, p_size.y, Image::INTERPOLATE_NEAREST);
 			} else {
 				image->create(1, 1, false, Image::FORMAT_RGBA8);
 				image->set_pixel(0, 0, get_terrain_color(terrain_set, terrain));
 			}
 			Ref<ImageTexture> icon;
-			icon.instantiate();
+			icon.instance();
 			icon->create_from_image(image);
 			icon->set_size_override(p_size);
 
@@ -2383,8 +2385,8 @@ void RTileSet::_compatibility_conversion() {
 		CompatibilityTileData *ctd = E->value();
 
 		// Add the texture
-		TileSetAtlasSource *atlas_source = memnew(TileSetAtlasSource);
-		int source_id = add_source(Ref<TileSetSource>(atlas_source));
+		RTileSetAtlasSource *atlas_source = memnew(RTileSetAtlasSource);
+		int source_id = add_source(Ref<RTileSetSource>(atlas_source));
 
 		atlas_source->set_texture(ctd->texture);
 
@@ -2646,12 +2648,12 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 
 #ifndef DISABLE_DEPRECATED
 	// TODO: This should be moved to a dedicated conversion system (see #50691)
-	if (components.size() >= 1 && components[0].is_valid_int()) {
+	if (components.size() >= 1 && components[0].is_valid_integer()) {
 		int id = components[0].to_int();
 
 		// Get or create the compatibility object
 		CompatibilityTileData *ctd;
-		Map<int, RCompatibilityTileData *>::Element *E = compatibility_data.find(id);
+		Map<int, CompatibilityTileData *>::Element *E = compatibility_data.find(id);
 		if (!E) {
 			ctd = memnew(CompatibilityTileData);
 			compatibility_data.insert(id, ctd);
@@ -2805,7 +2807,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 #endif // DISABLE_DEPRECATED
 
 		// This is now a new property.
-		if (components.size() == 2 && components[0].begins_with("occlusion_layer_") && components[0].trim_prefix("occlusion_layer_").is_valid_int()) {
+		if (components.size() == 2 && components[0].begins_with("occlusion_layer_") && components[0].trim_prefix("occlusion_layer_").is_valid_integer()) {
 			// Occlusion layers.
 			int index = components[0].trim_prefix("occlusion_layer_").to_int();
 			ERR_FAIL_COND_V(index < 0, false);
@@ -2824,7 +2826,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_occlusion_layer_sdf_collision(index, p_value);
 				return true;
 			}
-		} else if (components.size() == 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
+		} else if (components.size() == 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_integer()) {
 			// Physics layers.
 			int index = components[0].trim_prefix("physics_layer_").to_int();
 			ERR_FAIL_COND_V(index < 0, false);
@@ -2850,7 +2852,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_physics_layer_physics_material(index, physics_material);
 				return true;
 			}
-		} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int()) {
+		} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_integer()) {
 			// Terrains.
 			int terrain_set_index = components[0].trim_prefix("terrain_set_").to_int();
 			ERR_FAIL_COND_V(terrain_set_index < 0, false);
@@ -2860,7 +2862,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 					add_terrain_set();
 				}
 				set_terrain_set_mode(terrain_set_index, TerrainMode(int(p_value)));
-			} else if (components.size() >= 3 && components[1].begins_with("terrain_") && components[1].trim_prefix("terrain_").is_valid_int()) {
+			} else if (components.size() >= 3 && components[1].begins_with("terrain_") && components[1].trim_prefix("terrain_").is_valid_integer()) {
 				int terrain_index = components[1].trim_prefix("terrain_").to_int();
 				ERR_FAIL_COND_V(terrain_index < 0, false);
 				if (components[2] == "name") {
@@ -2885,7 +2887,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 					return true;
 				}
 			}
-		} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
+		} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_integer()) {
 			// Navigation layers.
 			int index = components[0].trim_prefix("navigation_layer_").to_int();
 			ERR_FAIL_COND_V(index < 0, false);
@@ -2897,7 +2899,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_navigation_layer_layers(index, p_value);
 				return true;
 			}
-		} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_int()) {
+		} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_integer()) {
 			// Custom data layers.
 			int index = components[0].trim_prefix("custom_data_layer_").to_int();
 			ERR_FAIL_COND_V(index < 0, false);
@@ -2916,7 +2918,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_custom_data_type(index, Variant::Type(int(p_value)));
 				return true;
 			}
-		} else if (components.size() == 2 && components[0] == "sources" && components[1].is_valid_int()) {
+		} else if (components.size() == 2 && components[0] == "sources" && components[1].is_valid_integer()) {
 			// Create source only if it does not exists.
 			int source_id = components[1].to_int();
 
@@ -2949,7 +2951,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 				return true;
 			}
 			return false;
-		} else if (components.size() == 1 && components[0].begins_with("pattern_") && components[0].trim_prefix("pattern_").is_valid_int()) {
+		} else if (components.size() == 1 && components[0].begins_with("pattern_") && components[0].trim_prefix("pattern_").is_valid_integer()) {
 			int pattern_index = components[0].trim_prefix("pattern_").to_int();
 			for (int i = patterns.size(); i <= pattern_index; i++) {
 				add_pattern(p_value);
@@ -2967,7 +2969,7 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 	Vector<String> components = String(p_name).split("/", true, 2);
 
-	if (components.size() == 2 && components[0].begins_with("occlusion_layer_") && components[0].trim_prefix("occlusion_layer_").is_valid_int()) {
+	if (components.size() == 2 && components[0].begins_with("occlusion_layer_") && components[0].trim_prefix("occlusion_layer_").is_valid_integer()) {
 		// Occlusion layers.
 		int index = components[0].trim_prefix("occlusion_layer_").to_int();
 		if (index < 0 || index >= occlusion_layers.size()) {
@@ -2980,7 +2982,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_occlusion_layer_sdf_collision(index);
 			return true;
 		}
-	} else if (components.size() == 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
+	} else if (components.size() == 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_integer()) {
 		// Physics layers.
 		int index = components[0].trim_prefix("physics_layer_").to_int();
 		if (index < 0 || index >= physics_layers.size()) {
@@ -2996,7 +2998,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_physics_layer_physics_material(index);
 			return true;
 		}
-	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int()) {
+	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_integer()) {
 		// Terrains.
 		int terrain_set_index = components[0].trim_prefix("terrain_set_").to_int();
 		if (terrain_set_index < 0 || terrain_set_index >= terrain_sets.size()) {
@@ -3005,7 +3007,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 		if (components[1] == "mode") {
 			r_ret = get_terrain_set_mode(terrain_set_index);
 			return true;
-		} else if (components.size() >= 3 && components[1].begins_with("terrain_") && components[1].trim_prefix("terrain_").is_valid_int()) {
+		} else if (components.size() >= 3 && components[1].begins_with("terrain_") && components[1].trim_prefix("terrain_").is_valid_integer()) {
 			int terrain_index = components[1].trim_prefix("terrain_").to_int();
 			if (terrain_index < 0 || terrain_index >= terrain_sets[terrain_set_index].terrains.size()) {
 				return false;
@@ -3018,7 +3020,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 				return true;
 			}
 		}
-	} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
+	} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_integer()) {
 		// navigation layers.
 		int index = components[0].trim_prefix("navigation_layer_").to_int();
 		if (index < 0 || index >= navigation_layers.size()) {
@@ -3028,7 +3030,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_navigation_layer_layers(index);
 			return true;
 		}
-	} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_int()) {
+	} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_integer()) {
 		// Custom data layers.
 		int index = components[0].trim_prefix("custom_data_layer_").to_int();
 		if (index < 0 || index >= custom_data_layers.size()) {
@@ -3041,7 +3043,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_custom_data_type(index);
 			return true;
 		}
-	} else if (components.size() == 2 && components[0] == "sources" && components[1].is_valid_int()) {
+	} else if (components.size() == 2 && components[0] == "sources" && components[1].is_valid_integer()) {
 		// Atlases data.
 		int source_id = components[1].to_int();
 
@@ -3078,7 +3080,7 @@ bool RTileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			return true;
 		}
 		return false;
-	} else if (components.size() == 1 && components[0].begins_with("pattern_") && components[0].trim_prefix("pattern_").is_valid_int()) {
+	} else if (components.size() == 1 && components[0].begins_with("pattern_") && components[0].trim_prefix("pattern_").is_valid_integer()) {
 		int pattern_index = components[0].trim_prefix("pattern_").to_int();
 		if (pattern_index < 0 || pattern_index >= (int)patterns.size()) {
 			return false;
@@ -3156,34 +3158,34 @@ void RTileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 	// Sources.
 	// Note: sources have to be listed in at the end as some TileData rely on the TileSet properties being initialized first.
 	for (const Map<int, Ref<RTileSetSource>>::Element *E_source = sources.front(); E_source; E_source = E_source->next()) {
-		p_list->push_back(PropertyInfo(Variant::INT, vformat("sources/%d", E_source->key()), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR));
+		p_list->push_back(PropertyInfo(Variant::INT, vformat("sources/%d", E_source->key()), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
 	}
 
 	// Tile Proxies.
 	// Note: proxies need to be set after sources are set.
 	p_list->push_back(PropertyInfo(Variant::NIL, "Tile Proxies", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
-	p_list->push_back(PropertyInfo(Variant::ARRAY, "tile_proxies/source_level", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR));
-	p_list->push_back(PropertyInfo(Variant::ARRAY, "tile_proxies/coords_level", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR));
-	p_list->push_back(PropertyInfo(Variant::ARRAY, "tile_proxies/alternative_level", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR));
+	p_list->push_back(PropertyInfo(Variant::ARRAY, "tile_proxies/source_level", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
+	p_list->push_back(PropertyInfo(Variant::ARRAY, "tile_proxies/coords_level", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
+	p_list->push_back(PropertyInfo(Variant::ARRAY, "tile_proxies/alternative_level", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
 
 	// Patterns.
 	for (unsigned int pattern_index = 0; pattern_index < patterns.size(); pattern_index++) {
-		p_list->push_back(PropertyInfo(Variant::OBJECT, vformat("pattern_%d", pattern_index), PROPERTY_HINT_RESOURCE_TYPE, "TileMapPattern", PROPERTY_USAGE_NO_EDITOR));
+		p_list->push_back(PropertyInfo(Variant::OBJECT, vformat("pattern_%d", pattern_index), PROPERTY_HINT_RESOURCE_TYPE, "TileMapPattern", PROPERTY_USAGE_NOEDITOR));
 	}
 }
 
 void RTileSet::_validate_property(PropertyInfo &property) const {
-	if (property.name == "tile_layout" && tile_shape == TILE_SHAPE_SQUARE) {
-		property.usage ^= PROPERTY_USAGE_READ_ONLY;
-	} else if (property.name == "tile_offset_axis" && tile_shape == TILE_SHAPE_SQUARE) {
-		property.usage ^= PROPERTY_USAGE_READ_ONLY;
-	}
+	//if (property.name == "tile_layout" && tile_shape == TILE_SHAPE_SQUARE) {
+	//	property.usage ^= PROPERTY_USAGE_READ_ONLY;
+	//} else if (property.name == "tile_offset_axis" && tile_shape == TILE_SHAPE_SQUARE) {
+	//	property.usage ^= PROPERTY_USAGE_READ_ONLY;
+	//}
 }
 
 void RTileSet::_bind_methods() {
 	// Sources management.
 	ClassDB::bind_method(D_METHOD("get_next_source_id"), &RTileSet::get_next_source_id);
-	ClassDB::bind_method(D_METHOD("add_source", "source", "atlas_source_id_override"), &RTileSet::add_source, DEFVAL(TileSet::INVALID_SOURCE));
+	ClassDB::bind_method(D_METHOD("add_source", "source", "atlas_source_id_override"), &RTileSet::add_source, RTileSet::INVALID_SOURCE);
 	ClassDB::bind_method(D_METHOD("remove_source", "source_id"), &RTileSet::remove_source);
 	ClassDB::bind_method(D_METHOD("set_source_id", "source_id", "new_source_id"), &RTileSet::set_source_id);
 	ClassDB::bind_method(D_METHOD("get_source_count"), &RTileSet::get_source_count);
@@ -3288,6 +3290,8 @@ void RTileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_pattern", "index"), &RTileSet::get_pattern, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("remove_pattern", "index"), &RTileSet::remove_pattern);
 	ClassDB::bind_method(D_METHOD("get_patterns_count"), &RTileSet::get_patterns_count);
+
+	ClassDB::bind_method(D_METHOD("_source_changed"), &RTileSet::_source_changed);
 
 	ADD_GROUP("Rendering", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "uv_clipping"), "set_uv_clipping", "is_uv_clipping");
@@ -3559,13 +3563,13 @@ void RTileSetAtlasSource::reset_state() {
 
 void RTileSetAtlasSource::set_texture(Ref<Texture> p_texture) {
 	if (texture.is_valid()) {
-		texture->disconnect(SNAME("changed"), callable_mp(this, &RTileSetAtlasSource::_queue_update_padded_texture));
+		texture->disconnect("changed", this, "_queue_update_padded_texture");
 	}
 
 	texture = p_texture;
 
 	if (texture.is_valid()) {
-		texture->connect(SNAME("changed"), callable_mp(this, &RTileSetAtlasSource::_queue_update_padded_texture));
+		texture->connect("changed", this, "_queue_update_padded_texture");
 	}
 
 	_clear_tiles_outside_texture();
@@ -3666,7 +3670,7 @@ bool RTileSetAtlasSource::_set(const StringName &p_name, const Variant &p_value)
 	// Compute the vector2i if we have coordinates.
 	Vector<String> coords_split = components[0].split(":");
 	Vector2i coords = RTileSetSource::INVALID_ATLAS_COORDS;
-	if (coords_split.size() == 2 && coords_split[0].is_valid_int() && coords_split[1].is_valid_int()) {
+	if (coords_split.size() == 2 && coords_split[0].is_valid_integer() && coords_split[1].is_valid_integer()) {
 		coords = Vector2i(coords_split[0].to_int(), coords_split[1].to_int());
 	}
 
@@ -3696,7 +3700,7 @@ bool RTileSetAtlasSource::_set(const StringName &p_name, const Variant &p_value)
 			} else if (components[1] == "animation_frames_count") {
 				set_tile_animation_frames_count(coords, p_value);
 				return true;
-			} else if (components.size() >= 3 && components[1].begins_with("animation_frame_") && components[1].trim_prefix("animation_frame_").is_valid_int()) {
+			} else if (components.size() >= 3 && components[1].begins_with("animation_frame_") && components[1].trim_prefix("animation_frame_").is_valid_integer()) {
 				int frame = components[1].trim_prefix("animation_frame_").to_int();
 				if (components[2] == "duration") {
 					if (frame >= get_tile_animation_frames_count(coords)) {
@@ -3706,7 +3710,7 @@ bool RTileSetAtlasSource::_set(const StringName &p_name, const Variant &p_value)
 					return true;
 				}
 				return false;
-			} else if (components[1].is_valid_int()) {
+			} else if (components[1].is_valid_integer()) {
 				int alternative_id = components[1].to_int();
 				if (alternative_id != RTileSetSource::INVALID_TILE_ALTERNATIVE) {
 					// Create the alternative if needed ?
@@ -3714,7 +3718,7 @@ bool RTileSetAtlasSource::_set(const StringName &p_name, const Variant &p_value)
 						create_alternative_tile(coords, alternative_id);
 					}
 					if (!tiles[coords].alternatives.has(alternative_id)) {
-						tiles[coords].alternatives[alternative_id] = memnew(TileData);
+						tiles[coords].alternatives[alternative_id] = memnew(RTileData);
 						tiles[coords].alternatives[alternative_id]->set_tile_set(tile_set);
 						tiles[coords].alternatives[alternative_id]->set_allow_transform(alternative_id > 0);
 						tiles[coords].alternatives_ids.append(alternative_id);
@@ -3740,7 +3744,7 @@ bool RTileSetAtlasSource::_get(const StringName &p_name, Variant &r_ret) const {
 
 	// Properties.
 	Vector<String> coords_split = components[0].split(":");
-	if (coords_split.size() == 2 && coords_split[0].is_valid_int() && coords_split[1].is_valid_int()) {
+	if (coords_split.size() == 2 && coords_split[0].is_valid_integer() && coords_split[1].is_valid_integer()) {
 		Vector2i coords = Vector2i(coords_split[0].to_int(), coords_split[1].to_int());
 		if (tiles.has(coords)) {
 			if (components.size() >= 2) {
@@ -3773,7 +3777,7 @@ bool RTileSetAtlasSource::_get(const StringName &p_name, Variant &r_ret) const {
 						return true;
 					}
 					return false;
-				} else if (components[1].is_valid_int()) {
+				} else if (components[1].is_valid_integer()) {
 					int alternative_id = components[1].to_int();
 					if (alternative_id != RTileSetSource::INVALID_TILE_ALTERNATIVE && tiles[coords].alternatives.has(alternative_id)) {
 						if (components.size() >= 3) {
@@ -3801,36 +3805,36 @@ void RTileSetAtlasSource::_get_property_list(List<PropertyInfo> *p_list) const {
 		List<PropertyInfo> tile_property_list;
 
 		// size_in_atlas
-		property_info = PropertyInfo(Variant::VECTOR2I, "size_in_atlas", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR);
-		if (E_tile.value.size_in_atlas == Vector2i(1, 1)) {
+		property_info = PropertyInfo(Variant::VECTOR2I, "size_in_atlas", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR);
+		if (E_tile->value().size_in_atlas == Vector2i(1, 1)) {
 			property_info.usage ^= PROPERTY_USAGE_STORAGE;
 		}
 		tile_property_list.push_back(property_info);
 
 		// next_alternative_id
-		property_info = PropertyInfo(Variant::INT, "next_alternative_id", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR);
-		if (E_tile.value.next_alternative_id == 1) {
+		property_info = PropertyInfo(Variant::INT, "next_alternative_id", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR);
+		if (E_tile->value().next_alternative_id == 1) {
 			property_info.usage ^= PROPERTY_USAGE_STORAGE;
 		}
 		tile_property_list.push_back(property_info);
 
 		// animation_columns.
-		property_info = PropertyInfo(Variant::INT, "animation_columns", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR);
-		if (E_tile.value.animation_columns == 0) {
+		property_info = PropertyInfo(Variant::INT, "animation_columns", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR);
+		if (E_tile->value().animation_columns == 0) {
 			property_info.usage ^= PROPERTY_USAGE_STORAGE;
 		}
 		tile_property_list.push_back(property_info);
 
 		// animation_separation.
-		property_info = PropertyInfo(Variant::INT, "animation_separation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR);
-		if (E_tile.value.animation_separation == Vector2i()) {
+		property_info = PropertyInfo(Variant::INT, "animation_separation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR);
+		if (E_tile->value().animation_separation == Vector2i()) {
 			property_info.usage ^= PROPERTY_USAGE_STORAGE;
 		}
 		tile_property_list.push_back(property_info);
 
 		// animation_speed.
-		property_info = PropertyInfo(Variant::FLOAT, "animation_speed", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR);
-		if (E_tile.value.animation_speed == 1.0) {
+		property_info = PropertyInfo(Variant::REAL, "animation_speed", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR);
+		if (E_tile->value().animation_speed == 1.0) {
 			property_info.usage ^= PROPERTY_USAGE_STORAGE;
 		}
 		tile_property_list.push_back(property_info);
@@ -3839,9 +3843,9 @@ void RTileSetAtlasSource::_get_property_list(List<PropertyInfo> *p_list) const {
 		tile_property_list.push_back(PropertyInfo(Variant::INT, "animation_frames_count", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NETWORK));
 
 		// animation_frame_*.
-		bool store_durations = tiles[E_tile.key].animation_frames_durations.size() >= 2;
-		for (int i = 0; i < (int)tiles[E_tile.key].animation_frames_durations.size(); i++) {
-			property_info = PropertyInfo(Variant::FLOAT, vformat("animation_frame_%d/duration", i), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR);
+		bool store_durations = tiles[E_tile->key()].animation_frames_durations.size() >= 2;
+		for (int i = 0; i < (int)tiles[E_tile->key()].animation_frames_durations.size(); i++) {
+			property_info = PropertyInfo(Variant::REAL, vformat("animation_frame_%d/duration", i), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR);
 			if (!store_durations) {
 				property_info.usage ^= PROPERTY_USAGE_STORAGE;
 			}
@@ -3850,25 +3854,29 @@ void RTileSetAtlasSource::_get_property_list(List<PropertyInfo> *p_list) const {
 
 		for (const Map<int, RTileData *>::Element *E_alternative = E_tile->value().alternatives.front(); E_alternative; E_alternative = E_alternative->next()) {
 			// Add a dummy property to show the alternative exists.
-			tile_property_list.push_back(PropertyInfo(Variant::INT, vformat("%d", E_alternative->key()), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR));
+			tile_property_list.push_back(PropertyInfo(Variant::INT, vformat("%d", E_alternative->key()), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
 
 			// Get the alternative tile's properties and append them to the list of properties.
 			List<PropertyInfo> alternative_property_list;
 			E_alternative->value()->get_property_list(&alternative_property_list);
-			for (PropertyInfo &alternative_property_info : alternative_property_list) {
+
+			for (List<PropertyInfo>::Element *E = alternative_property_list.front(); E; E = E->next()) {
+				PropertyInfo &alternative_property_info = E->get();
 				Variant default_value = ClassDB::class_get_default_property_value("TileData", alternative_property_info.name);
-				Variant value = E_alternative.value->get(alternative_property_info.name);
+				Variant value = E_alternative->value()->get(alternative_property_info.name);
 				if (default_value.get_type() != Variant::NIL && bool(Variant::evaluate(Variant::OP_EQUAL, value, default_value))) {
 					alternative_property_info.usage ^= PROPERTY_USAGE_STORAGE;
 				}
-				alternative_property_info.name = vformat("%s/%s", vformat("%d", E_alternative.key), alternative_property_info.name);
+				alternative_property_info.name = vformat("%s/%s", vformat("%d", E_alternative->key()), alternative_property_info.name);
 				tile_property_list.push_back(alternative_property_info);
 			}
 		}
 
 		// Add all alternative.
-		for (PropertyInfo &tile_property_info : tile_property_list) {
-			tile_property_info.name = vformat("%s/%s", vformat("%d:%d", E_tile.key.x, E_tile.key.y), tile_property_info.name);
+		for (List<PropertyInfo>::Element *E = tile_property_list.front(); E; E = E->next()) {
+			PropertyInfo &tile_property_info = E->get();
+
+			tile_property_info.name = vformat("%s/%s", vformat("%d:%d", E_tile->key().x, E_tile->key().y), tile_property_info.name);
 			p_list->push_back(tile_property_info);
 		}
 	}
@@ -3889,9 +3897,9 @@ void RTileSetAtlasSource::create_tile(const Vector2i p_atlas_coords, const Vecto
 	tad.alternatives[0] = memnew(RTileData);
 	tad.alternatives[0]->set_tile_set(tile_set);
 	tad.alternatives[0]->set_allow_transform(false);
-	tad.alternatives[0]->connect("changed", callable_mp((Resource *)this, &RTileSetAtlasSource::emit_changed));
-	tad.alternatives[0]->notify_property_list_changed();
-	tad.alternatives_ids.append(0);
+	tad.alternatives[0]->connect("changed", this, "emit_changed");
+	tad.alternatives[0]->property_list_changed_notify();
+	tad.alternatives_ids.push_back(0);
 
 	// Create and resize the tile.
 	tiles.insert(p_atlas_coords, tad);
@@ -3952,7 +3960,7 @@ void RTileSetAtlasSource::set_tile_animation_columns(const Vector2i p_atlas_coor
 	_create_coords_mapping_cache(p_atlas_coords);
 	_queue_update_padded_texture();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileSetAtlasSource::get_tile_animation_columns(const Vector2i p_atlas_coords) const {
@@ -3975,7 +3983,7 @@ void RTileSetAtlasSource::set_tile_animation_separation(const Vector2i p_atlas_c
 	_create_coords_mapping_cache(p_atlas_coords);
 	_queue_update_padded_texture();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Vector2i RTileSetAtlasSource::get_tile_animation_separation(const Vector2i p_atlas_coords) const {
@@ -3989,7 +3997,7 @@ void RTileSetAtlasSource::set_tile_animation_speed(const Vector2i p_atlas_coords
 
 	tiles[p_atlas_coords].animation_speed = p_speed;
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 real_t RTileSetAtlasSource::get_tile_animation_speed(const Vector2i p_atlas_coords) const {
@@ -4020,9 +4028,9 @@ void RTileSetAtlasSource::set_tile_animation_frames_count(const Vector2i p_atlas
 	_create_coords_mapping_cache(p_atlas_coords);
 	_queue_update_padded_texture();
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileSetAtlasSource::get_tile_animation_frames_count(const Vector2i p_atlas_coords) const {
@@ -4037,7 +4045,7 @@ void RTileSetAtlasSource::set_tile_animation_frame_duration(const Vector2i p_atl
 
 	tiles[p_atlas_coords].animation_frames_durations[p_frame_index] = p_duration;
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 real_t RTileSetAtlasSource::get_tile_animation_frame_duration(const Vector2i p_atlas_coords, int p_frame_index) const {
@@ -4223,10 +4231,10 @@ int RTileSetAtlasSource::create_alternative_tile(const Vector2i p_atlas_coords, 
 
 	int new_alternative_id = p_alternative_id_override >= 0 ? p_alternative_id_override : tiles[p_atlas_coords].next_alternative_id;
 
-	tiles[p_atlas_coords].alternatives[new_alternative_id] = memnew(TileData);
+	tiles[p_atlas_coords].alternatives[new_alternative_id] = memnew(RTileData);
 	tiles[p_atlas_coords].alternatives[new_alternative_id]->set_tile_set(tile_set);
 	tiles[p_atlas_coords].alternatives[new_alternative_id]->set_allow_transform(true);
-	tiles[p_atlas_coords].alternatives[new_alternative_id]->notify_property_list_changed();
+	tiles[p_atlas_coords].alternatives[new_alternative_id]->property_list_changed_notify();
 	tiles[p_atlas_coords].alternatives_ids.push_back(new_alternative_id);
 	tiles[p_atlas_coords].alternatives_ids.sort();
 	_compute_next_alternative_id(p_atlas_coords);
@@ -4307,11 +4315,11 @@ void RTileSetAtlasSource::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_use_texture_padding", "use_texture_padding"), &RTileSetAtlasSource::set_use_texture_padding);
 	ClassDB::bind_method(D_METHOD("get_use_texture_padding"), &RTileSetAtlasSource::get_use_texture_padding);
 
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture", PROPERTY_USAGE_NO_EDITOR), "set_texture", "get_texture");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "margins", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_margins", "get_margins");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "separation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_separation", "get_separation");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "texture_region_size", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_texture_region_size", "get_texture_region_size");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_texture_padding", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_use_texture_padding", "get_use_texture_padding");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture", PROPERTY_USAGE_NOEDITOR), "set_texture", "get_texture");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "margins", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_margins", "get_margins");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "separation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_separation", "get_separation");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "texture_region_size", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_texture_region_size", "get_texture_region_size");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_texture_padding", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_use_texture_padding", "get_use_texture_padding");
 
 	// Base tiles
 	ClassDB::bind_method(D_METHOD("create_tile", "atlas_coords", "size"), &RTileSetAtlasSource::create_tile, DEFVAL(Vector2i(1, 1)));
@@ -4351,6 +4359,8 @@ void RTileSetAtlasSource::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_update_padded_texture"), &RTileSetAtlasSource::_update_padded_texture);
 	ClassDB::bind_method(D_METHOD("get_runtime_texture"), &RTileSetAtlasSource::get_runtime_texture);
 	ClassDB::bind_method(D_METHOD("get_runtime_tile_texture_region", "atlas_coords", "frame"), &RTileSetAtlasSource::get_runtime_tile_texture_region);
+
+	ClassDB::bind_method(D_METHOD("_queue_update_padded_texture"), &RTileSetAtlasSource::_queue_update_padded_texture);
 }
 
 RTileSetAtlasSource::~RTileSetAtlasSource() {
@@ -4624,7 +4634,7 @@ int RTileSetScenesCollectionSource::get_next_scene_tile_id() const {
 bool RTileSetScenesCollectionSource::_set(const StringName &p_name, const Variant &p_value) {
 	Vector<String> components = String(p_name).split("/", true, 2);
 
-	if (components.size() >= 2 && components[0] == "scenes" && components[1].is_valid_int()) {
+	if (components.size() >= 2 && components[0] == "scenes" && components[1].is_valid_integer()) {
 		int scene_id = components[1].to_int();
 		if (components.size() >= 3 && components[2] == "scene") {
 			if (has_scene_tile_id(scene_id)) {
@@ -4648,7 +4658,7 @@ bool RTileSetScenesCollectionSource::_set(const StringName &p_name, const Varian
 bool RTileSetScenesCollectionSource::_get(const StringName &p_name, Variant &r_ret) const {
 	Vector<String> components = String(p_name).split("/", true, 2);
 
-	if (components.size() >= 2 && components[0] == "scenes" && components[1].is_valid_int() && scenes.has(components[1].to_int())) {
+	if (components.size() >= 2 && components[0] == "scenes" && components[1].is_valid_integer() && scenes.has(components[1].to_int())) {
 		if (components.size() >= 3 && components[2] == "scene") {
 			r_ret = scenes[components[1].to_int()].scene;
 			return true;
@@ -4726,7 +4736,7 @@ void RTileData::notify_tile_data_properties_should_change() {
 		}
 	}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_signal("changed");
 }
 
@@ -5035,7 +5045,7 @@ void RTileData::set_collision_polygons_count(int p_layer_id, int p_polygons_coun
 		return;
 	}
 	physics.write[p_layer_id].polygons.resize(p_polygons_count);
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_signal("changed");
 }
 
@@ -5046,14 +5056,14 @@ int RTileData::get_collision_polygons_count(int p_layer_id) const {
 
 void RTileData::add_collision_polygon(int p_layer_id) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
-	physics.write[p_layer_id].polygons.push_back(PhysicsLayerRTileData::PolygonShapeTileData());
+	physics.write[p_layer_id].polygons.push_back(PhysicsLayerTileData::PolygonShapeTileData());
 	emit_signal("changed");
 }
 
 void RTileData::remove_collision_polygon(int p_layer_id, int p_polygon_index) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	ERR_FAIL_INDEX(p_polygon_index, physics[p_layer_id].polygons.size());
-	physics.write[p_layer_id].polygons.remove_at(p_polygon_index);
+	physics.write[p_layer_id].polygons.remove(p_polygon_index);
 	emit_signal("changed");
 }
 
@@ -5067,12 +5077,12 @@ void RTileData::set_collision_polygon_points(int p_layer_id, int p_polygon_index
 	} else {
 		// Decompose into convex shapes.
 		Vector<Vector<Vector2>> decomp = Geometry2D::decompose_polygon_in_convex(p_polygon);
-		ERR_FAIL_COND_MSG(decomp.is_empty(), "Could not decompose the polygon into convex shapes.");
+		ERR_FAIL_COND_MSG(decomp.empty(), "Could not decompose the polygon into convex shapes.");
 
 		physics.write[p_layer_id].polygons.write[p_polygon_index].shapes.resize(decomp.size());
 		for (int i = 0; i < decomp.size(); i++) {
 			Ref<ConvexPolygonShape2D> shape;
-			shape.instantiate();
+			shape.instance();
 			shape->set_points(decomp[i]);
 			physics.write[p_layer_id].polygons.write[p_polygon_index].shapes[i] = shape;
 		}
@@ -5139,7 +5149,7 @@ void RTileData::set_terrain_set(int p_terrain_set) {
 		}
 	}
 	terrain_set = p_terrain_set;
-	notify_property_list_changed();
+	property_list_changed_notify();
 	emit_signal("changed");
 }
 
@@ -5147,8 +5157,8 @@ int RTileData::get_terrain_set() const {
 	return terrain_set;
 }
 
-void RTileData::set_peering_bit_terrain(TileSet::CellNeighbor p_peering_bit, int p_terrain_index) {
-	ERR_FAIL_INDEX(p_peering_bit, TileSet::CellNeighbor::CELL_NEIGHBOR_MAX);
+void RTileData::set_peering_bit_terrain(RTileSet::CellNeighbor p_peering_bit, int p_terrain_index) {
+	ERR_FAIL_INDEX(p_peering_bit, RTileSet::CellNeighbor::CELL_NEIGHBOR_MAX);
 	ERR_FAIL_COND(terrain_set < 0);
 	ERR_FAIL_COND(p_terrain_index < -1);
 	if (tile_set) {
@@ -5159,24 +5169,24 @@ void RTileData::set_peering_bit_terrain(TileSet::CellNeighbor p_peering_bit, int
 	emit_signal("changed");
 }
 
-int RTileData::get_peering_bit_terrain(TileSet::CellNeighbor p_peering_bit) const {
+int RTileData::get_peering_bit_terrain(RTileSet::CellNeighbor p_peering_bit) const {
 	ERR_FAIL_COND_V(!is_valid_peering_bit_terrain(p_peering_bit), -1);
 	return terrain_peering_bits[p_peering_bit];
 }
 
-bool RTileData::is_valid_peering_bit_terrain(TileSet::CellNeighbor p_peering_bit) const {
+bool RTileData::is_valid_peering_bit_terrain(RTileSet::CellNeighbor p_peering_bit) const {
 	ERR_FAIL_COND_V(!tile_set, false);
 
 	return tile_set->is_valid_peering_bit_terrain(terrain_set, p_peering_bit);
 }
 
-TileSet::TerrainsPattern RTileData::get_terrains_pattern() const {
-	ERR_FAIL_COND_V(!tile_set, TileSet::TerrainsPattern());
+RTileSet::TerrainsPattern RTileData::get_terrains_pattern() const {
+	ERR_FAIL_COND_V(!tile_set, RTileSet::TerrainsPattern());
 
-	TileSet::TerrainsPattern output(tile_set, terrain_set);
-	for (int i = 0; i < TileSet::CELL_NEIGHBOR_MAX; i++) {
-		if (tile_set->is_valid_peering_bit_terrain(terrain_set, TileSet::CellNeighbor(i))) {
-			output.set_terrain(TileSet::CellNeighbor(i), get_peering_bit_terrain(TileSet::CellNeighbor(i)));
+	RTileSet::TerrainsPattern output(tile_set, terrain_set);
+	for (int i = 0; i < RTileSet::CELL_NEIGHBOR_MAX; i++) {
+		if (tile_set->is_valid_peering_bit_terrain(terrain_set, RTileSet::CellNeighbor(i))) {
+			output.set_terrain(RTileSet::CellNeighbor(i), get_peering_bit_terrain(RTileSet::CellNeighbor(i)));
 		}
 	}
 	return output;
@@ -5233,7 +5243,7 @@ Variant RTileData::get_custom_data_by_layer_id(int p_layer_id) const {
 bool RTileData::_set(const StringName &p_name, const Variant &p_value) {
 	Vector<String> components = String(p_name).split("/", true, 2);
 
-	if (components.size() == 2 && components[0].begins_with("occlusion_layer_") && components[0].trim_prefix("occlusion_layer_").is_valid_int()) {
+	if (components.size() == 2 && components[0].begins_with("occlusion_layer_") && components[0].trim_prefix("occlusion_layer_").is_valid_integer()) {
 		// Occlusion layers.
 		int layer_index = components[0].trim_prefix("occlusion_layer_").to_int();
 		ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5250,7 +5260,7 @@ bool RTileData::_set(const StringName &p_name, const Variant &p_value) {
 			set_occluder(layer_index, polygon);
 			return true;
 		}
-	} else if (components.size() >= 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
+	} else if (components.size() >= 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_integer()) {
 		// Physics layers.
 		int layer_index = components[0].trim_prefix("physics_layer_").to_int();
 		ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5275,7 +5285,7 @@ bool RTileData::_set(const StringName &p_name, const Variant &p_value) {
 				set_collision_polygons_count(layer_index, p_value);
 				return true;
 			}
-		} else if (components.size() == 3 && components[1].begins_with("polygon_") && components[1].trim_prefix("polygon_").is_valid_int()) {
+		} else if (components.size() == 3 && components[1].begins_with("polygon_") && components[1].trim_prefix("polygon_").is_valid_integer()) {
 			int polygon_index = components[1].trim_prefix("polygon_").to_int();
 			ERR_FAIL_COND_V(polygon_index < 0, false);
 
@@ -5304,7 +5314,7 @@ bool RTileData::_set(const StringName &p_name, const Variant &p_value) {
 				return true;
 			}
 		}
-	} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
+	} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_integer()) {
 		// Navigation layers.
 		int layer_index = components[0].trim_prefix("navigation_layer_").to_int();
 		ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5323,15 +5333,15 @@ bool RTileData::_set(const StringName &p_name, const Variant &p_value) {
 		}
 	} else if (components.size() == 2 && components[0] == "terrains_peering_bit") {
 		// Terrains.
-		for (int i = 0; i < TileSet::CELL_NEIGHBOR_MAX; i++) {
-			TileSet::CellNeighbor bit = TileSet::CellNeighbor(i);
-			if (components[1] == TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[i]) {
+		for (int i = 0; i < RTileSet::CELL_NEIGHBOR_MAX; i++) {
+			RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(i);
+			if (components[1] == RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[i]) {
 				set_peering_bit_terrain(bit, p_value);
 				return true;
 			}
 		}
 		return false;
-	} else if (components.size() == 1 && components[0].begins_with("custom_data_") && components[0].trim_prefix("custom_data_").is_valid_int()) {
+	} else if (components.size() == 1 && components[0].begins_with("custom_data_") && components[0].trim_prefix("custom_data_").is_valid_integer()) {
 		// Custom data layers.
 		int layer_index = components[0].trim_prefix("custom_data_").to_int();
 		ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5355,7 +5365,7 @@ bool RTileData::_get(const StringName &p_name, Variant &r_ret) const {
 	Vector<String> components = String(p_name).split("/", true, 2);
 
 	if (tile_set) {
-		if (components.size() == 2 && components[0].begins_with("occlusion_layer") && components[0].trim_prefix("occlusion_layer_").is_valid_int()) {
+		if (components.size() == 2 && components[0].begins_with("occlusion_layer") && components[0].trim_prefix("occlusion_layer_").is_valid_integer()) {
 			// Occlusion layers.
 			int layer_index = components[0].trim_prefix("occlusion_layer_").to_int();
 			ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5366,7 +5376,7 @@ bool RTileData::_get(const StringName &p_name, Variant &r_ret) const {
 				r_ret = get_occluder(layer_index);
 				return true;
 			}
-		} else if (components.size() >= 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
+		} else if (components.size() >= 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_integer()) {
 			// Physics layers.
 			int layer_index = components[0].trim_prefix("physics_layer_").to_int();
 			ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5385,7 +5395,7 @@ bool RTileData::_get(const StringName &p_name, Variant &r_ret) const {
 					r_ret = get_collision_polygons_count(layer_index);
 					return true;
 				}
-			} else if (components.size() == 3 && components[1].begins_with("polygon_") && components[1].trim_prefix("polygon_").is_valid_int()) {
+			} else if (components.size() == 3 && components[1].begins_with("polygon_") && components[1].trim_prefix("polygon_").is_valid_integer()) {
 				int polygon_index = components[1].trim_prefix("polygon_").to_int();
 				ERR_FAIL_COND_V(polygon_index < 0, false);
 				if (polygon_index >= physics[layer_index].polygons.size()) {
@@ -5404,14 +5414,14 @@ bool RTileData::_get(const StringName &p_name, Variant &r_ret) const {
 			}
 		} else if (components.size() == 2 && components[0] == "terrains_peering_bit") {
 			// Terrains.
-			for (int i = 0; i < TileSet::CELL_NEIGHBOR_MAX; i++) {
-				if (components[1] == TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[i]) {
+			for (int i = 0; i < RTileSet::CELL_NEIGHBOR_MAX; i++) {
+				if (components[1] == RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[i]) {
 					r_ret = terrain_peering_bits[i];
 					return true;
 				}
 			}
 			return false;
-		} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
+		} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_integer()) {
 			// Occlusion layers.
 			int layer_index = components[0].trim_prefix("navigation_layer_").to_int();
 			ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5422,7 +5432,7 @@ bool RTileData::_get(const StringName &p_name, Variant &r_ret) const {
 				r_ret = get_navigation_polygon(layer_index);
 				return true;
 			}
-		} else if (components.size() == 1 && components[0].begins_with("custom_data_") && components[0].trim_prefix("custom_data_").is_valid_int()) {
+		} else if (components.size() == 1 && components[0].begins_with("custom_data_") && components[0].trim_prefix("custom_data_").is_valid_integer()) {
 			// Custom data layers.
 			int layer_index = components[0].trim_prefix("custom_data_").to_int();
 			ERR_FAIL_COND_V(layer_index < 0, false);
@@ -5456,13 +5466,13 @@ void RTileData::_get_property_list(List<PropertyInfo> *p_list) const {
 		p_list->push_back(PropertyInfo(Variant::NIL, "Physics", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 		for (int i = 0; i < physics.size(); i++) {
 			p_list->push_back(PropertyInfo(Variant::VECTOR2, vformat("physics_layer_%d/linear_velocity", i), PROPERTY_HINT_NONE));
-			p_list->push_back(PropertyInfo(Variant::FLOAT, vformat("physics_layer_%d/angular_velocity", i), PROPERTY_HINT_NONE));
+			p_list->push_back(PropertyInfo(Variant::REAL, vformat("physics_layer_%d/angular_velocity", i), PROPERTY_HINT_NONE));
 			p_list->push_back(PropertyInfo(Variant::INT, vformat("physics_layer_%d/polygons_count", i), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR));
 
 			for (int j = 0; j < physics[i].polygons.size(); j++) {
 				// physics_layer_%d/points
 				property_info = PropertyInfo(Variant::ARRAY, vformat("physics_layer_%d/polygon_%d/points", i, j), PROPERTY_HINT_ARRAY_TYPE, "Vector2", PROPERTY_USAGE_DEFAULT);
-				if (physics[i].polygons[j].polygon.is_empty()) {
+				if (physics[i].polygons[j].polygon.empty()) {
 					property_info.usage ^= PROPERTY_USAGE_STORAGE;
 				}
 				p_list->push_back(property_info);
@@ -5475,7 +5485,7 @@ void RTileData::_get_property_list(List<PropertyInfo> *p_list) const {
 				p_list->push_back(property_info);
 
 				// physics_layer_%d/polygon_%d/one_way_margin
-				property_info = PropertyInfo(Variant::FLOAT, vformat("physics_layer_%d/polygon_%d/one_way_margin", i, j));
+				property_info = PropertyInfo(Variant::REAL, vformat("physics_layer_%d/polygon_%d/one_way_margin", i, j));
 				if (physics[i].polygons[j].one_way_margin == 1.0) {
 					property_info.usage ^= PROPERTY_USAGE_STORAGE;
 				}
@@ -5486,10 +5496,10 @@ void RTileData::_get_property_list(List<PropertyInfo> *p_list) const {
 		// Terrain data
 		if (terrain_set >= 0) {
 			p_list->push_back(PropertyInfo(Variant::NIL, "Terrains", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
-			for (int i = 0; i < TileSet::CELL_NEIGHBOR_MAX; i++) {
-				TileSet::CellNeighbor bit = TileSet::CellNeighbor(i);
+			for (int i = 0; i < RTileSet::CELL_NEIGHBOR_MAX; i++) {
+				RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(i);
 				if (is_valid_peering_bit_terrain(bit)) {
-					property_info = PropertyInfo(Variant::INT, "terrains_peering_bit/" + String(TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[i]));
+					property_info = PropertyInfo(Variant::INT, "terrains_peering_bit/" + String(RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[i]));
 					if (get_peering_bit_terrain(bit) == -1) {
 						property_info.usage ^= PROPERTY_USAGE_STORAGE;
 					}
@@ -5512,8 +5522,8 @@ void RTileData::_get_property_list(List<PropertyInfo> *p_list) const {
 		p_list->push_back(PropertyInfo(Variant::NIL, "Custom data", PROPERTY_HINT_NONE, "custom_data_", PROPERTY_USAGE_GROUP));
 		for (int i = 0; i < custom_data.size(); i++) {
 			Variant default_val;
-			Callable::CallError error;
-			Variant::construct(custom_data[i].get_type(), default_val, nullptr, 0, error);
+			Variant::CallError error;
+			Variant::construct(custom_data[i].get_type(), nullptr, 0, error);
 			property_info = PropertyInfo(tile_set->get_custom_data_type(i), vformat("custom_data_%d", i), PROPERTY_HINT_NONE, String(), PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT);
 			if (custom_data[i] == default_val) {
 				property_info.usage ^= PROPERTY_USAGE_STORAGE;
@@ -5595,7 +5605,7 @@ void RTileData::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "terrain_set"), "set_terrain_set", "get_terrain_set");
 
 	ADD_GROUP("Miscellaneous", "");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "probability"), "set_probability", "get_probability");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "probability"), "set_probability", "get_probability");
 
 	ADD_SIGNAL(MethodInfo("changed"));
 }
