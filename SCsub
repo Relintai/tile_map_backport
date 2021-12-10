@@ -1,0 +1,13 @@
+Import('env')
+
+env.add_source_files(env.modules_sources,"register_types.cpp")
+env.add_source_files(env.modules_sources,"vector3i.cpp")
+env.add_source_files(env.modules_sources,"polypartition.cpp")
+env.add_source_files(env.modules_sources,"rtile_set.cpp")
+
+#if env["tools"]:
+#    env.add_source_files(env.modules_sources, "skeleton_editor_plugin_remover.cpp")
+#    env.add_source_files(env.modules_sources, "skeleton_editor_plugin.cpp")
+#    env.add_source_files(env.modules_sources, "spatial_editor_gizmos.cpp")
+#    env.add_source_files(env.modules_sources, "skeleton_editor_module_plugin.cpp")
+    
