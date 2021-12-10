@@ -134,13 +134,13 @@ int RTileMapPattern::get_cell_source_id(const Vector2i &p_coords) const {
 }
 
 Vector2i RTileMapPattern::get_cell_atlas_coords(const Vector2i &p_coords) const {
-	ERR_FAIL_COND_V(!pattern.has(p_coords), TileSetSource::INVALID_ATLAS_COORDS);
+	ERR_FAIL_COND_V(!pattern.has(p_coords), RTileSetSource::INVALID_ATLAS_COORDS);
 
 	return pattern[p_coords].get_atlas_coords();
 }
 
 int RTileMapPattern::get_cell_alternative_tile(const Vector2i &p_coords) const {
-	ERR_FAIL_COND_V(!pattern.has(p_coords), TileSetSource::INVALID_TILE_ALTERNATIVE);
+	ERR_FAIL_COND_V(!pattern.has(p_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE);
 
 	return pattern[p_coords].alternative_tile;
 }
@@ -4280,7 +4280,7 @@ bool RTileSetAtlasSource::has_alternative_tile(const Vector2i p_atlas_coords, in
 }
 
 int RTileSetAtlasSource::get_next_alternative_tile_id(const Vector2i p_atlas_coords) const {
-	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), TileSetSource::INVALID_TILE_ALTERNATIVE, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
+	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
 	return tiles[p_atlas_coords].next_alternative_id;
 }
 
@@ -4290,8 +4290,8 @@ int RTileSetAtlasSource::get_alternative_tiles_count(const Vector2i p_atlas_coor
 }
 
 int RTileSetAtlasSource::get_alternative_tile_id(const Vector2i p_atlas_coords, int p_index) const {
-	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), TileSetSource::INVALID_TILE_ALTERNATIVE, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
-	ERR_FAIL_INDEX_V(p_index, tiles[p_atlas_coords].alternatives_ids.size(), TileSetSource::INVALID_TILE_ALTERNATIVE);
+	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
+	ERR_FAIL_INDEX_V(p_index, tiles[p_atlas_coords].alternatives_ids.size(), RTileSetSource::INVALID_TILE_ALTERNATIVE);
 
 	return tiles[p_atlas_coords].alternatives_ids[p_index];
 }
