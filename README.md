@@ -1,4 +1,4 @@
-# R Tile Map
+# RTileMap
 
 Godot 4.0's TileMap backported to 3.x as an engine module, with (eventually) a few smaller features added.
 
