@@ -670,7 +670,7 @@ public:
 	virtual Vector2i get_tile_id(int p_index) const override;
 
 	bool has_room_for_tile(Vector2i p_atlas_coords, Vector2i p_size, int p_animation_columns, Vector2i p_animation_separation, int p_frames_count, Vector2i p_ignored_tile = INVALID_ATLAS_COORDS) const;
-	PoolVector2Array get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2i p_margins, Vector2i p_separation, Vector2i p_texture_region_size);
+	Vector<Vector2> get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2i p_margins, Vector2i p_separation, Vector2i p_texture_region_size);
 	Vector2i get_tile_at_coords(Vector2i p_atlas_coords) const;
 
 	// Animation.
@@ -711,8 +711,8 @@ public:
 	~RTileSetAtlasSource();
 };
 
-class TileSetScenesCollectionSource : public RTileSetSource {
-	GDCLASS(TileSetScenesCollectionSource, RTileSetSource);
+class RTileSetScenesCollectionSource : public RTileSetSource {
+	GDCLASS(RTileSetScenesCollectionSource, RTileSetSource);
 
 private:
 	struct SceneData {

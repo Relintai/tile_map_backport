@@ -3895,13 +3895,13 @@ void RTileSetAtlasSource::create_tile(const Vector2i p_atlas_coords, const Vecto
 
 	// Create and resize the tile.
 	tiles.insert(p_atlas_coords, tad);
-	tiles_ids.append(p_atlas_coords);
+	tiles_ids.push_back(p_atlas_coords);
 	tiles_ids.sort();
 
 	_create_coords_mapping_cache(p_atlas_coords);
 	_queue_update_padded_texture();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 void RTileSetAtlasSource::remove_tile(Vector2i p_atlas_coords) {
@@ -3922,7 +3922,7 @@ void RTileSetAtlasSource::remove_tile(Vector2i p_atlas_coords) {
 
 	_queue_update_padded_texture();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 bool RTileSetAtlasSource::has_tile(Vector2i p_atlas_coords) const {
@@ -4096,10 +4096,10 @@ bool RTileSetAtlasSource::has_room_for_tile(Vector2i p_atlas_coords, Vector2i p_
 	return true;
 }
 
-PoolVector2Array RTileSetAtlasSource::get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2i p_margins, Vector2i p_separation, Vector2i p_texture_region_size) {
-	ERR_FAIL_COND_V(p_margins.x < 0 || p_margins.y < 0, PoolVector2Array());
-	ERR_FAIL_COND_V(p_separation.x < 0 || p_separation.y < 0, PoolVector2Array());
-	ERR_FAIL_COND_V(p_texture_region_size.x <= 0 || p_texture_region_size.y <= 0, PoolVector2Array());
+Vector<Vector2> RTileSetAtlasSource::get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2i p_margins, Vector2i p_separation, Vector2i p_texture_region_size) {
+	ERR_FAIL_COND_V(p_margins.x < 0 || p_margins.y < 0, Vector<Vector2>());
+	ERR_FAIL_COND_V(p_separation.x < 0 || p_separation.y < 0, Vector<Vector2>());
+	ERR_FAIL_COND_V(p_texture_region_size.x <= 0 || p_texture_region_size.y <= 0, Vector<Vector2>());
 
 	// Compute the new atlas grid size.
 	Size2 new_grid_size;
@@ -4114,12 +4114,12 @@ PoolVector2Array RTileSetAtlasSource::get_tiles_to_be_removed_on_change(Ref<Text
 	}
 
 	Vector<Vector2> output;
-	for (KeyValue<Vector2i, RTileAlternativesData> &E : tiles) {
-		for (unsigned int frame = 0; frame < E.value.animation_frames_durations.size(); frame++) {
-			Vector2i frame_coords = E.key + (E.value.size_in_atlas + E.value.animation_separation) * ((E.value.animation_columns > 0) ? Vector2i(frame % E.value.animation_columns, frame / E.value.animation_columns) : Vector2i(frame, 0));
-			frame_coords += E.value.size_in_atlas;
+	for (const Map<Vector2i, TileAlternativesData>::Element *E = tiles.front(); E; E = E->next()) {
+		for (unsigned int frame = 0; frame < E->value().animation_frames_durations.size(); frame++) {
+			Vector2i frame_coords = E->key() + (E->value().size_in_atlas + E->value().animation_separation) * ((E->value().animation_columns > 0) ? Vector2i(frame % E.value.animation_columns, frame / E.value.animation_columns) : Vector2i(frame, 0));
+			frame_coords += E->value().size_in_atlas;
 			if (frame_coords.x > new_grid_size.x || frame_coords.y > new_grid_size.y) {
-				output.push_back(E.key);
+				output.push_back(E->key());
 				break;
 			}
 		}
@@ -4149,7 +4149,7 @@ Vector2i RTileSetAtlasSource::get_tile_effective_texture_offset(Vector2i p_atlas
 
 	Vector2 margin = (get_tile_texture_region(p_atlas_coords).size - tile_set->get_tile_size()) / 2;
 	margin = Vector2i(MAX(0, margin.x), MAX(0, margin.y));
-	Vector2i effective_texture_offset = Object::cast_to<TileData>(get_tile_data(p_atlas_coords, p_alternative_tile))->get_texture_offset();
+	Vector2i effective_texture_offset = Object::cast_to<RTileData>(get_tile_data(p_atlas_coords, p_alternative_tile))->get_texture_offset();
 	if (ABS(effective_texture_offset.x) > margin.x || ABS(effective_texture_offset.y) > margin.y) {
 		effective_texture_offset = effective_texture_offset.clamp(-margin, margin);
 	}
@@ -4206,7 +4206,7 @@ void RTileSetAtlasSource::move_tile_in_atlas(Vector2i p_atlas_coords, Vector2i p
 		tiles.erase(p_atlas_coords);
 
 		tiles_ids.erase(p_atlas_coords);
-		tiles_ids.append(new_atlas_coords);
+		tiles_ids.push_back(new_atlas_coords);
 		tiles_ids.sort();
 	}
 	tiles[new_atlas_coords].size_in_atlas = new_size;
@@ -4214,7 +4214,7 @@ void RTileSetAtlasSource::move_tile_in_atlas(Vector2i p_atlas_coords, Vector2i p
 	_create_coords_mapping_cache(new_atlas_coords);
 	_queue_update_padded_texture();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileSetAtlasSource::create_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_id_override) {
@@ -4227,11 +4227,11 @@ int RTileSetAtlasSource::create_alternative_tile(const Vector2i p_atlas_coords, 
 	tiles[p_atlas_coords].alternatives[new_alternative_id]->set_tile_set(tile_set);
 	tiles[p_atlas_coords].alternatives[new_alternative_id]->set_allow_transform(true);
 	tiles[p_atlas_coords].alternatives[new_alternative_id]->notify_property_list_changed();
-	tiles[p_atlas_coords].alternatives_ids.append(new_alternative_id);
+	tiles[p_atlas_coords].alternatives_ids.push_back(new_alternative_id);
 	tiles[p_atlas_coords].alternatives_ids.sort();
 	_compute_next_alternative_id(p_atlas_coords);
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 
 	return new_alternative_id;
 }
@@ -4246,7 +4246,7 @@ void RTileSetAtlasSource::remove_alternative_tile(const Vector2i p_atlas_coords,
 	tiles[p_atlas_coords].alternatives_ids.erase(p_alternative_tile);
 	tiles[p_atlas_coords].alternatives_ids.sort();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 void RTileSetAtlasSource::set_alternative_tile_id(const Vector2i p_atlas_coords, int p_alternative_tile, int p_new_id) {
@@ -4257,13 +4257,13 @@ void RTileSetAtlasSource::set_alternative_tile_id(const Vector2i p_atlas_coords,
 	ERR_FAIL_COND_MSG(tiles[p_atlas_coords].alternatives.has(p_new_id), vformat("TileSetAtlasSource has already an alternative with id %d at %s.", p_new_id, String(p_atlas_coords)));
 
 	tiles[p_atlas_coords].alternatives[p_new_id] = tiles[p_atlas_coords].alternatives[p_alternative_tile];
-	tiles[p_atlas_coords].alternatives_ids.append(p_new_id);
+	tiles[p_atlas_coords].alternatives_ids.push_back(p_new_id);
 
 	tiles[p_atlas_coords].alternatives.erase(p_alternative_tile);
 	tiles[p_atlas_coords].alternatives_ids.erase(p_alternative_tile);
 	tiles[p_atlas_coords].alternatives_ids.sort();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 bool RTileSetAtlasSource::has_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) const {
@@ -4355,9 +4355,9 @@ void RTileSetAtlasSource::_bind_methods() {
 
 RTileSetAtlasSource::~RTileSetAtlasSource() {
 	// Free everything needed.
-	for (KeyValue<Vector2i, TileAlternativesData> &E_alternatives : tiles) {
-		for (KeyValue<int, TileData *> &E_tile_data : E_alternatives.value.alternatives) {
-			memdelete(E_tile_data.value);
+	for (const Map<Vector2i, TileAlternativesData>::Element *E_alternatives = tiles.front(); E_alternatives; E_alternatives = E_alternatives->next()) {
+		for (const Map<int, RTileData*>::Element *E_tile_data = E_alternatives->value().alternatives.front(); E_tile_data; E_tile_data = E_tile_data->next()) {
+			memdelete(E_tile_data->value());
 		}
 	}
 }
@@ -4426,9 +4426,9 @@ void RTileSetAtlasSource::_create_coords_mapping_cache(Vector2i p_atlas_coords) 
 void RTileSetAtlasSource::_clear_tiles_outside_texture() {
 	LocalVector<Vector2i> to_remove;
 
-	for (const KeyValue<Vector2i, RTileSetAtlasSource::TileAlternativesData> &E : tiles) {
-		if (!has_room_for_tile(E.key, E.value.size_in_atlas, E.value.animation_columns, E.value.animation_separation, E.value.animation_frames_durations.size(), E.key)) {
-			to_remove.push_back(E.key);
+	for (const Map<Vector2i, RTileSetAtlasSource::TileAlternativesData>::Element *E = tiles.front(); E; E = E->next()) {
+		if (!has_room_for_tile(E->key(), E->value().size_in_atlas, E->value().animation_columns, E->value().animation_separation, E->value().animation_frames_durations.size(), E.key)) {
+			to_remove.push_back(E->key());
 		}
 	}
 
@@ -4459,16 +4459,17 @@ void RTileSetAtlasSource::_update_padded_texture() {
 
 	Size2 size = get_atlas_grid_size() * (texture_region_size + Vector2i(2, 2));
 
-	Ref<Image> src = texture->get_image();
+	Ref<Image> src = texture->get_data();
 
 	Ref<Image> image;
-	image.instantiate();
+	image.instance();
 	image->create(size.x, size.y, false, Image::FORMAT_RGBA8);
 
-	for (KeyValue<Vector2i, TileAlternativesData> kv : tiles) {
-		for (int frame = 0; frame < (int)kv.value.animation_frames_durations.size(); frame++) {
+	for (const Map<Vector2i, TileAlternativesData>::Element *kv = tiles.front(); kv; kv = kv->next()) {
+	
+		for (int frame = 0; frame < (int)kv->value().animation_frames_durations.size(); frame++) {
 			// Compute the source rects.
-			Rect2i src_rect = get_tile_texture_region(kv.key, frame);
+			Rect2i src_rect = get_tile_texture_region(kv->key(), frame);
 
 			Rect2i top_src_rect = Rect2i(src_rect.position, Vector2i(src_rect.size.x, 1));
 			Rect2i bottom_src_rect = Rect2i(src_rect.position + Vector2i(0, src_rect.size.y - 1), Vector2i(src_rect.size.x, 1));
@@ -4476,7 +4477,7 @@ void RTileSetAtlasSource::_update_padded_texture() {
 			Rect2i right_src_rect = Rect2i(src_rect.position + Vector2i(src_rect.size.x - 1, 0), Vector2i(1, src_rect.size.y));
 
 			// Copy the tile and the paddings.
-			Vector2i frame_coords = kv.key + (kv.value.size_in_atlas + kv.value.animation_separation) * ((kv.value.animation_columns > 0) ? Vector2i(frame % kv.value.animation_columns, frame / kv.value.animation_columns) : Vector2i(frame, 0));
+			Vector2i frame_coords = kv->key() + (kv->value().size_in_atlas + kv->value().animation_separation) * ((kv->value().animation_columns > 0) ? Vector2i(frame % kv.value.animation_columns, frame / kv.value.animation_columns) : Vector2i(frame, 0));
 			Vector2i base_pos = frame_coords * (texture_region_size + Vector2i(2, 2)) + Vector2i(1, 1);
 
 			image->blit_rect(*src, src_rect, base_pos);
@@ -4494,7 +4495,7 @@ void RTileSetAtlasSource::_update_padded_texture() {
 	}
 
 	if (!padded_texture.is_valid()) {
-		padded_texture.instantiate();
+		padded_texture.instance();
 	}
 	padded_texture->create_from_image(image);
 	emit_changed();
@@ -4543,12 +4544,12 @@ int RTileSetScenesCollectionSource::create_scene_tile(Ref<PackedScene> p_packed_
 	int new_scene_id = p_id_override >= 0 ? p_id_override : next_scene_id;
 
 	scenes[new_scene_id] = SceneData();
-	scenes_ids.append(new_scene_id);
+	scenes_ids.push_back(new_scene_id);
 	scenes_ids.sort();
 	set_scene_tile_scene(new_scene_id, p_packed_scene);
 	_compute_next_alternative_id();
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 
 	return new_scene_id;
 }
@@ -4560,7 +4561,7 @@ void RTileSetScenesCollectionSource::set_scene_tile_id(int p_id, int p_new_id) {
 
 	scenes[p_new_id] = SceneData();
 	scenes[p_new_id] = scenes[p_id];
-	scenes_ids.append(p_new_id);
+	scenes_ids.push_back(p_new_id);
 	scenes_ids.sort();
 
 	_compute_next_alternative_id();
@@ -4568,7 +4569,7 @@ void RTileSetScenesCollectionSource::set_scene_tile_id(int p_id, int p_new_id) {
 	scenes.erase(p_id);
 	scenes_ids.erase(p_id);
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 void RTileSetScenesCollectionSource::set_scene_tile_scene(int p_id, Ref<PackedScene> p_packed_scene) {
@@ -4587,7 +4588,7 @@ void RTileSetScenesCollectionSource::set_scene_tile_scene(int p_id, Ref<PackedSc
 	} else {
 		scenes[p_id].scene = Ref<PackedScene>();
 	}
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Ref<PackedScene> RTileSetScenesCollectionSource::get_scene_tile_scene(int p_id) const {
@@ -4600,7 +4601,7 @@ void RTileSetScenesCollectionSource::set_scene_tile_display_placeholder(int p_id
 
 	scenes[p_id].display_placeholder = p_display_placeholder;
 
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 bool RTileSetScenesCollectionSource::get_scene_tile_display_placeholder(int p_id) const {
@@ -4613,7 +4614,7 @@ void RTileSetScenesCollectionSource::remove_scene_tile(int p_id) {
 
 	scenes.erase(p_id);
 	scenes_ids.erase(p_id);
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileSetScenesCollectionSource::get_next_scene_tile_id() const {
@@ -4688,7 +4689,7 @@ void RTileSetScenesCollectionSource::_bind_methods() {
 
 /////////////////////////////// TileData //////////////////////////////////////
 
-void RTileData::set_tile_set(const TileSet *p_tile_set) {
+void RTileData::set_tile_set(const RTileSet *p_tile_set) {
 	tile_set = p_tile_set;
 	notify_tile_data_properties_should_change();
 }
@@ -4712,19 +4713,21 @@ void RTileData::notify_tile_data_properties_should_change() {
 	for (int i = 0; i < custom_data.size(); i++) {
 		if (custom_data[i].get_type() != tile_set->get_custom_data_type(i)) {
 			Variant new_val;
-			Callable::CallError error;
+			Variant::CallError error;
+
 			if (Variant::can_convert(custom_data[i].get_type(), tile_set->get_custom_data_type(i))) {
-				const Variant *args[] = { &custom_data[i] };
-				Variant::construct(tile_set->get_custom_data_type(i), new_val, args, 1, error);
+				const Variant *args[] = { &new_val, &custom_data[i] };
+				Variant::construct(tile_set->get_custom_data_type(i), args, 1, error);
 			} else {
-				Variant::construct(tile_set->get_custom_data_type(i), new_val, nullptr, 0, error);
+				const Variant *args[] = { &new_val };
+				Variant::construct(tile_set->get_custom_data_type(i), args, 0, error);
 			}
 			custom_data.write[i] = new_val;
 		}
 	}
 
 	notify_property_list_changed();
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 void RTileData::add_occlusion_layer(int p_to_pos) {
@@ -4736,15 +4739,14 @@ void RTileData::add_occlusion_layer(int p_to_pos) {
 }
 
 void RTileData::move_occlusion_layer(int p_from_index, int p_to_pos) {
-	ERR_FAIL_INDEX(p_from_index, occluders.size());
 	ERR_FAIL_INDEX(p_to_pos, occluders.size() + 1);
 	occluders.insert(p_to_pos, occluders[p_from_index]);
-	occluders.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	occluders.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 }
 
 void RTileData::remove_occlusion_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, occluders.size());
-	occluders.remove_at(p_index);
+	occluders.remove(p_index);
 }
 
 void RTileData::add_physics_layer(int p_to_pos) {
@@ -4759,12 +4761,12 @@ void RTileData::move_physics_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, physics.size());
 	ERR_FAIL_INDEX(p_to_pos, physics.size() + 1);
 	physics.insert(p_to_pos, physics[p_from_index]);
-	physics.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	physics.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 }
 
 void RTileData::remove_physics_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, physics.size());
-	physics.remove_at(p_index);
+	physics.remove(p_index);
 }
 
 void RTileData::add_terrain_set(int p_to_pos) {
@@ -4848,12 +4850,12 @@ void RTileData::move_navigation_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, navigation.size());
 	ERR_FAIL_INDEX(p_to_pos, navigation.size() + 1);
 	navigation.insert(p_to_pos, navigation[p_from_index]);
-	navigation.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	navigation.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 }
 
 void RTileData::remove_navigation_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, navigation.size());
-	navigation.remove_at(p_index);
+	navigation.remove(p_index);
 }
 
 void RTileData::add_custom_data_layer(int p_to_pos) {
@@ -4868,12 +4870,12 @@ void RTileData::move_custom_data_layer(int p_from_index, int p_to_pos) {
 	ERR_FAIL_INDEX(p_from_index, custom_data.size());
 	ERR_FAIL_INDEX(p_to_pos, custom_data.size() + 1);
 	custom_data.insert(p_to_pos, navigation[p_from_index]);
-	custom_data.remove_at(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
+	custom_data.remove(p_to_pos < p_from_index ? p_from_index + 1 : p_from_index);
 }
 
 void RTileData::remove_custom_data_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, custom_data.size());
-	custom_data.remove_at(p_index);
+	custom_data.remove(p_index);
 }
 
 void RTileData::reset_state() {
@@ -4891,8 +4893,8 @@ bool RTileData::is_allowing_transform() const {
 	return allow_transform;
 }
 
-TileData *RTileData::duplicate() {
-	TileData *output = memnew(TileData);
+RTileData *RTileData::duplicate() {
+	RTileData *output = memnew(RTileData);
 	output->tile_set = tile_set;
 
 	output->allow_transform = allow_transform;
@@ -4926,7 +4928,7 @@ TileData *RTileData::duplicate() {
 void RTileData::set_flip_h(bool p_flip_h) {
 	ERR_FAIL_COND_MSG(!allow_transform && p_flip_h, "Transform is only allowed for alternative tiles (with its alternative_id != 0)");
 	flip_h = p_flip_h;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 bool RTileData::get_flip_h() const {
 	return flip_h;
@@ -4935,7 +4937,7 @@ bool RTileData::get_flip_h() const {
 void RTileData::set_flip_v(bool p_flip_v) {
 	ERR_FAIL_COND_MSG(!allow_transform && p_flip_v, "Transform is only allowed for alternative tiles (with its alternative_id != 0)");
 	flip_v = p_flip_v;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 bool RTileData::get_flip_v() const {
@@ -4945,7 +4947,7 @@ bool RTileData::get_flip_v() const {
 void RTileData::set_transpose(bool p_transpose) {
 	ERR_FAIL_COND_MSG(!allow_transform && p_transpose, "Transform is only allowed for alternative tiles (with its alternative_id != 0)");
 	transpose = p_transpose;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 bool RTileData::get_transpose() const {
 	return transpose;
@@ -4953,7 +4955,7 @@ bool RTileData::get_transpose() const {
 
 void RTileData::set_texture_offset(Vector2i p_texture_offset) {
 	tex_offset = p_texture_offset;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Vector2i RTileData::get_texture_offset() const {
@@ -4962,7 +4964,7 @@ Vector2i RTileData::get_texture_offset() const {
 
 void RTileData::set_material(Ref<ShaderMaterial> p_material) {
 	material = p_material;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 Ref<ShaderMaterial> RTileData::get_material() const {
 	return material;
@@ -4970,7 +4972,7 @@ Ref<ShaderMaterial> RTileData::get_material() const {
 
 void RTileData::set_modulate(Color p_modulate) {
 	modulate = p_modulate;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 Color RTileData::get_modulate() const {
 	return modulate;
@@ -4978,7 +4980,7 @@ Color RTileData::get_modulate() const {
 
 void RTileData::set_z_index(int p_z_index) {
 	z_index = p_z_index;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 int RTileData::get_z_index() const {
 	return z_index;
@@ -4986,7 +4988,7 @@ int RTileData::get_z_index() const {
 
 void RTileData::set_y_sort_origin(int p_y_sort_origin) {
 	y_sort_origin = p_y_sort_origin;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 int RTileData::get_y_sort_origin() const {
 	return y_sort_origin;
@@ -4995,7 +4997,7 @@ int RTileData::get_y_sort_origin() const {
 void RTileData::set_occluder(int p_layer_id, Ref<OccluderPolygon2D> p_occluder_polygon) {
 	ERR_FAIL_INDEX(p_layer_id, occluders.size());
 	occluders.write[p_layer_id] = p_occluder_polygon;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Ref<OccluderPolygon2D> RTileData::get_occluder(int p_layer_id) const {
@@ -5007,7 +5009,7 @@ Ref<OccluderPolygon2D> RTileData::get_occluder(int p_layer_id) const {
 void RTileData::set_constant_linear_velocity(int p_layer_id, const Vector2 &p_velocity) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	physics.write[p_layer_id].linear_velocity = p_velocity;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Vector2 RTileData::get_constant_linear_velocity(int p_layer_id) const {
@@ -5018,7 +5020,7 @@ Vector2 RTileData::get_constant_linear_velocity(int p_layer_id) const {
 void RTileData::set_constant_angular_velocity(int p_layer_id, real_t p_velocity) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	physics.write[p_layer_id].angular_velocity = p_velocity;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 real_t RTileData::get_constant_angular_velocity(int p_layer_id) const {
@@ -5034,7 +5036,7 @@ void RTileData::set_collision_polygons_count(int p_layer_id, int p_polygons_coun
 	}
 	physics.write[p_layer_id].polygons.resize(p_polygons_count);
 	notify_property_list_changed();
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileData::get_collision_polygons_count(int p_layer_id) const {
@@ -5045,14 +5047,14 @@ int RTileData::get_collision_polygons_count(int p_layer_id) const {
 void RTileData::add_collision_polygon(int p_layer_id) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	physics.write[p_layer_id].polygons.push_back(PhysicsLayerRTileData::PolygonShapeTileData());
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 void RTileData::remove_collision_polygon(int p_layer_id, int p_polygon_index) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	ERR_FAIL_INDEX(p_polygon_index, physics[p_layer_id].polygons.size());
 	physics.write[p_layer_id].polygons.remove_at(p_polygon_index);
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 void RTileData::set_collision_polygon_points(int p_layer_id, int p_polygon_index, Vector<Vector2> p_polygon) {
@@ -5060,7 +5062,7 @@ void RTileData::set_collision_polygon_points(int p_layer_id, int p_polygon_index
 	ERR_FAIL_INDEX(p_polygon_index, physics[p_layer_id].polygons.size());
 	ERR_FAIL_COND_MSG(p_polygon.size() != 0 && p_polygon.size() < 3, "Invalid polygon. Needs either 0 or more than 3 points.");
 
-	if (p_polygon.is_empty()) {
+	if (p_polygon.empty()) {
 		physics.write[p_layer_id].polygons.write[p_polygon_index].shapes.clear();
 	} else {
 		// Decompose into convex shapes.
@@ -5076,7 +5078,7 @@ void RTileData::set_collision_polygon_points(int p_layer_id, int p_polygon_index
 		}
 	}
 	physics.write[p_layer_id].polygons.write[p_polygon_index].polygon = p_polygon;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Vector<Vector2> RTileData::get_collision_polygon_points(int p_layer_id, int p_polygon_index) const {
@@ -5089,7 +5091,7 @@ void RTileData::set_collision_polygon_one_way(int p_layer_id, int p_polygon_inde
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	ERR_FAIL_INDEX(p_polygon_index, physics[p_layer_id].polygons.size());
 	physics.write[p_layer_id].polygons.write[p_polygon_index].one_way = p_one_way;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 bool RTileData::is_collision_polygon_one_way(int p_layer_id, int p_polygon_index) const {
@@ -5102,7 +5104,7 @@ void RTileData::set_collision_polygon_one_way_margin(int p_layer_id, int p_polyg
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
 	ERR_FAIL_INDEX(p_polygon_index, physics[p_layer_id].polygons.size());
 	physics.write[p_layer_id].polygons.write[p_polygon_index].one_way_margin = p_one_way_margin;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 float RTileData::get_collision_polygon_one_way_margin(int p_layer_id, int p_polygon_index) const {
@@ -5138,7 +5140,7 @@ void RTileData::set_terrain_set(int p_terrain_set) {
 	}
 	terrain_set = p_terrain_set;
 	notify_property_list_changed();
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileData::get_terrain_set() const {
@@ -5154,7 +5156,7 @@ void RTileData::set_peering_bit_terrain(TileSet::CellNeighbor p_peering_bit, int
 		ERR_FAIL_COND(!is_valid_peering_bit_terrain(p_peering_bit));
 	}
 	terrain_peering_bits[p_peering_bit] = p_terrain_index;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 int RTileData::get_peering_bit_terrain(TileSet::CellNeighbor p_peering_bit) const {
@@ -5184,7 +5186,7 @@ TileSet::TerrainsPattern RTileData::get_terrains_pattern() const {
 void RTileData::set_navigation_polygon(int p_layer_id, Ref<NavigationPolygon> p_navigation_polygon) {
 	ERR_FAIL_INDEX(p_layer_id, navigation.size());
 	navigation.write[p_layer_id] = p_navigation_polygon;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Ref<NavigationPolygon> RTileData::get_navigation_polygon(int p_layer_id) const {
@@ -5196,7 +5198,7 @@ Ref<NavigationPolygon> RTileData::get_navigation_polygon(int p_layer_id) const {
 void RTileData::set_probability(float p_probability) {
 	ERR_FAIL_COND(p_probability < 0.0);
 	probability = p_probability;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 float RTileData::get_probability() const {
 	return probability;
@@ -5220,7 +5222,7 @@ Variant RTileData::get_custom_data(String p_layer_name) const {
 void RTileData::set_custom_data_by_layer_id(int p_layer_id, Variant p_value) {
 	ERR_FAIL_INDEX(p_layer_id, custom_data.size());
 	custom_data.write[p_layer_id] = p_value;
-	emit_signal(SNAME("changed"));
+	emit_signal("changed");
 }
 
 Variant RTileData::get_custom_data_by_layer_id(int p_layer_id) const {
