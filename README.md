@@ -2,6 +2,8 @@
 
 Godot 4.0's TileMap backported to 3.x as an engine module, with (eventually) a few smaller features added.
 
+The tilemap classes will be prefixed with R, so it compiles cleanly with the built in TileMap class.
+
 # Building
 
 1. Get the source code for the engine.
