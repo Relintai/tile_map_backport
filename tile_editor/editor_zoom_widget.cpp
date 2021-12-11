@@ -33,6 +33,8 @@
 #include "core/os/keyboard.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
+#include "core/os/input.h"
+#include "core/os/keyboard.h"
 
 void EditorZoomWidget::_update_zoom_label() {
 	String zoom_text;
@@ -42,16 +44,19 @@ void EditorZoomWidget::_update_zoom_label() {
 	// even if their display doesn't have a particularly low DPI.
 	if (zoom >= 10) {
 		// Don't show a decimal when the zoom level is higher than 1000 %.
-		zoom_text = TS->format_number(rtos(Math::round((zoom / MAX(1, EDSCALE)) * 100))) + " " + TS->percent_sign();
+		zoom_text = (rtos(Math::round((zoom / MAX(1, EDSCALE)) * 100))) + " %";
 	} else {
-		zoom_text = TS->format_number(rtos(Math::snapped((zoom / MAX(1, EDSCALE)) * 100, 0.1))) + " " + TS->percent_sign();
+		double v = (zoom / MAX(1, EDSCALE)) * 100;
+		double val =  Math::floor(v / 0.1 + 0.5) * 0.1;
+
+		zoom_text = (rtos(val)) + " %";
 	}
 
 	zoom_reset->set_text(zoom_text);
 }
 
 void EditorZoomWidget::_button_zoom_minus() {
-	set_zoom_by_increments(-6, Input::get_singleton()->is_key_pressed(Key::ALT));
+	set_zoom_by_increments(-6, Input::get_singleton()->is_key_pressed(KEY_ALT));
 	emit_signal("zoom_changed", zoom);
 }
 
@@ -61,7 +66,7 @@ void EditorZoomWidget::_button_zoom_reset() {
 }
 
 void EditorZoomWidget::_button_zoom_plus() {
-	set_zoom_by_increments(6, Input::get_singleton()->is_key_pressed(Key::ALT));
+	set_zoom_by_increments(6, Input::get_singleton()->is_key_pressed(KEY_ALT));
 	emit_signal("zoom_changed", zoom);
 }
 
@@ -145,8 +150,8 @@ void EditorZoomWidget::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED:
-			zoom_minus->set_icon(get_theme_icon("ZoomLess", "EditorIcons"));
-			zoom_plus->set_icon(get_theme_icon("ZoomMore", "EditorIcons"));
+			zoom_minus->set_icon(get_icon("ZoomLess", "EditorIcons"));
+			zoom_plus->set_icon(get_icon("ZoomMore", "EditorIcons"));
 			break;
 		default:
 			break;
@@ -158,6 +163,10 @@ void EditorZoomWidget::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_zoom"), &EditorZoomWidget::get_zoom);
 	ClassDB::bind_method(D_METHOD("set_zoom_by_increments", "increment", "integer_only"), &EditorZoomWidget::set_zoom_by_increments);
 
+	ClassDB::bind_method(D_METHOD("_button_zoom_minus"), &EditorZoomWidget::_button_zoom_minus);
+	ClassDB::bind_method(D_METHOD("_button_zoom_reset"), &EditorZoomWidget::_button_zoom_reset);
+	ClassDB::bind_method(D_METHOD("_button_zoom_reset"), &EditorZoomWidget::_button_zoom_reset);
+
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "zoom"), "set_zoom", "get_zoom");
 
 	ADD_SIGNAL(MethodInfo("zoom_changed", PropertyInfo(Variant::REAL, "zoom")));
@@ -168,34 +177,34 @@ EditorZoomWidget::EditorZoomWidget() {
 	zoom_minus = memnew(Button);
 	zoom_minus->set_flat(true);
 	add_child(zoom_minus);
-	zoom_minus->connect("pressed", callable_mp(this, &EditorZoomWidget::_button_zoom_minus));
-	zoom_minus->set_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_minus", TTR("Zoom Out"), KeyModifierMask::CMD | Key::MINUS));
-	zoom_minus->set_shortcut_context(this);
+	zoom_minus->connect("pressed", this, "_button_zoom_minus");
+	zoom_minus->set_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_minus", TTR("Zoom Out"), KeyModifierMask::KEY_MASK_CMD | KEY_MINUS));
+	//zoom_minus->set_shortcut_context(this);
 	zoom_minus->set_focus_mode(FOCUS_NONE);
 
 	zoom_reset = memnew(Button);
 	zoom_reset->set_flat(true);
 	add_child(zoom_reset);
-	zoom_reset->add_theme_constant_override("outline_size", 1);
-	zoom_reset->add_theme_color_override("font_outline_color", Color(0, 0, 0));
-	zoom_reset->add_theme_color_override("font_color", Color(1, 1, 1));
-	zoom_reset->connect("pressed", callable_mp(this, &EditorZoomWidget::_button_zoom_reset));
-	zoom_reset->set_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_reset", TTR("Zoom Reset"), KeyModifierMask::CMD | Key::KEY_0));
-	zoom_reset->set_shortcut_context(this);
+	zoom_reset->add_constant_override("outline_size", 1);
+	zoom_reset->add_color_override("font_outline_color", Color(0, 0, 0));
+	zoom_reset->add_color_override("font_color", Color(1, 1, 1));
+	zoom_reset->connect("pressed", this, "_button_zoom_reset");
+	zoom_reset->set_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_reset", TTR("Zoom Reset"), KeyModifierMask::KEY_MASK_CMD | KEY_0));
+	//zoom_reset->set_shortcut_context(this);
 	zoom_reset->set_focus_mode(FOCUS_NONE);
-	zoom_reset->set_text_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+	//zoom_reset->set_text_alignment(HORIZONTAL_ALIGNMENT_CENTER);
 	// Prevent the button's size from changing when the text size changes
 	zoom_reset->set_custom_minimum_size(Size2(75 * EDSCALE, 0));
 
 	zoom_plus = memnew(Button);
 	zoom_plus->set_flat(true);
 	add_child(zoom_plus);
-	zoom_plus->connect("pressed", callable_mp(this, &EditorZoomWidget::_button_zoom_plus));
-	zoom_plus->set_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_plus", TTR("Zoom In"), KeyModifierMask::CMD | Key::EQUAL)); // Usually direct access key for PLUS
-	zoom_plus->set_shortcut_context(this);
+	zoom_plus->connect("pressed", this, "_button_zoom_plus");
+	zoom_plus->set_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_plus", TTR("Zoom In"), KeyModifierMask::KEY_MASK_CMD | KEY_EQUAL)); // Usually direct access key for PLUS
+	//zoom_plus->set_shortcut_context(this);
 	zoom_plus->set_focus_mode(FOCUS_NONE);
 
 	_update_zoom_label();
 
-	add_theme_constant_override("separation", Math::round(-8 * EDSCALE));
+	add_constant_override("separation", Math::round(-8 * EDSCALE));
 }
