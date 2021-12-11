@@ -31,6 +31,7 @@
 #ifndef RTILE_SET_H
 #define RTILE_SET_H
 
+#include "array_lt_op.h"
 #include "core/resource.h"
 #include "core/object.h"
 #include "core/vector.h"
