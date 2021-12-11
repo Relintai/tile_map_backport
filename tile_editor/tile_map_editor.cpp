@@ -141,7 +141,7 @@ void RTileMapEditorTilesPlugin::_update_tile_set_sources_list() {
 
 		RTileSetSource *source = *tile_set->get_source(source_id);
 
-		Ref<Texture2D> texture;
+		Ref<Texture> texture;
 		String item_text;
 
 		// Common to all type of sources.
@@ -278,7 +278,7 @@ void RTileMapEditorTilesPlugin::_patterns_item_list_gui_input(const Ref<InputEve
 	}
 }
 
-void RTileMapEditorTilesPlugin::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture2D> p_texture) {
+void RTileMapEditorTilesPlugin::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture) {
 	// TODO optimize ?
 	for (int i = 0; i < patterns_item_list->get_item_count(); i++) {
 		if (patterns_item_list->get_item_metadata(i) == p_pattern) {
@@ -386,7 +386,7 @@ void RTileMapEditorTilesPlugin::_update_scenes_collection_view() {
 	scene_tiles_list->set_fixed_icon_size(Vector2(int_size, int_size));
 }
 
-void RTileMapEditorTilesPlugin::_scene_thumbnail_done(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, Variant p_ud) {
+void RTileMapEditorTilesPlugin::_scene_thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, Variant p_ud) {
 	int index = p_ud;
 
 	if (index >= 0 && index < scene_tiles_list->get_item_count()) {
@@ -3053,7 +3053,7 @@ void RTileMapEditorTerrainsPlugin::_update_terrains_tree() {
 	}
 
 	// Fill in the terrain list.
-	Vector<Vector<Ref<Texture2D>>> icons = tile_set->generate_terrains_icons(Size2(16, 16) * EDSCALE);
+	Vector<Vector<Ref<Texture>>> icons = tile_set->generate_terrains_icons(Size2(16, 16) * EDSCALE);
 	for (int terrain_set_index = 0; terrain_set_index < tile_set->get_terrain_sets_count(); terrain_set_index++) {
 		// Add an item for the terrain set.
 		TreeItem *terrain_set_tree_item = terrains_tree->create_item();
@@ -3128,7 +3128,7 @@ void RTileMapEditorTerrainsPlugin::_update_tiles_list() {
 				RTileSet::TerrainsPattern terrains_pattern = E->get();
 
 				// Get the icon.
-				Ref<Texture2D> icon;
+				Ref<Texture> icon;
 				Rect2 region;
 				bool transpose = false;
 
@@ -3347,7 +3347,7 @@ void RTileMapEditor::_layers_selection_button_draw() {
 	}
 
 	RID ci = layers_selection_button->get_canvas_item();
-	Ref<Texture2D> arrow = Control::get_theme_icon(SNAME("arrow"), SNAME("OptionButton"));
+	Ref<Texture> arrow = Control::get_theme_icon(SNAME("arrow"), SNAME("OptionButton"));
 
 	Color clr = Color(1, 1, 1);
 	if (get_theme_constant(SNAME("modulate_arrow"))) {
@@ -3630,7 +3630,7 @@ void RTileMapEditor::_update_layers_selection() {
 	// Set button minimum width.
 	Size2 min_button_size = Size2(layers_selection_popup->get_contents_minimum_size().x, 0);
 	if (has_theme_icon(SNAME("arrow"), SNAME("OptionButton"))) {
-		Ref<Texture2D> arrow = Control::get_theme_icon(SNAME("arrow"), SNAME("OptionButton"));
+		Ref<Texture> arrow = Control::get_theme_icon(SNAME("arrow"), SNAME("OptionButton"));
 		min_button_size.x += arrow->get_size().x;
 	}
 	layers_selection_button->set_custom_minimum_size(min_button_size);

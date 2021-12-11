@@ -140,7 +140,7 @@ void RAtlasMergingDialog::_update_texture() {
 		merge_button->set_disabled(false);
 	} else {
 		_generate_merged(Vector<Ref<RTileSetAtlasSource>>(), next_line_after_column);
-		preview->set_texture(Ref<Texture2D>());
+		preview->set_texture(Ref<Texture>());
 		preview->hide();
 		select_2_atlases_label->show();
 		get_ok_button()->set_disabled(true);
@@ -154,7 +154,7 @@ void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 	Ref<ImageTexture> output_image_texture = merged->get_texture();
 	output_image_texture->get_image()->save_png(p_path);
 
-	Ref<Texture2D> new_texture_resource = ResourceLoader::load(p_path, "Texture2D");
+	Ref<Texture> new_texture_resource = ResourceLoader::load(p_path, "Texture");
 	merged->set_texture(new_texture_resource);
 
 	undo_redo->create_action(TTR("Merge RTileSetAtlasSource"));
@@ -235,7 +235,7 @@ void RAtlasMergingDialog::update_tile_set(Ref<RTileSet> p_tile_set) {
 		int source_id = p_tile_set->get_source_id(i);
 		Ref<RTileSetAtlasSource> atlas_source = p_tile_set->get_source(source_id);
 		if (atlas_source.is_valid()) {
-			Ref<Texture2D> texture = atlas_source->get_texture();
+			Ref<Texture> texture = atlas_source->get_texture();
 			if (texture.is_valid()) {
 				String item_text = vformat("%s (id:%d)", texture->get_path().get_file(), source_id);
 				atlas_merging_atlases_list->add_item(item_text, texture);

@@ -51,7 +51,7 @@ private:
 
 protected:
 	Ref<RTileSet> tile_set;
-	TileData *_get_tile_data(TileMapCell p_cell);
+	RTileData *_get_tile_data(RTileMapCell p_cell);
 	virtual void _tile_set_changed(){};
 
 	static void _bind_methods();
@@ -67,11 +67,11 @@ public:
 	virtual void forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event){};
 
 	// Used to draw the tile data property value over a tile.
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false){};
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false){};
 };
 
-class DummyObject : public Object {
-	GDCLASS(DummyObject, Object)
+class RDummyObject : public Object {
+	GDCLASS(RDummyObject, Object)
 private:
 	Map<String, Variant> properties;
 
@@ -86,8 +86,8 @@ public:
 	void clear_dummy_properties();
 };
 
-class GenericTilePolygonEditor : public VBoxContainer {
-	GDCLASS(GenericTilePolygonEditor, VBoxContainer);
+class RGenericTilePolygonEditor : public VBoxContainer {
+	GDCLASS(RGenericTilePolygonEditor, VBoxContainer);
 
 private:
 	Ref<RTileSet> tile_set;
@@ -131,7 +131,7 @@ private:
 	Button *button_center_view;
 	Vector2 panning;
 
-	Ref<Texture2D> background_texture;
+	Ref<Texture> background_texture;
 	Rect2 background_region;
 	Vector2 background_offset;
 	bool background_h_flip;
@@ -169,7 +169,7 @@ public:
 	void set_use_undo_redo(bool p_use_undo_redo);
 
 	void set_tile_set(Ref<RTileSet> p_tile_set);
-	void set_background(Ref<Texture2D> p_texture, Rect2 p_region = Rect2(), Vector2 p_offset = Vector2(), bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false, Color p_modulate = Color(1.0, 1.0, 1.0, 0.0));
+	void set_background(Ref<Texture> p_texture, Rect2 p_region = Rect2(), Vector2 p_offset = Vector2(), bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false, Color p_modulate = Color(1.0, 1.0, 1.0, 0.0));
 
 	int get_polygon_count();
 	int add_polygon(Vector<Point2> p_polygon, int p_index = -1);
@@ -181,11 +181,11 @@ public:
 	void set_polygons_color(Color p_color);
 	void set_multiple_polygon_mode(bool p_multiple_polygon_mode);
 
-	GenericTilePolygonEditor();
+	RGenericTilePolygonEditor();
 };
 
-class TileDataDefaultEditor : public RTileDataEditor {
-	GDCLASS(TileDataDefaultEditor, RTileDataEditor);
+class RTileDataDefaultEditor : public RTileDataEditor {
+	GDCLASS(RTileDataDefaultEditor, RTileDataEditor);
 
 private:
 	// Toolbar
@@ -193,8 +193,8 @@ private:
 	Button *picker_button;
 
 	// UI
-	Ref<Texture2D> tile_bool_checked;
-	Ref<Texture2D> tile_bool_unchecked;
+	Ref<Texture> tile_bool_checked;
+	Ref<Texture> tile_bool_unchecked;
 	Label *label;
 
 	EditorProperty *property_editor = nullptr;
@@ -208,13 +208,13 @@ private:
 	DragType drag_type = DRAG_TYPE_NONE;
 	Vector2 drag_start_pos;
 	Vector2 drag_last_pos;
-	Map<TileMapCell, Variant> drag_modified;
+	Map<RTileMapCell, Variant> drag_modified;
 	Variant drag_painted_value;
 
 	void _property_value_changed(StringName p_property, Variant p_value, StringName p_field);
 
 protected:
-	DummyObject *dummy_object = memnew(DummyObject);
+	RDummyObject *dummy_object = memnew(RDummyObject);
 
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
@@ -226,7 +226,7 @@ protected:
 	virtual void _set_painted_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile);
 	virtual void _set_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile, Variant p_value);
 	virtual Variant _get_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile);
-	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<TileMapCell, Variant> p_previous_values, Variant p_new_value);
+	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<RTileMapCell, Variant> p_previous_values, Variant p_new_value);
 
 public:
 	virtual Control *get_toolbar() override { return toolbar; };
@@ -234,43 +234,43 @@ public:
 	virtual void forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
 	virtual void forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
 	virtual void forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 
 	void setup_property_editor(Variant::Type p_type, String p_property, String p_label = "", Variant p_default_value = Variant());
 
-	TileDataDefaultEditor();
-	~TileDataDefaultEditor();
+	RTileDataDefaultEditor();
+	~RTileDataDefaultEditor();
 };
 
-class TileDataTextureOffsetEditor : public TileDataDefaultEditor {
-	GDCLASS(TileDataTextureOffsetEditor, TileDataDefaultEditor);
+class RTileDataTextureOffsetEditor : public RTileDataDefaultEditor {
+	GDCLASS(RTileDataTextureOffsetEditor, RTileDataDefaultEditor);
 
 public:
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 };
 
-class TileDataPositionEditor : public TileDataDefaultEditor {
-	GDCLASS(TileDataPositionEditor, TileDataDefaultEditor);
+class RTileDataPositionEditor : public RTileDataDefaultEditor {
+	GDCLASS(RTileDataPositionEditor, RTileDataDefaultEditor);
 
 public:
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 };
 
-class TileDataYSortEditor : public TileDataDefaultEditor {
-	GDCLASS(TileDataYSortEditor, TileDataDefaultEditor);
+class RTileDataYSortEditor : public RTileDataDefaultEditor {
+	GDCLASS(RTileDataYSortEditor, RTileDataDefaultEditor);
 
 public:
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 };
 
-class TileDataOcclusionShapeEditor : public TileDataDefaultEditor {
-	GDCLASS(TileDataOcclusionShapeEditor, TileDataDefaultEditor);
+class RTileDataOcclusionShapeEditor : public RTileDataDefaultEditor {
+	GDCLASS(RTileDataOcclusionShapeEditor, RTileDataDefaultEditor);
 
 private:
 	int occlusion_layer = -1;
 
 	// UI
-	GenericTilePolygonEditor *polygon_editor;
+	RGenericTilePolygonEditor *polygon_editor;
 
 	void _polygon_changed(PackedVector2Array p_polygon);
 
@@ -278,7 +278,7 @@ private:
 	virtual void _set_painted_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
 	virtual void _set_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile, Variant p_value) override;
 	virtual Variant _get_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
-	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<TileMapCell, Variant> p_previous_values, Variant p_new_value) override;
+	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<RTileMapCell, Variant> p_previous_values, Variant p_new_value) override;
 
 protected:
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -288,21 +288,21 @@ protected:
 	void _notification(int p_what);
 
 public:
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 
 	void set_occlusion_layer(int p_occlusion_layer) { occlusion_layer = p_occlusion_layer; }
 
-	TileDataOcclusionShapeEditor();
+	RTileDataOcclusionShapeEditor();
 };
 
-class TileDataCollisionEditor : public TileDataDefaultEditor {
-	GDCLASS(TileDataCollisionEditor, TileDataDefaultEditor);
+class RTileDataCollisionEditor : public RTileDataDefaultEditor {
+	GDCLASS(RTileDataCollisionEditor, RTileDataDefaultEditor);
 
 	int physics_layer = -1;
 
 	// UI
-	GenericTilePolygonEditor *polygon_editor;
-	DummyObject *dummy_object = memnew(DummyObject);
+	RGenericTilePolygonEditor *polygon_editor;
+	RDummyObject *dummy_object = memnew(RDummyObject);
 	Map<StringName, EditorProperty *> property_editors;
 
 	void _property_value_changed(StringName p_property, Variant p_value, StringName p_field);
@@ -312,7 +312,7 @@ class TileDataCollisionEditor : public TileDataDefaultEditor {
 	virtual void _set_painted_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
 	virtual void _set_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile, Variant p_value) override;
 	virtual Variant _get_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
-	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<TileMapCell, Variant> p_previous_values, Variant p_new_value) override;
+	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<RTileMapCell, Variant> p_previous_values, Variant p_new_value) override;
 
 protected:
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -322,16 +322,16 @@ protected:
 	void _notification(int p_what);
 
 public:
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 
 	void set_physics_layer(int p_physics_layer) { physics_layer = p_physics_layer; }
 
-	TileDataCollisionEditor();
-	~TileDataCollisionEditor();
+	RTileDataCollisionEditor();
+	~RTileDataCollisionEditor();
 };
 
-class TileDataTerrainsEditor : public RTileDataEditor {
-	GDCLASS(TileDataTerrainsEditor, RTileDataEditor);
+class RTileDataTerrainsEditor : public RTileDataEditor {
+	GDCLASS(RTileDataTerrainsEditor, RTileDataEditor);
 
 private:
 	// Toolbar
@@ -349,12 +349,12 @@ private:
 	DragType drag_type = DRAG_TYPE_NONE;
 	Vector2 drag_start_pos;
 	Vector2 drag_last_pos;
-	Map<TileMapCell, Variant> drag_modified;
+	Map<RTileMapCell, Variant> drag_modified;
 	Variant drag_painted_value;
 
 	// UI
 	Label *label;
-	DummyObject *dummy_object = memnew(DummyObject);
+	RDummyObject *dummy_object = memnew(RDummyObject);
 	EditorPropertyEnum *terrain_set_property_editor = nullptr;
 	EditorPropertyEnum *terrain_property_editor = nullptr;
 
@@ -375,21 +375,21 @@ public:
 	virtual void forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
 	virtual void forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
 	virtual void forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, RTileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 
-	TileDataTerrainsEditor();
-	~TileDataTerrainsEditor();
+	RTileDataTerrainsEditor();
+	~RTileDataTerrainsEditor();
 };
 
-class TileDataNavigationEditor : public TileDataDefaultEditor {
-	GDCLASS(TileDataNavigationEditor, TileDataDefaultEditor);
+class RTileDataNavigationEditor : public RTileDataDefaultEditor {
+	GDCLASS(RTileDataNavigationEditor, RTileDataDefaultEditor);
 
 private:
 	int navigation_layer = -1;
 	PackedVector2Array navigation_polygon;
 
 	// UI
-	GenericTilePolygonEditor *polygon_editor;
+	RGenericTilePolygonEditor *polygon_editor;
 
 	void _polygon_changed(PackedVector2Array p_polygon);
 
@@ -397,7 +397,7 @@ private:
 	virtual void _set_painted_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
 	virtual void _set_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile, Variant p_value) override;
 	virtual Variant _get_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
-	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<TileMapCell, Variant> p_previous_values, Variant p_new_value) override;
+	virtual void _setup_undo_redo_action(RTileSetAtlasSource *p_tile_set_atlas_source, Map<RTileMapCell, Variant> p_previous_values, Variant p_new_value) override;
 
 protected:
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -407,11 +407,11 @@ protected:
 	void _notification(int p_what);
 
 public:
-	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
+	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 
 	void set_navigation_layer(int p_navigation_layer) { navigation_layer = p_navigation_layer; }
 
-	TileDataNavigationEditor();
+	RTileDataNavigationEditor();
 };
 
 #endif // TILE_DATA_EDITORS_H

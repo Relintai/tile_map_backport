@@ -216,7 +216,7 @@ void RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_ch
 	tile_set_scenes_collection_source_changed_needs_update = true;
 }
 
-void RTileSetScenesCollectionSourceEditor::_scene_thumbnail_done(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, Variant p_ud) {
+void RTileSetScenesCollectionSourceEditor::_scene_thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, Variant p_ud) {
 	int index = p_ud;
 
 	if (index >= 0 && index < scene_tiles_list->get_item_count()) {
@@ -420,7 +420,7 @@ bool RTileSetScenesCollectionSourceEditor::_can_drop_data_fw(const Point2 &p_poi
 			return false;
 		}
 
-		// Check if we have a Texture2D.
+		// Check if we have a Texture.
 		if (String(d["type"]) == "files") {
 			Vector<String> files = d["files"];
 

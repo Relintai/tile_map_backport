@@ -55,7 +55,7 @@ void RTileSetEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_data,
 		Dictionary d = p_data;
 		Vector<String> files = d["files"];
 		for (int i = 0; i < files.size(); i++) {
-			Ref<Texture2D> resource = ResourceLoader::load(files[i]);
+			Ref<Texture> resource = ResourceLoader::load(files[i]);
 			if (resource.is_valid()) {
 				// Retrieve the id for the next created source.
 				source_id = tile_set->get_next_source_id();
@@ -91,7 +91,7 @@ bool RTileSetEditor::_can_drop_data_fw(const Point2 &p_point, const Variant &p_d
 			return false;
 		}
 
-		// Check if we have a Texture2D.
+		// Check if we have a Texture.
 		if (String(d["type"]) == "files") {
 			Vector<String> files = d["files"];
 
@@ -103,7 +103,7 @@ bool RTileSetEditor::_can_drop_data_fw(const Point2 &p_point, const Variant &p_d
 				String file = files[i];
 				String ftype = EditorFileSystem::get_singleton()->get_file_type(file);
 
-				if (!ClassDB::is_parent_class(ftype, "Texture2D")) {
+				if (!ClassDB::is_parent_class(ftype, "Texture")) {
 					return false;
 				}
 			}
@@ -142,7 +142,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 
 		TileSetSource *source = *tile_set->get_source(source_id);
 
-		Ref<Texture2D> texture;
+		Ref<Texture> texture;
 		String item_text;
 
 		// Common to all type of sources.
@@ -352,7 +352,7 @@ void RTileSetEditor::_patterns_item_list_gui_input(const Ref<InputEvent> &p_even
 	}
 }
 
-void RTileSetEditor::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture2D> p_texture) {
+void RTileSetEditor::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture) {
 	// TODO optimize ?
 	for (int i = 0; i < patterns_item_list->get_item_count(); i++) {
 		if (patterns_item_list->get_item_metadata(i) == p_pattern) {

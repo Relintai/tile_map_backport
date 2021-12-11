@@ -146,7 +146,7 @@ private:
 
 	ItemList *sources_list;
 
-	Ref<Texture2D> missing_atlas_texture_icon;
+	Ref<Texture> missing_atlas_texture_icon;
 	void _update_tile_set_sources_list();
 
 	void _update_source_display();
@@ -175,7 +175,7 @@ private:
 	ItemList *scene_tiles_list;
 
 	void _update_scenes_collection_view();
-	void _scene_thumbnail_done(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, Variant p_ud);
+	void _scene_thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, Variant p_ud);
 	void _scenes_list_multi_selected(int p_index, bool p_selected);
 	void _scenes_list_nothing_selected();
 
@@ -184,7 +184,7 @@ private:
 	ItemList *patterns_item_list;
 	Label *patterns_help_label;
 	void _patterns_item_list_gui_input(const Ref<InputEvent> &p_event);
-	void _pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture2D> p_texture);
+	void _pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture);
 	bool select_last_pattern = false;
 	void _update_patterns_list();
 
@@ -328,8 +328,8 @@ private:
 	void _update_bottom_panel();
 
 	// TileMap.
-	Ref<Texture2D> missing_tile_texture;
-	Ref<Texture2D> warning_pattern_texture;
+	Ref<Texture> missing_tile_texture;
+	Ref<Texture> warning_pattern_texture;
 
 	// CallBack.
 	void _tile_map_changed();

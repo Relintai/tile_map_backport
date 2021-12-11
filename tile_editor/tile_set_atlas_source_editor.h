@@ -226,8 +226,8 @@ private:
 
 	PopupMenu *base_tile_popup_menu;
 	PopupMenu *empty_base_tile_popup_menu;
-	Ref<Texture2D> resize_handle;
-	Ref<Texture2D> resize_handle_disabled;
+	Ref<Texture> resize_handle;
+	Ref<Texture> resize_handle_disabled;
 	Control *tile_atlas_control;
 	Control *tile_atlas_control_unscaled;
 	void _tile_atlas_control_draw();

@@ -69,7 +69,7 @@ private:
 	MenuButton *sources_add_button;
 	MenuButton *sources_advanced_menu_button;
 	ItemList *sources_list;
-	Ref<Texture2D> missing_texture_texture;
+	Ref<Texture> missing_texture_texture;
 	void _source_selected(int p_source_index);
 	void _source_delete_pressed();
 	void _source_add_id_pressed(int p_id_pressed);
@@ -82,7 +82,7 @@ private:
 	ItemList *patterns_item_list;
 	Label *patterns_help_label;
 	void _patterns_item_list_gui_input(const Ref<InputEvent> &p_event);
-	void _pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture2D> p_texture);
+	void _pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture);
 	bool select_last_pattern = false;
 	void _update_patterns_list();
 

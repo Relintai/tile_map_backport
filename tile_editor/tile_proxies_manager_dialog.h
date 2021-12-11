@@ -47,8 +47,8 @@ private:
 
 	UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
 
-	TileMapCell from;
-	TileMapCell to;
+	RTileMapCell from;
+	RTileMapCell to;
 
 	// GUI
 	ItemList *source_level_list;
