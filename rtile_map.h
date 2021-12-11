@@ -383,7 +383,7 @@ public:
 	//GDVIRTUAL3(_tile_data_runtime_update, int, Vector2i, RTileData *);
 
 	// Configuration warnings.
-	Vector<String> get_configuration_warnings() const;
+	String get_configuration_warning() const;
 
 	RTileMap();
 	~RTileMap();
