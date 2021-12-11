@@ -3328,7 +3328,8 @@ void RTileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_coords_level_tile_proxy", "source_from", "coords_from"), &RTileSet::has_coords_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("remove_coords_level_tile_proxy", "source_from", "coords_from"), &RTileSet::remove_coords_level_tile_proxy);
 
-	ClassDB::bind_method(D_METHOD("set_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from", "source_to", "coords_to", "alternative_to"), &RTileSet::set_alternative_level_tile_proxy);
+	//TODO 3.x only supports binding up to 5 arguments
+	//ClassDB::bind_method(D_METHOD("set_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from", "source_to", "coords_to", "alternative_to"), &RTileSet::set_alternative_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("get_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from"), &RTileSet::get_alternative_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("has_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from"), &RTileSet::has_alternative_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("remove_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from"), &RTileSet::remove_alternative_level_tile_proxy);
@@ -4390,7 +4391,8 @@ void RTileSetAtlasSource::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("move_tile_in_atlas", "atlas_coords", "new_atlas_coords", "new_size"), &RTileSetAtlasSource::move_tile_in_atlas, DEFVAL(INVALID_ATLAS_COORDSV), DEFVAL(Vector2(-1, -1)));
 	ClassDB::bind_method(D_METHOD("get_tile_size_in_atlas", "atlas_coords"), &RTileSetAtlasSource::get_tile_size_in_atlas);
 
-	ClassDB::bind_method(D_METHOD("has_room_for_tile", "atlas_coords", "size", "animation_columns", "animation_separation", "frames_count", "ignored_tile"), &RTileSetAtlasSource::has_room_for_tile, DEFVAL(INVALID_ATLAS_COORDSV));
+	//TODO 3.x only supports binding up to 5 arguments
+	//ClassDB::bind_method(D_METHOD("has_room_for_tile", "atlas_coords", "size", "animation_columns", "animation_separation", "frames_count", "ignored_tile"), &RTileSetAtlasSource::has_room_for_tile, DEFVAL(INVALID_ATLAS_COORDSV));
 	ClassDB::bind_method(D_METHOD("get_tiles_to_be_removed_on_change", "texture", "margins", "separation", "texture_region_size"), &RTileSetAtlasSource::get_tiles_to_be_removed_on_change);
 	ClassDB::bind_method(D_METHOD("get_tile_at_coords", "atlas_coords"), &RTileSetAtlasSource::get_tile_at_coords);
 
