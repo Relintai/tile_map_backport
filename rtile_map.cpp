@@ -727,8 +727,14 @@ RTileMap::VisibilityMode RTileMap::get_navigation_visibility_mode() {
 	return navigation_visibility_mode;
 }
 
+bool RTileMap::is_y_sort_enabled() const {
+	return _y_sort_enabled;
+}
+
 void RTileMap::set_y_sort_enabled(bool p_enable) {
-	Node2D::set_y_sort_enabled(p_enable);
+	_y_sort_enabled = p_enable;
+
+	//Node2D::set_y_sort_enabled(p_enable);
 	_clear_internals();
 	_recreate_internals();
 	emit_signal("changed");
@@ -1360,10 +1366,10 @@ void RTileMap::draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<RTile
 		// Draw the tile.
 		if (p_frame >= 0) {
 			Rect2i source_rect = atlas_source->get_runtime_tile_texture_region(p_atlas_coords, p_frame);
-			tex->draw_rect_region(p_canvas_item, dest_rect, source_rect, modulate, transpose, p_tile_set->is_uv_clipping());
+			tex->draw_rect_region(p_canvas_item, dest_rect, source_rect, modulate, transpose, Ref<Texture>(), p_tile_set->is_uv_clipping());
 		} else if (atlas_source->get_tile_animation_frames_count(p_atlas_coords) == 1) {
 			Rect2i source_rect = atlas_source->get_runtime_tile_texture_region(p_atlas_coords, 0);
-			tex->draw_rect_region(p_canvas_item, dest_rect, source_rect, modulate, transpose, p_tile_set->is_uv_clipping());
+			tex->draw_rect_region(p_canvas_item, dest_rect, source_rect, modulate, transpose, Ref<Texture>(), p_tile_set->is_uv_clipping());
 		} else {
 			real_t speed = atlas_source->get_tile_animation_speed(p_atlas_coords);
 			real_t animation_duration = atlas_source->get_tile_animation_total_duration(p_atlas_coords) / speed;
@@ -3646,6 +3652,10 @@ void RTileMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_layer_z_index", "layer", "z_index"), &RTileMap::set_layer_z_index);
 	ClassDB::bind_method(D_METHOD("get_layer_z_index", "layer"), &RTileMap::get_layer_z_index);
 
+	ClassDB::bind_method(D_METHOD("is_y_sort_enabled"), &RTileMap::is_y_sort_enabled);
+	ClassDB::bind_method(D_METHOD("set_y_sort_enabled", "p_enable"), &RTileMap::set_y_sort_enabled);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "y_sort_enabled"), "set_y_sort_enabled", "is_y_sort_enabled");
+
 	ClassDB::bind_method(D_METHOD("set_collision_animatable", "enabled"), &RTileMap::set_collision_animatable);
 	ClassDB::bind_method(D_METHOD("is_collision_animatable"), &RTileMap::is_collision_animatable);
 	ClassDB::bind_method(D_METHOD("set_collision_visibility_mode", "collision_visibility_mode"), &RTileMap::set_collision_visibility_mode);
@@ -3732,6 +3742,8 @@ void RTileMap::_tile_set_changed_deferred_update() {
 }
 
 RTileMap::RTileMap() {
+	_y_sort_enabled = false;
+
 	set_notify_transform(true);
 	set_notify_local_transform(false);
 

@@ -184,6 +184,8 @@ private:
 	Rect2i used_rect_cache;
 	bool used_rect_cache_dirty = true;
 
+	bool _y_sort_enabled;
+
 	// TileMap layers.
 	struct TileMapLayer {
 		String name;
@@ -343,6 +345,7 @@ public:
 	int get_effective_quadrant_size(int p_layer) const;
 	//---
 
+	virtual bool is_y_sort_enabled() const;
 	virtual void set_y_sort_enabled(bool p_enable);
 
 	Vector2 map_to_world(const Vector2i &p_pos) const;
