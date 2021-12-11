@@ -3720,7 +3720,7 @@ void RTileMap::_bind_methods() {
 	BIND_VMETHOD(MethodInfo(PropertyInfo(Variant::BOOL, "ret"), "_use_tile_data_runtime_update", PropertyInfo(Variant::INT, "in"), PropertyInfo(Variant::VECTOR2, "vec")));
 	BIND_VMETHOD(MethodInfo("_tile_data_runtime_update", PropertyInfo(Variant::REAL, "gcd"), PropertyInfo(Variant::VECTOR2, "vec"), PropertyInfo(Variant::OBJECT, "rtd", PROPERTY_HINT_RESOURCE_TYPE, "RTileData")));
 
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "tile_set", PROPERTY_HINT_RESOURCE_TYPE, "TileSet"), "set_tileset", "get_tileset");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "tile_set", PROPERTY_HINT_RESOURCE_TYPE, "RTileSet"), "set_tileset", "get_tileset");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "cell_quadrant_size", PROPERTY_HINT_RANGE, "1,128,1"), "set_quadrant_size", "get_quadrant_size");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "collision_animatable"), "set_collision_animatable", "is_collision_animatable");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_visibility_mode", PROPERTY_HINT_ENUM, "Default,Force Show,Force Hide"), "set_collision_visibility_mode", "get_collision_visibility_mode");
