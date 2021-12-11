@@ -74,7 +74,7 @@ void RTileMapPattern::_set_tile_data(const Vector<int> &p_data) {
 		uint16_t atlas_coords_x = decode_uint16(&local[6]);
 		uint16_t atlas_coords_y = decode_uint16(&local[8]);
 		uint16_t alternative_tile = decode_uint16(&local[10]);
-		set_cell(Vector2i(x, y), source_id, Vector2i(atlas_coords_x, atlas_coords_y), alternative_tile);
+		set_cell(Vector2(x, y), source_id, Vector2(atlas_coords_x, atlas_coords_y), alternative_tile);
 	}
 	emit_signal("changed");
 }
@@ -102,20 +102,23 @@ Vector<int> RTileMapPattern::_get_tile_data() const {
 	return data;
 }
 
-void RTileMapPattern::set_cell(const Vector2i &p_coords, int p_source_id, const Vector2i p_atlas_coords, int p_alternative_tile) {
-	ERR_FAIL_COND_MSG(p_coords.x < 0 || p_coords.y < 0, vformat("Cannot set cell with negative coords in a TileMapPattern. Wrong coords: %s", Vector2(p_coords)));
+void RTileMapPattern::set_cell(const Vector2 &p_coords, int p_source_id, const Vector2 p_atlas_coords, int p_alternative_tile) {
+	ERR_FAIL_COND_MSG(p_coords.x < 0 || p_coords.y < 0, vformat("Cannot set cell with negative coords in a TileMapPattern. Wrong coords: %s", p_coords));
 
-	size = Vector2i(MAX(p_coords.x, size.x), MAX(p_coords.y, size.y));
+	Vector2i coordsi = Vector2i(p_coords.x, p_coords.y);
+	size = Vector2i(MAX(coordsi.x, size.x), MAX(coordsi.y, size.y));
 
-	pattern[p_coords] = RTileMapCell(p_source_id, p_atlas_coords, p_alternative_tile);
+	pattern[coordsi] = RTileMapCell(p_source_id, Vector2i(p_atlas_coords.x, p_atlas_coords.y), p_alternative_tile);
 	emit_changed();
 }
 
-bool RTileMapPattern::has_cell(const Vector2i &p_coords) const {
-	return pattern.has(p_coords);
+bool RTileMapPattern::has_cell(const Vector2 &p_coords) const {
+	return pattern.has(Vector2i(p_coords.x, p_coords.y));
 }
 
-void RTileMapPattern::remove_cell(const Vector2i &p_coords, bool p_update_size) {
+void RTileMapPattern::remove_cell(const Vector2 &p_coordsv, bool p_update_size) {
+	Vector2i p_coords = Vector2i(p_coordsv.x, p_coordsv.y);
+
 	ERR_FAIL_COND(!pattern.has(p_coords));
 
 	pattern.erase(p_coords);
@@ -130,32 +133,38 @@ void RTileMapPattern::remove_cell(const Vector2i &p_coords, bool p_update_size) 
 	emit_changed();
 }
 
-int RTileMapPattern::get_cell_source_id(const Vector2i &p_coords) const {
+int RTileMapPattern::get_cell_source_id(const Vector2 &p_coordsv) const {
+	Vector2i p_coords = Vector2i(p_coordsv.x, p_coordsv.y);
+
 	ERR_FAIL_COND_V(!pattern.has(p_coords), RTileSet::INVALID_SOURCE);
 
 	return pattern[p_coords].source_id;
 }
 
-Vector2i RTileMapPattern::get_cell_atlas_coords(const Vector2i &p_coords) const {
+Vector2 RTileMapPattern::get_cell_atlas_coords(const Vector2 &p_coordsv) const {
+	Vector2i p_coords = Vector2i(p_coordsv.x, p_coordsv.y);
+
 	ERR_FAIL_COND_V(!pattern.has(p_coords), RTileSetSource::INVALID_ATLAS_COORDS);
 
 	return pattern[p_coords].get_atlas_coords();
 }
 
-int RTileMapPattern::get_cell_alternative_tile(const Vector2i &p_coords) const {
+int RTileMapPattern::get_cell_alternative_tile(const Vector2 &p_coordsv) const {
+	Vector2i p_coords = Vector2i(p_coordsv.x, p_coordsv.y);
+
 	ERR_FAIL_COND_V(!pattern.has(p_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE);
 
 	return pattern[p_coords].alternative_tile;
 }
 
-TypedArray<Vector2i> RTileMapPattern::get_used_cells() const {
+PoolVector2Array RTileMapPattern::get_used_cells() const {
 	// Returns the cells used in the tilemap.
-	TypedArray<Vector2i> a;
+	PoolVector2Array a;
 	a.resize(pattern.size());
 	int i = 0;
 
 	for (const Map<Vector2i, RTileMapCell>::Element *E = pattern.front(); E; E = E->next()) {
-		Vector2i p(E->key().x, E->key().y);
+		Vector2 p(E->key().x, E->key().y);
 		a[i++] = p;
 	}
 
@@ -215,8 +224,8 @@ void RTileMapPattern::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_tile_data", "data"), &RTileMapPattern::_set_tile_data);
 	ClassDB::bind_method(D_METHOD("_get_tile_data"), &RTileMapPattern::_get_tile_data);
 
-	ClassDB::bind_method(D_METHOD("set_cell", "coords", "source_id", "atlas_coords", "alternative_tile"), &RTileMapPattern::set_cell, DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS), DEFVAL(RTileSetSource::INVALID_TILE_ALTERNATIVE));
-	ClassDB::bind_method(D_METHOD("has_cell", "coords"), &RTileMapPattern::has_cell);
+	ClassDB::bind_method(D_METHOD("set_cell", "coords_x", "coords_Y", "source_id", "atlas_coords_x", "atlas_coords_y", "alternative_tile"), &RTileMapPattern::set_cell, DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS.x), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS.y), DEFVAL(RTileSetSource::INVALID_TILE_ALTERNATIVE));
+	ClassDB::bind_method(D_METHOD("has_cell", "coords_x", "coords_y"), &RTileMapPattern::has_cell);
 	ClassDB::bind_method(D_METHOD("remove_cell", "coords", "update_size"), &RTileMapPattern::remove_cell);
 	ClassDB::bind_method(D_METHOD("get_cell_source_id", "coords"), &RTileMapPattern::get_cell_source_id);
 	ClassDB::bind_method(D_METHOD("get_cell_atlas_coords", "coords"), &RTileMapPattern::get_cell_atlas_coords);
@@ -605,6 +614,33 @@ void RTileSet::set_occlusion_layer_sdf_collision(int p_layer_index, bool p_sdf_c
 bool RTileSet::get_occlusion_layer_sdf_collision(int p_layer_index) const {
 	ERR_FAIL_INDEX_V(p_layer_index, occlusion_layers.size(), false);
 	return occlusion_layers[p_layer_index].sdf_collision;
+}
+
+Vector<Variant> RTileSet::occlusion_layers_get() {
+	Vector<Variant> r;                     
+	for (int i = 0; i < occlusion_layers.size(); i++) { 
+		r.push_back(occlusion_layers[i].light_mask); 
+		r.push_back(occlusion_layers[i].sdf_collision); 
+	}                                      
+	return r;
+}
+void RTileSet::occlusion_layers_set(const Vector<Variant> &data) {
+	if (data.size() % 2 != 0) {
+		return;
+	}
+
+	occlusion_layers.clear();
+
+	for (int i = 0; i < data.size(); i += 2) {
+		uint32_t lm = data[i];
+		bool sc = data[i + i];
+
+		OcclusionLayer ol;
+		ol.light_mask = lm;
+		ol.sdf_collision = sc;
+
+		occlusion_layers.push_back(ol);
+	}
 }
 
 int RTileSet::get_physics_layers_count() const {
@@ -1118,24 +1154,27 @@ void RTileSet::remove_source_level_tile_proxy(int p_source_from) {
 	emit_changed();
 }
 
-void RTileSet::set_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_source_to, Vector2i p_coords_to) {
+void RTileSet::set_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from_v, int p_source_to, Vector2 p_coords_to_v) {
+	Vector2i p_coords_from = p_coords_from_v;
+	Vector2i p_coords_to = p_coords_to_v;
+
 	ERR_FAIL_COND(p_source_from == RTileSet::INVALID_SOURCE || p_source_to == RTileSet::INVALID_SOURCE);
 	ERR_FAIL_COND(p_coords_from == RTileSetSource::INVALID_ATLAS_COORDS || p_coords_to == RTileSetSource::INVALID_ATLAS_COORDS);
 
 	Array from;
 	from.push_back(p_source_from);
-	from.push_back(p_coords_from);
+	from.push_back(p_coords_from_v);
 
 	Array to;
 	to.push_back(p_source_to);
-	to.push_back(p_coords_to);
+	to.push_back(p_coords_to_v);
 
 	coords_level_proxies[from] = to;
 
 	emit_changed();
 }
 
-Array RTileSet::get_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from) {
+Array RTileSet::get_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from) {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -1145,7 +1184,7 @@ Array RTileSet::get_coords_level_tile_proxy(int p_source_from, Vector2i p_coords
 	return coords_level_proxies[from];
 }
 
-bool RTileSet::has_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from) {
+bool RTileSet::has_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from) {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -1153,7 +1192,7 @@ bool RTileSet::has_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_
 	return coords_level_proxies.has(from);
 }
 
-void RTileSet::remove_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from) {
+void RTileSet::remove_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from) {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -1165,7 +1204,7 @@ void RTileSet::remove_coords_level_tile_proxy(int p_source_from, Vector2i p_coor
 	emit_changed();
 }
 
-void RTileSet::set_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from, int p_source_to, Vector2i p_coords_to, int p_alternative_to) {
+void RTileSet::set_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from, int p_source_to, Vector2 p_coords_to, int p_alternative_to) {
 	ERR_FAIL_COND(p_source_from == RTileSet::INVALID_SOURCE || p_source_to == RTileSet::INVALID_SOURCE);
 	ERR_FAIL_COND(p_coords_from == RTileSetSource::INVALID_ATLAS_COORDS || p_coords_to == RTileSetSource::INVALID_ATLAS_COORDS);
 
@@ -1184,7 +1223,7 @@ void RTileSet::set_alternative_level_tile_proxy(int p_source_from, Vector2i p_co
 	emit_changed();
 }
 
-Array RTileSet::get_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from) {
+Array RTileSet::get_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from) {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -1195,7 +1234,7 @@ Array RTileSet::get_alternative_level_tile_proxy(int p_source_from, Vector2i p_c
 	return alternative_level_proxies[from];
 }
 
-bool RTileSet::has_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from) {
+bool RTileSet::has_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from) {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -1204,7 +1243,7 @@ bool RTileSet::has_alternative_level_tile_proxy(int p_source_from, Vector2i p_co
 	return alternative_level_proxies.has(from);
 }
 
-void RTileSet::remove_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from) {
+void RTileSet::remove_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from) {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -1253,7 +1292,7 @@ Array RTileSet::get_alternative_level_tile_proxies() const {
 	return output;
 }
 
-Array RTileSet::map_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from) const {
+Array RTileSet::map_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from) const {
 	Array from;
 	from.push_back(p_source_from);
 	from.push_back(p_coords_from);
@@ -2382,6 +2421,7 @@ void RTileSet::reset_state() {
 }
 
 const Vector2i RTileSetSource::INVALID_ATLAS_COORDS = Vector2i(-1, -1);
+const Vector2 RTileSetSource::INVALID_ATLAS_COORDSV = Vector2(-1, -1);
 const int RTileSetSource::INVALID_TILE_ALTERNATIVE = -1;
 
 #ifndef DISABLE_DEPRECATED
@@ -2422,7 +2462,7 @@ void RTileSet::_compatibility_conversion() {
 
 					Array value_array;
 					value_array.push_back(source_id);
-					value_array.push_back(coords);
+					value_array.push_back(Vector2(coords));
 					value_array.push_back(alternative_tile);
 
 					if (!compatibility_tilemap_mapping.has(E->key())) {
@@ -2507,14 +2547,14 @@ void RTileSet::_compatibility_conversion() {
 
 							// Add to the mapping.
 							Array key_array;
-							key_array.push_back(coords);
+							key_array.push_back(Vector2(coords));
 							key_array.push_back(flip_h);
 							key_array.push_back(flip_v);
 							key_array.push_back(transpose);
 
 							Array value_array;
 							value_array.push_back(source_id);
-							value_array.push_back(coords);
+							value_array.push_back(Vector2(coords));
 							value_array.push_back(alternative_tile);
 
 							if (!compatibility_tilemap_mapping.has(E->key())) {
@@ -2610,10 +2650,10 @@ void RTileSet::_compatibility_conversion() {
 	compatibility_data = Map<int, CompatibilityTileData *>();
 }
 
-Array RTileSet::compatibility_tilemap_map(int p_tile_id, Vector2i p_coords, bool p_flip_h, bool p_flip_v, bool p_transpose) {
+Array RTileSet::compatibility_tilemap_map(int p_tile_id, Vector2 p_coords, bool p_flip_h, bool p_flip_v, bool p_transpose) {
 	Array cannot_convert_array;
 	cannot_convert_array.push_back(RTileSet::INVALID_SOURCE);
-	cannot_convert_array.push_back(RTileSetAtlasSource::INVALID_ATLAS_COORDS);
+	cannot_convert_array.push_back(Vector2(RTileSetAtlasSource::INVALID_ATLAS_COORDS));
 	cannot_convert_array.push_back(RTileSetAtlasSource::INVALID_TILE_ALTERNATIVE);
 
 	if (!compatibility_tilemap_mapping.has(p_tile_id)) {
@@ -2693,7 +2733,9 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 			} else if (what == "icon_coordinate") {
 				ctd->autotile_icon_coordinate = p_value;
 			} else if (what == "tile_size") {
-				ctd->autotile_tile_size = p_value;
+				Vector2 ats = p_value;
+
+				ctd->autotile_tile_size = Size2i(ats);
 			} else if (what == "spacing") {
 				ctd->autotile_spacing = p_value;
 			} else if (what == "bitmask_flags") {
@@ -2702,7 +2744,9 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 					Vector2i last_coord;
 					while (p.size() > 0) {
 						if (p[0].get_type() == Variant::VECTOR2) {
-							last_coord = p[0];
+							Vector2 lc = p[0];
+
+							last_coord = Vector2i(lc);
 						} else if (p[0].get_type() == Variant::INT) {
 							ctd->autotile_bitmask_flags.insert(last_coord, p[0]);
 						}
@@ -2771,7 +2815,9 @@ bool RTileSet::_set(const StringName &p_name, const Variant &p_value) {
 				for (int j = 0; j < d.size(); j++) {
 					String key = d.get_key_at_index(j);
 					if (key == "autotile_coord") {
-						csd.autotile_coords = d[key];
+						Vector2 ac = d[key];
+
+						csd.autotile_coords = Vector2i(ac);
 					} else if (key == "one_way") {
 						csd.one_way = d[key];
 					} else if (key == "one_way_margin") {
@@ -3136,7 +3182,7 @@ void RTileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::NIL, "Terrains", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 	for (int terrain_set_index = 0; terrain_set_index < terrain_sets.size(); terrain_set_index++) {
 		p_list->push_back(PropertyInfo(Variant::INT, vformat("terrain_set_%d/mode", terrain_set_index), PROPERTY_HINT_ENUM, "Match corners and sides,Match corners,Match sides"));
-		p_list->push_back(PropertyInfo(Variant::NIL, vformat("terrain_set_%d/terrains", terrain_set_index), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_ARRAY, vformat("terrain_set_%d/terrain_", terrain_set_index)));
+		p_list->push_back(PropertyInfo(Variant::ARRAY, vformat("terrain_set_%d/terrains", terrain_set_index), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR, vformat("terrain_set_%d/terrain_", terrain_set_index)));
 		for (int terrain_index = 0; terrain_index < terrain_sets[terrain_set_index].terrains.size(); terrain_index++) {
 			p_list->push_back(PropertyInfo(Variant::STRING, vformat("terrain_set_%d/terrain_%d/name", terrain_set_index, terrain_index)));
 			p_list->push_back(PropertyInfo(Variant::COLOR, vformat("terrain_set_%d/terrain_%d/color", terrain_set_index, terrain_index)));
@@ -3146,7 +3192,7 @@ void RTileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 	// Navigation.
 	p_list->push_back(PropertyInfo(Variant::NIL, "Navigation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 	for (int i = 0; i < navigation_layers.size(); i++) {
-		p_list->push_back(PropertyInfo(Variant::INT, vformat("navigation_layer_%d/layers", i), PROPERTY_HINT_LAYERS_2D_NAVIGATION));
+		p_list->push_back(PropertyInfo(Variant::INT, vformat("navigation_layer_%d/layers", i), PROPERTY_HINT_LAYERS_2D_PHYSICS));
 	}
 
 	// Custom data.
@@ -3211,7 +3257,7 @@ void RTileSet::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_shape", PROPERTY_HINT_ENUM, "Square,Isometric,Half-Offset Square,Hexagon"), "set_tile_shape", "get_tile_shape");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_layout", PROPERTY_HINT_ENUM, "Stacked,Stacked Offset,Stairs Right,Stairs Down,Diamond Right,Diamond Down"), "set_tile_layout", "get_tile_layout");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_offset_axis", PROPERTY_HINT_ENUM, "Horizontal Offset,Vertical Offset"), "set_tile_offset_axis", "get_tile_offset_axis");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "tile_size"), "set_tile_size", "get_tile_size");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "tile_size"), "set_tile_size", "get_tile_size");
 
 	// Rendering.
 	ClassDB::bind_method(D_METHOD("set_uv_clipping", "uv_clipping"), &RTileSet::set_uv_clipping);
@@ -3280,7 +3326,7 @@ void RTileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_coords_level_tile_proxy", "source_from", "coords_from"), &RTileSet::has_coords_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("remove_coords_level_tile_proxy", "source_from", "coords_from"), &RTileSet::remove_coords_level_tile_proxy);
 
-	ClassDB::bind_method(D_METHOD("set_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from", "source_to", "coords_to", "alternative_to"), &TileSet::set_alternative_level_tile_proxy);
+	ClassDB::bind_method(D_METHOD("set_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from", "source_to", "coords_to", "alternative_to"), &RTileSet::set_alternative_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("get_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from"), &RTileSet::get_alternative_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("has_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from"), &RTileSet::has_alternative_level_tile_proxy);
 	ClassDB::bind_method(D_METHOD("remove_alternative_level_tile_proxy", "source_from", "coords_from", "alternative_from"), &RTileSet::remove_alternative_level_tile_proxy);
@@ -3300,19 +3346,23 @@ void RTileSet::_bind_methods() {
 
 	ADD_GROUP("Rendering", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "uv_clipping"), "set_uv_clipping", "is_uv_clipping");
-	ADD_ARRAY("occlusion_layers", "occlusion_layer_");
+	//ADD_ARRAY("occlusion_layers", "occlusion_layer_");
 
-	ADD_GROUP("Physics", "");
-	ADD_ARRAY("physics_layers", "physics_layer_");
+	//ClassDB::bind_method(D_METHOD("occlusion_layers_get"), &RTileSet::occlusion_layers_get);
+	//ClassDB::bind_method(D_METHOD("occlusion_layers_set"), &RTileSet::occlusion_layers_set);
+	//ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "occlusion_layers", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, ""), "occlusion_layers_set", "occlusion_layers_get");
 
-	ADD_GROUP("Terrains", "");
-	ADD_ARRAY("terrain_sets", "terrain_set_");
+	//ADD_GROUP("Physics", "");
+	//ADD_ARRAY("physics_layers", "physics_layer_");
 
-	ADD_GROUP("Navigation", "");
-	ADD_ARRAY("navigation_layers", "navigation_layer_");
+	//ADD_GROUP("Terrains", "");
+	//ADD_ARRAY("terrain_sets", "terrain_set_");
 
-	ADD_GROUP("Custom data", "");
-	ADD_ARRAY("custom_data_layers", "custom_data_layer_");
+	//ADD_GROUP("Navigation", "");
+	//ADD_ARRAY("navigation_layers", "navigation_layer_");
+
+	//ADD_GROUP("Custom data", "");
+	//ADD_ARRAY("custom_data_layers", "custom_data_layer_");
 
 	// -- Enum binding --
 	BIND_ENUM_CONSTANT(TILE_SHAPE_SQUARE);
@@ -3772,7 +3822,7 @@ bool RTileSetAtlasSource::_get(const StringName &p_name, Variant &r_ret) const {
 				} else if (components[1] == "animation_frames_count") {
 					r_ret = get_tile_animation_frames_count(coords);
 					return true;
-				} else if (components.size() >= 3 && components[1].begins_with("animation_frame_") && components[1].trim_prefix("animation_frame_").is_valid_int()) {
+				} else if (components.size() >= 3 && components[1].begins_with("animation_frame_") && components[1].trim_prefix("animation_frame_").is_valid_integer()) {
 					int frame = components[1].trim_prefix("animation_frame_").to_int();
 					if (frame < 0 || frame >= get_tile_animation_frames_count(coords)) {
 						return false;
@@ -4327,12 +4377,12 @@ void RTileSetAtlasSource::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_texture_padding", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_use_texture_padding", "get_use_texture_padding");
 
 	// Base tiles
-	ClassDB::bind_method(D_METHOD("create_tile", "atlas_coords", "size"), &RTileSetAtlasSource::create_tile, DEFVAL(Vector2i(1, 1)));
+	ClassDB::bind_method(D_METHOD("create_tile", "atlas_coords", "size"), &RTileSetAtlasSource::create_tile, DEFVAL(Vector2(1, 1)));
 	ClassDB::bind_method(D_METHOD("remove_tile", "atlas_coords"), &RTileSetAtlasSource::remove_tile); // Remove a tile. If p_tile_key.alternative_tile if different from 0, remove the alternative
-	ClassDB::bind_method(D_METHOD("move_tile_in_atlas", "atlas_coords", "new_atlas_coords", "new_size"), &RTileSetAtlasSource::move_tile_in_atlas, DEFVAL(INVALID_ATLAS_COORDS), DEFVAL(Vector2i(-1, -1)));
+	ClassDB::bind_method(D_METHOD("move_tile_in_atlas", "atlas_coords", "new_atlas_coords", "new_size"), &RTileSetAtlasSource::move_tile_in_atlas, DEFVAL(INVALID_ATLAS_COORDSV), DEFVAL(Vector2(-1, -1)));
 	ClassDB::bind_method(D_METHOD("get_tile_size_in_atlas", "atlas_coords"), &RTileSetAtlasSource::get_tile_size_in_atlas);
 
-	ClassDB::bind_method(D_METHOD("has_room_for_tile", "atlas_coords", "size", "animation_columns", "animation_separation", "frames_count", "ignored_tile"), &RTileSetAtlasSource::has_room_for_tile, DEFVAL(INVALID_ATLAS_COORDS));
+	ClassDB::bind_method(D_METHOD("has_room_for_tile", "atlas_coords", "size", "animation_columns", "animation_separation", "frames_count", "ignored_tile"), &RTileSetAtlasSource::has_room_for_tile, DEFVAL(INVALID_ATLAS_COORDSV));
 	ClassDB::bind_method(D_METHOD("get_tiles_to_be_removed_on_change", "texture", "margins", "separation", "texture_region_size"), &RTileSetAtlasSource::get_tiles_to_be_removed_on_change);
 	ClassDB::bind_method(D_METHOD("get_tile_at_coords", "atlas_coords"), &RTileSetAtlasSource::get_tile_at_coords);
 
@@ -5479,7 +5529,7 @@ void RTileData::_get_property_list(List<PropertyInfo> *p_list) const {
 
 			for (int j = 0; j < physics[i].polygons.size(); j++) {
 				// physics_layer_%d/points
-				property_info = PropertyInfo(Variant::ARRAY, vformat("physics_layer_%d/polygon_%d/points", i, j), PROPERTY_HINT_ARRAY_TYPE, "Vector2", PROPERTY_USAGE_DEFAULT);
+				property_info = PropertyInfo(Variant::ARRAY, vformat("physics_layer_%d/polygon_%d/points", i, j), PROPERTY_HINT_NONE, "Vector2", PROPERTY_USAGE_DEFAULT);
 				if (physics[i].polygons[j].polygon.empty()) {
 					property_info.usage ^= PROPERTY_USAGE_STORAGE;
 				}
@@ -5603,7 +5653,7 @@ void RTileData::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "get_flip_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "get_flip_v");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "transpose"), "set_transpose", "get_transpose");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "texture_offset"), "set_texture_offset", "get_texture_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "texture_offset"), "set_texture_offset", "get_texture_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "modulate"), "set_modulate", "get_modulate");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "material", PROPERTY_HINT_RESOURCE_TYPE, "ShaderMaterial"), "set_material", "get_material");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "z_index"), "set_z_index", "get_z_index");

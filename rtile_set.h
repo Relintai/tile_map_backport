@@ -126,14 +126,14 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_cell(const Vector2i &p_coords, int p_source_id, const Vector2i p_atlas_coords, int p_alternative_tile = 0);
-	bool has_cell(const Vector2i &p_coords) const;
-	void remove_cell(const Vector2i &p_coords, bool p_update_size = true);
-	int get_cell_source_id(const Vector2i &p_coords) const;
-	Vector2i get_cell_atlas_coords(const Vector2i &p_coords) const;
-	int get_cell_alternative_tile(const Vector2i &p_coords) const;
+	void set_cell(const Vector2 &p_coords, int p_source_id, const Vector2 p_atlas_coords, int p_alternative_tile = 0);
+	bool has_cell(const Vector2 &p_coords) const;
+	void remove_cell(const Vector2 &p_coords, bool p_update_size = true);
+	int get_cell_source_id(const Vector2 &p_coords) const;
+	Vector2 get_cell_atlas_coords(const Vector2 &p_coords) const;
+	int get_cell_alternative_tile(const Vector2 &p_coords) const;
 
-	Vector<Vector2i> get_used_cells() const;
+	PoolVector2Array get_used_cells() const;
 
 	Vector2i get_size() const;
 	void set_size(const Vector2i &p_size);
@@ -198,7 +198,7 @@ private:
 
 public:
 	// Format of output array [source_id, atlas_coords, alternative]
-	Array compatibility_tilemap_map(int p_tile_id, Vector2i p_coords, bool p_flip_h, bool p_flip_v, bool p_transpose);
+	Array compatibility_tilemap_map(int p_tile_id, Vector2 p_coords, bool p_flip_h, bool p_flip_v, bool p_transpose);
 #endif // DISABLE_DEPRECATED
 
 public:
@@ -420,6 +420,9 @@ public:
 	void set_occlusion_layer_sdf_collision(int p_layer_index, bool p_sdf_collision);
 	bool get_occlusion_layer_sdf_collision(int p_layer_index) const;
 
+	Vector<Variant> occlusion_layers_get();
+	void occlusion_layers_set(const Vector<Variant> &data);
+
 	// Physics
 	int get_physics_layers_count() const;
 	void add_physics_layer(int p_index = -1);
@@ -477,21 +480,21 @@ public:
 	bool has_source_level_tile_proxy(int p_source_from);
 	void remove_source_level_tile_proxy(int p_source_from);
 
-	void set_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_source_to, Vector2i p_coords_to);
-	Array get_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from);
-	bool has_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from);
-	void remove_coords_level_tile_proxy(int p_source_from, Vector2i p_coords_from);
+	void set_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_source_to, Vector2 p_coords_to);
+	Array get_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from);
+	bool has_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from);
+	void remove_coords_level_tile_proxy(int p_source_from, Vector2 p_coords_from);
 
-	void set_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from, int p_source_to, Vector2i p_coords_to, int p_alternative_to);
-	Array get_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from);
-	bool has_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from);
-	void remove_alternative_level_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from);
+	void set_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from, int p_source_to, Vector2 p_coords_to, int p_alternative_to);
+	Array get_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from);
+	bool has_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from);
+	void remove_alternative_level_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from);
 
 	Array get_source_level_tile_proxies() const;
 	Array get_coords_level_tile_proxies() const;
 	Array get_alternative_level_tile_proxies() const;
 
-	Array map_tile_proxy(int p_source_from, Vector2i p_coords_from, int p_alternative_from) const;
+	Array map_tile_proxy(int p_source_from, Vector2 p_coords_from, int p_alternative_from) const;
 
 	void cleanup_invalid_tile_proxies();
 	void clear_tile_proxies();
@@ -532,7 +535,9 @@ protected:
 
 public:
 	static const Vector2i INVALID_ATLAS_COORDS; // Vector2i(-1, -1);
+	static const Vector2 INVALID_ATLAS_COORDSV; // Vector2(-1, -1);
 	static const int INVALID_TILE_ALTERNATIVE; // -1;
+
 
 	// Not exposed.
 	virtual void set_tile_set(const RTileSet *p_tile_set);
