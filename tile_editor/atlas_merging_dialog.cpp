@@ -52,7 +52,8 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_at
 		Vector2i new_texture_region_size;
 		for (int source_index = 0; source_index < p_atlas_sources.size(); source_index++) {
 			Ref<RTileSetAtlasSource> atlas_source = p_atlas_sources[source_index];
-			new_texture_region_size = new_texture_region_size.max(atlas_source->get_texture_region_size());
+			Vector2i trg = atlas_source->get_texture_region_size();
+			new_texture_region_size = Vector2i(MAX(new_texture_region_size.x, trg.x), MAX(new_texture_region_size.y, trg.y));
 		}
 
 		// Generate the merged RTileSetAtlasSource.
@@ -67,7 +68,9 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_at
 
 			for (int tile_index = 0; tile_index < atlas_source->get_tiles_count(); tile_index++) {
 				Vector2i tile_id = atlas_source->get_tile_id(tile_index);
-				atlas_size = atlas_size.max(tile_id + atlas_source->get_tile_size_in_atlas(tile_id));
+				
+				Vector2i tsa = tile_id + atlas_source->get_tile_size_in_atlas(tile_id);
+				atlas_size = Vector2i(MAX(atlas_size.x, tsa.x), MAX(atlas_size.y, tsa.y));
 
 				Rect2i new_tile_rect_in_altas = Rect2i(atlas_offset + tile_id, atlas_source->get_tile_size_in_atlas(tile_id));
 
@@ -97,10 +100,13 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_at
 				for (int frame = 0; frame < atlas_source->get_tile_animation_frames_count(tile_id); frame++) {
 					Rect2i src_rect = atlas_source->get_tile_texture_region(tile_id, frame);
 					Rect2 dst_rect_wide = Rect2i(new_tile_rect_in_altas.position * new_texture_region_size, new_tile_rect_in_altas.size * new_texture_region_size);
-					if (dst_rect_wide.get_end().x > output_image->get_width() || dst_rect_wide.get_end().y > output_image->get_height()) {
-						output_image->crop(MAX(dst_rect_wide.get_end().x, output_image->get_width()), MAX(dst_rect_wide.get_end().y, output_image->get_height()));
+
+					Vector2 srwe = dst_rect_wide.get_position() + dst_rect_wide.get_size();
+
+					if (srwe.x > output_image->get_width() || srwe.y > output_image->get_height()) {
+						output_image->crop(MAX(srwe.x, output_image->get_width()), MAX(srwe.y, output_image->get_height()));
 					}
-					output_image->blit_rect(atlas_source->get_texture()->get_image(), src_rect, dst_rect_wide.get_center() - src_rect.size / 2);
+					output_image->blit_rect(atlas_source->get_texture()->get_data(), src_rect, dst_rect_wide.get_center() - src_rect.size / 2);
 				}
 			}
 
@@ -136,14 +142,14 @@ void RAtlasMergingDialog::_update_texture() {
 		preview->set_texture(merged->get_texture());
 		preview->show();
 		select_2_atlases_label->hide();
-		get_ok_button()->set_disabled(false);
+		get_ok()->set_disabled(false);
 		merge_button->set_disabled(false);
 	} else {
 		_generate_merged(Vector<Ref<RTileSetAtlasSource>>(), next_line_after_column);
 		preview->set_texture(Ref<Texture>());
 		preview->hide();
 		select_2_atlases_label->show();
-		get_ok_button()->set_disabled(true);
+		get_ok()->set_disabled(true);
 		merge_button->set_disabled(true);
 	}
 }
@@ -173,8 +179,8 @@ void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 
 			// Add the tile proxies.
 			for (int tile_index = 0; tile_index < tas->get_tiles_count(); tile_index++) {
-				Vector2i tile_id = tas->get_tile_id(tile_index);
-				undo_redo->add_do_method(*tile_set, "set_coords_level_tile_proxy", source_id, tile_id, next_id, merged_mapping[i][tile_id]);
+				Vector2 tile_id = tas->get_tile_id(tile_index);
+				undo_redo->add_do_method(*tile_set, "set_coords_level_tile_proxy", source_id, tile_id, next_id, Vector2(merged_mapping[i][tile_id]));
 				if (tile_set->has_coords_level_tile_proxy(source_id, tile_id)) {
 					Array a = tile_set->get_coords_level_tile_proxy(source_id, tile_id);
 					undo_redo->add_undo_method(*tile_set, "set_coords_level_tile_proxy", a[0], a[1]);
@@ -192,7 +198,7 @@ void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 
 void RAtlasMergingDialog::ok_pressed() {
 	delete_original_atlases = false;
-	editor_file_dialog->popup_file_dialog();
+	editor_file_dialog->popup_centered();
 }
 
 void RAtlasMergingDialog::cancel_pressed() {
@@ -205,7 +211,7 @@ void RAtlasMergingDialog::cancel_pressed() {
 void RAtlasMergingDialog::custom_action(const String &p_action) {
 	if (p_action == "merge") {
 		delete_original_atlases = true;
-		editor_file_dialog->popup_file_dialog();
+		editor_file_dialog->popup_centered();
 	}
 }
 
@@ -226,6 +232,12 @@ bool RAtlasMergingDialog::_get(const StringName &p_name, Variant &r_ret) const {
 	return false;
 }
 
+void RAtlasMergingDialog::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_update_texture"), &RAtlasMergingDialog::_update_texture);
+	ClassDB::bind_method(D_METHOD("_property_changed"), &RAtlasMergingDialog::_property_changed);
+	ClassDB::bind_method(D_METHOD("_merge_confirmed"), &RAtlasMergingDialog::_merge_confirmed);
+}
+
 void RAtlasMergingDialog::update_tile_set(Ref<RTileSet> p_tile_set) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	tile_set = p_tile_set;
@@ -244,7 +256,7 @@ void RAtlasMergingDialog::update_tile_set(Ref<RTileSet> p_tile_set) {
 		}
 	}
 
-	get_ok_button()->set_disabled(true);
+	get_ok()->set_disabled(true);
 	merge_button->set_disabled(true);
 
 	commited_actions_count = 0;
@@ -256,8 +268,8 @@ RAtlasMergingDialog::RAtlasMergingDialog() {
 	set_hide_on_ok(false);
 
 	// Ok buttons
-	get_ok_button()->set_text(TTR("Merge (Keep original Atlases)"));
-	get_ok_button()->set_disabled(true);
+	get_ok()->set_text(TTR("Merge (Keep original Atlases)"));
+	get_ok()->set_disabled(true);
 	merge_button = add_button(TTR("Merge"), true, "merge");
 	merge_button->set_disabled(true);
 
@@ -274,7 +286,7 @@ RAtlasMergingDialog::RAtlasMergingDialog() {
 	//atlas_merging_atlases_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	atlas_merging_atlases_list->set_custom_minimum_size(Size2(100, 200));
 	atlas_merging_atlases_list->set_select_mode(ItemList::SELECT_MULTI);
-	atlas_merging_atlases_list->connect("multi_selected", callable_mp(this, &RAtlasMergingDialog::_update_texture).unbind(2));
+	atlas_merging_atlases_list->connect("multi_selected", this, "_update_texture");
 	atlas_merging_h_split_container->add_child(atlas_merging_atlases_list);
 
 	VBoxContainer *atlas_merging_right_panel = memnew(VBoxContainer);
@@ -290,7 +302,7 @@ RAtlasMergingDialog::RAtlasMergingDialog() {
 	columns_editor_property->set_label(TTR("Next Line After Column"));
 	columns_editor_property->set_object_and_property(this, "next_line_after_column");
 	columns_editor_property->update_property();
-	columns_editor_property->connect("property_changed", callable_mp(this, &RAtlasMergingDialog::_property_changed));
+	columns_editor_property->connect("property_changed", this, "_property_changed");
 	atlas_merging_right_panel->add_child(columns_editor_property);
 
 	// Preview.
@@ -309,15 +321,15 @@ RAtlasMergingDialog::RAtlasMergingDialog() {
 	select_2_atlases_label = memnew(Label);
 	select_2_atlases_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	select_2_atlases_label->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	select_2_atlases_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
-	select_2_atlases_label->set_vertical_alignment(VERTICAL_ALIGNMENT_CENTER);
+	select_2_atlases_label->set_align(Label::ALIGN_CENTER);
+	select_2_atlases_label->set_valign(Label::VALIGN_CENTER);
 	select_2_atlases_label->set_text(TTR("Please select two atlases or more."));
 	atlas_merging_right_panel->add_child(select_2_atlases_label);
 
 	// The file dialog to choose the texture path.
 	editor_file_dialog = memnew(EditorFileDialog);
-	editor_file_dialog->set_file_mode(EditorFileDialog::FILE_MODE_SAVE_FILE);
+	editor_file_dialog->set_mode(EditorFileDialog::MODE_SAVE_FILE);
 	editor_file_dialog->add_filter("*.png");
-	editor_file_dialog->connect("file_selected", callable_mp(this, &RAtlasMergingDialog::_merge_confirmed));
+	editor_file_dialog->connect("file_selected", this, "_merge_confirmed");
 	add_child(editor_file_dialog);
 }

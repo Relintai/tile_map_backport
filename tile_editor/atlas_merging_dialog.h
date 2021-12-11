@@ -56,7 +56,7 @@ private:
 
 	// GUI.
 	ItemList *atlas_merging_atlases_list;
-	EditorPropertyVector2i *texture_region_size_editor_property;
+	EditorPropertyVector2 *texture_region_size_editor_property;
 	EditorPropertyInteger *columns_editor_property;
 	TextureRect *preview;
 	Label *select_2_atlases_label;
@@ -76,6 +76,8 @@ protected:
 
 	bool _set(const StringName &p_name, const Variant &p_value);
 	bool _get(const StringName &p_name, Variant &r_ret) const;
+
+	static void _bind_methods();
 
 public:
 	void update_tile_set(Ref<RTileSet> p_tile_set);
