@@ -422,8 +422,10 @@ public:
 	static Vector<Point2i> bresenham_line(const Point2i &p_start, const Point2i &p_end) {
 		Vector<Point2i> points;
 
-		Vector2i delta = (p_end - p_start).abs() * 2;
-		Vector2i step = (p_end - p_start).sign();
+		Point2i e_s = p_end - p_start;
+		
+		Vector2i delta = Vector2i(ABS(e_s.x), ABS(e_s.y)) * 2;
+		Vector2i step = Vector2i(SIGN(e_s.x), SIGN(e_s.y));
 		Vector2i current = p_start;
 
 		if (delta.x > delta.y) {
