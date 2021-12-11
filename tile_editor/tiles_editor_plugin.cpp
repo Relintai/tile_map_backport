@@ -193,7 +193,7 @@ void RTilesEditorPlugin::make_visible(bool p_visible) {
 	}
 }
 
-void RTilesEditorPlugin::queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback) {
+void RTilesEditorPlugin::queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<RTileMapPattern> p_pattern, Callable p_callback) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_pattern.is_valid());
 	{
@@ -245,7 +245,7 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 	// Update edited objects.
 	tile_set = Ref<RTileSet>();
 	if (p_object) {
-		if (p_object->is_class("TileMap")) {
+		if (p_object->is_class("RTileMap")) {
 			tile_map_id = p_object->get_instance_id();
 			tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 			tile_set = tile_map->get_tileset();
@@ -272,7 +272,7 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 }
 
 bool RTilesEditorPlugin::handles(Object *p_object) const {
-	return p_object->is_class("TileMap") || p_object->is_class("RTileSet");
+	return p_object->is_class("RTileMap") || p_object->is_class("RTileSet");
 }
 
 RTilesEditorPlugin::RTilesEditorPlugin(EditorNode *p_node) {
@@ -303,7 +303,7 @@ RTilesEditorPlugin::RTilesEditorPlugin(EditorNode *p_node) {
 	// Bottom buttons.
 	tileset_editor_button = p_node->add_bottom_panel_item(TTR("RTileSet"), tileset_editor);
 	tileset_editor_button->hide();
-	tilemap_editor_button = p_node->add_bottom_panel_item(TTR("TileMap"), tilemap_editor);
+	tilemap_editor_button = p_node->add_bottom_panel_item(TTR("RTileMap"), tilemap_editor);
 	tilemap_editor_button->hide();
 
 	// Initialization.

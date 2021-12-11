@@ -146,7 +146,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 		String item_text;
 
 		// Common to all type of sources.
-		if (!source->get_name().is_empty()) {
+		if (!source->get_name().empty()) {
 			item_text = vformat(TTR("%s (id:%d)"), source->get_name(), source_id);
 		}
 
@@ -154,7 +154,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 		RTileSetAtlasSource *atlas_source = Object::cast_to<RTileSetAtlasSource>(source);
 		if (atlas_source) {
 			texture = atlas_source->get_texture();
-			if (item_text.is_empty()) {
+			if (item_text.empty()) {
 				if (texture.is_valid()) {
 					item_text = vformat("%s (ID:%d)", texture->get_path().get_file(), source_id);
 				} else {

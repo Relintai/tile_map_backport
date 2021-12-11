@@ -112,12 +112,12 @@ private:
 	bool drag_erasing = false;
 	Vector2 drag_start_mouse_pos;
 	Vector2 drag_last_mouse_pos;
-	Map<Vector2i, TileMapCell> drag_modified;
+	Map<Vector2i, RTileMapCell> drag_modified;
 
-	TileMapCell _pick_random_tile(Ref<TileMapPattern> p_pattern);
-	Map<Vector2i, TileMapCell> _draw_line(Vector2 p_start_drag_mouse_pos, Vector2 p_from_mouse_pos, Vector2 p_to_mouse_pos, bool p_erase);
-	Map<Vector2i, TileMapCell> _draw_rect(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
-	Map<Vector2i, TileMapCell> _draw_bucket_fill(Vector2i p_coords, bool p_contiguous, bool p_erase);
+	RTileMapCell _pick_random_tile(Ref<RTileMapPattern> p_pattern);
+	Map<Vector2i, RTileMapCell> _draw_line(Vector2 p_start_drag_mouse_pos, Vector2 p_from_mouse_pos, Vector2 p_to_mouse_pos, bool p_erase);
+	Map<Vector2i, RTileMapCell> _draw_rect(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
+	Map<Vector2i, RTileMapCell> _draw_bucket_fill(Vector2i p_coords, bool p_contiguous, bool p_erase);
 	void _stop_dragging();
 
 	///// Selection system. /////
