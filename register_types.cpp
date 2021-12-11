@@ -23,6 +23,7 @@ SOFTWARE.
 #include "register_types.h"
 
 #include "rtile_set.h"
+#include "rtile_map.h"
 
 #ifdef TOOLS_ENABLED
 #endif
@@ -38,6 +39,8 @@ void register_rtile_map_types() {
     ClassDB::register_class<RTileSetAtlasSource>();
     ClassDB::register_class<RTileSetScenesCollectionSource>();
     ClassDB::register_class<RTileData>();
+
+    ClassDB::register_class<RTileMap>();
 }
 
 void unregister_rtile_map_types() {
