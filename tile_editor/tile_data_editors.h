@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_DATA_EDITORS_H
-#define TILE_DATA_EDITORS_H
+#ifndef RTILE_DATA_EDITORS_H
+#define RTILE_DATA_EDITORS_H
 
 #include "tile_atlas_view.h"
 
@@ -41,8 +41,8 @@
 #include "scene/gui/control.h"
 #include "scene/gui/label.h"
 
-class TileDataEditor : public VBoxContainer {
-	GDCLASS(TileDataEditor, VBoxContainer);
+class RTileDataEditor : public VBoxContainer {
+	GDCLASS(RTileDataEditor, VBoxContainer);
 
 private:
 	bool _tile_set_changed_update_needed = false;
@@ -61,10 +61,10 @@ public:
 
 	// Input to handle painting.
 	virtual Control *get_toolbar() { return nullptr; };
-	virtual void forward_draw_over_atlas(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform){};
-	virtual void forward_draw_over_alternatives(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform){};
-	virtual void forward_painting_atlas_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event){};
-	virtual void forward_painting_alternatives_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event){};
+	virtual void forward_draw_over_atlas(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform){};
+	virtual void forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform){};
+	virtual void forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event){};
+	virtual void forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event){};
 
 	// Used to draw the tile data property value over a tile.
 	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false){};
@@ -184,8 +184,8 @@ public:
 	GenericTilePolygonEditor();
 };
 
-class TileDataDefaultEditor : public TileDataEditor {
-	GDCLASS(TileDataDefaultEditor, TileDataEditor);
+class TileDataDefaultEditor : public RTileDataEditor {
+	GDCLASS(TileDataDefaultEditor, RTileDataEditor);
 
 private:
 	// Toolbar
@@ -230,10 +230,10 @@ protected:
 
 public:
 	virtual Control *get_toolbar() override { return toolbar; };
-	virtual void forward_draw_over_atlas(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
-	virtual void forward_draw_over_alternatives(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
-	virtual void forward_painting_atlas_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
-	virtual void forward_painting_alternatives_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
+	virtual void forward_draw_over_atlas(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
+	virtual void forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
+	virtual void forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
+	virtual void forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
 	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
 
 	void setup_property_editor(Variant::Type p_type, String p_property, String p_label = "", Variant p_default_value = Variant());
@@ -330,8 +330,8 @@ public:
 	~TileDataCollisionEditor();
 };
 
-class TileDataTerrainsEditor : public TileDataEditor {
-	GDCLASS(TileDataTerrainsEditor, TileDataEditor);
+class TileDataTerrainsEditor : public RTileDataEditor {
+	GDCLASS(TileDataTerrainsEditor, RTileDataEditor);
 
 private:
 	// Toolbar
@@ -371,10 +371,10 @@ protected:
 
 public:
 	virtual Control *get_toolbar() override { return toolbar; };
-	virtual void forward_draw_over_atlas(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
-	virtual void forward_draw_over_alternatives(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
-	virtual void forward_painting_atlas_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
-	virtual void forward_painting_alternatives_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
+	virtual void forward_draw_over_atlas(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
+	virtual void forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) override;
+	virtual void forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
+	virtual void forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_atlas_source, const Ref<InputEvent> &p_event) override;
 	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, TileMapCell p_cell, bool p_selected = false) override;
 
 	TileDataTerrainsEditor();

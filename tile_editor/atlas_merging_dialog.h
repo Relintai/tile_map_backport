@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef ATLAS_MERGING_DIALOG_H
-#define ATLAS_MERGING_DIALOG_H
+#ifndef RATLAS_MERGING_DIALOG_H
+#define RATLAS_MERGING_DIALOG_H
 
 #include "editor/editor_node.h"
 #include "editor/editor_properties.h"
@@ -39,8 +39,8 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/resources/tile_set.h"
 
-class AtlasMergingDialog : public ConfirmationDialog {
-	GDCLASS(AtlasMergingDialog, ConfirmationDialog);
+class RAtlasMergingDialog : public ConfirmationDialog {
+	GDCLASS(RAtlasMergingDialog, ConfirmationDialog);
 
 private:
 	int commited_actions_count = 0;
@@ -80,7 +80,7 @@ protected:
 public:
 	void update_tile_set(Ref<TileSet> p_tile_set);
 
-	AtlasMergingDialog();
+	RAtlasMergingDialog();
 };
 
 #endif // ATLAS_MERGING_DIALOG_H

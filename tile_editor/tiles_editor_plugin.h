@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILES_EDITOR_PLUGIN_H
-#define TILES_EDITOR_PLUGIN_H
+#ifndef RTILES_EDITOR_PLUGIN_H
+#define RTILES_EDITOR_PLUGIN_H
 
 #include "editor/editor_plugin.h"
 #include "scene/gui/box_container.h"
@@ -38,10 +38,10 @@
 #include "tile_map_editor.h"
 #include "tile_set_editor.h"
 
-class TilesEditorPlugin : public EditorPlugin {
-	GDCLASS(TilesEditorPlugin, EditorPlugin);
+class RTilesEditorPlugin : public EditorPlugin {
+	GDCLASS(RTilesEditorPlugin, EditorPlugin);
 
-	static TilesEditorPlugin *singleton;
+	static RTilesEditorPlugin *singleton;
 
 private:
 	EditorNode *editor_node;
@@ -51,10 +51,10 @@ private:
 	Ref<TileSet> tile_set;
 
 	Button *tilemap_editor_button;
-	TileMapEditor *tilemap_editor;
+	RTileMapEditor *tilemap_editor;
 
 	Button *tileset_editor_button;
-	TileSetEditor *tileset_editor;
+	RTileSetEditor *tileset_editor;
 
 	void _update_editors();
 
@@ -87,7 +87,7 @@ protected:
 	void _notification(int p_what);
 
 public:
-	_FORCE_INLINE_ static TilesEditorPlugin *get_singleton() { return singleton; }
+	_FORCE_INLINE_ static RTilesEditorPlugin *get_singleton() { return singleton; }
 
 	virtual bool forward_canvas_gui_input(const Ref<InputEvent> &p_event) override { return tilemap_editor->forward_canvas_gui_input(p_event); }
 	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) override { tilemap_editor->forward_canvas_draw_over_viewport(p_overlay); }
@@ -106,8 +106,8 @@ public:
 	virtual bool handles(Object *p_object) const override;
 	virtual void make_visible(bool p_visible) override;
 
-	TilesEditorPlugin(EditorNode *p_node);
-	~TilesEditorPlugin();
+	RTilesEditorPlugin(EditorNode *p_node);
+	~RTilesEditorPlugin();
 };
 
 #endif // TILES_EDITOR_PLUGIN_H

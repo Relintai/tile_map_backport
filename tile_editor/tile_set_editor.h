@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_SET_EDITOR_H
-#define TILE_SET_EDITOR_H
+#ifndef RTILE_SET_EDITOR_H
+#define RTILE_SET_EDITOR_H
 
 #include "atlas_merging_dialog.h"
 #include "scene/gui/box_container.h"
@@ -38,10 +38,10 @@
 #include "tile_set_atlas_source_editor.h"
 #include "tile_set_scenes_collection_source_editor.h"
 
-class TileSetEditor : public VBoxContainer {
-	GDCLASS(TileSetEditor, VBoxContainer);
+class RTileSetEditor : public VBoxContainer {
+	GDCLASS(RTileSetEditor, VBoxContainer);
 
-	static TileSetEditor *singleton;
+	static RTileSetEditor *singleton;
 
 private:
 	Ref<TileSet> tile_set;
@@ -54,8 +54,8 @@ private:
 
 	// Tiles.
 	Label *no_source_selected_label;
-	TileSetAtlasSourceEditor *tile_set_atlas_source_editor;
-	TileSetScenesCollectionSourceEditor *tile_set_scenes_collection_source_editor;
+	RTileSetAtlasSourceEditor *tile_set_atlas_source_editor;
+	RTileSetScenesCollectionSourceEditor *tile_set_scenes_collection_source_editor;
 
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
@@ -75,8 +75,8 @@ private:
 	void _source_add_id_pressed(int p_id_pressed);
 	void _sources_advanced_menu_id_pressed(int p_id_pressed);
 
-	AtlasMergingDialog *atlas_merging_dialog;
-	TileProxiesManagerDialog *tile_proxies_manager_dialog;
+	RAtlasMergingDialog *atlas_merging_dialog;
+	RTileProxiesManagerDialog *tile_proxies_manager_dialog;
 
 	// Patterns.
 	ItemList *patterns_item_list;
@@ -97,12 +97,12 @@ protected:
 	static void _bind_methods();
 
 public:
-	_FORCE_INLINE_ static TileSetEditor *get_singleton() { return singleton; }
+	_FORCE_INLINE_ static RTileSetEditor *get_singleton() { return singleton; }
 
 	void edit(Ref<TileSet> p_tile_set);
 
-	TileSetEditor();
-	~TileSetEditor();
+	RTileSetEditor();
+	~RTileSetEditor();
 };
 
 #endif // TILE_SET_EDITOR_PLUGIN_H

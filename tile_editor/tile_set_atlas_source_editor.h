@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_SET_ATLAS_SOURCE_EDITOR_H
-#define TILE_SET_ATLAS_SOURCE_EDITOR_H
+#ifndef RTILE_SET_ATLAS_SOURCE_EDITOR_H
+#define RTILE_SET_ATLAS_SOURCE_EDITOR_H
 
 #include "tile_atlas_view.h"
 #include "tile_data_editors.h"
@@ -40,8 +40,8 @@
 
 class TileSet;
 
-class TileSetAtlasSourceEditor : public HBoxContainer {
-	GDCLASS(TileSetAtlasSourceEditor, HBoxContainer);
+class RTileSetAtlasSourceEditor : public HBoxContainer {
+	GDCLASS(RTileSetAtlasSourceEditor, HBoxContainer);
 
 public:
 	// A class to store which tiles are selected.
@@ -86,7 +86,7 @@ public:
 		GDCLASS(AtlasTileProxyObject, Object);
 
 	private:
-		TileSetAtlasSourceEditor *tiles_set_atlas_source_editor;
+		RTileSetAtlasSourceEditor *tiles_set_atlas_source_editor;
 
 		TileSetAtlasSource *tile_set_atlas_source = nullptr;
 		Set<TileSelection> tiles = Set<TileSelection>();
@@ -105,7 +105,7 @@ public:
 		// Update the proxyed object.
 		void edit(TileSetAtlasSource *p_tile_set_atlas_source, Set<TileSelection> p_tiles = Set<TileSelection>());
 
-		AtlasTileProxyObject(TileSetAtlasSourceEditor *p_tiles_set_atlas_source_editor) {
+		AtlasTileProxyObject(RTileSetAtlasSourceEditor *p_tiles_set_atlas_source_editor) {
 			tiles_set_atlas_source_editor = p_tiles_set_atlas_source_editor;
 		}
 	};
@@ -131,8 +131,8 @@ private:
 	// -- Tile data editors --
 	String current_property;
 	Control *current_tile_data_editor_toolbar = nullptr;
-	Map<String, TileDataEditor *> tile_data_editors;
-	TileDataEditor *current_tile_data_editor = nullptr;
+	Map<String, RTileDataEditor *> tile_data_editors;
+	RTileDataEditor *current_tile_data_editor = nullptr;
 	void _tile_data_editors_tree_selected();
 
 	// -- Inspector --
@@ -150,7 +150,7 @@ private:
 	// -- Atlas view --
 	HBoxContainer *toolbox;
 	Label *tile_atlas_view_missing_source_label;
-	TileAtlasView *tile_atlas_view;
+	RTileAtlasView *tile_atlas_view;
 
 	// Dragging
 	enum DragType {
@@ -281,12 +281,12 @@ public:
 	void edit(Ref<TileSet> p_tile_set, TileSetAtlasSource *p_tile_set_source, int p_source_id);
 	void init_source();
 
-	TileSetAtlasSourceEditor();
-	~TileSetAtlasSourceEditor();
+	RTileSetAtlasSourceEditor();
+	~RTileSetAtlasSourceEditor();
 };
 
-class EditorPropertyTilePolygon : public EditorProperty {
-	GDCLASS(EditorPropertyTilePolygon, EditorProperty);
+class REditorPropertyTilePolygon : public EditorProperty {
+	GDCLASS(REditorPropertyTilePolygon, EditorProperty);
 
 	StringName count_property;
 	String element_pattern;
@@ -301,11 +301,11 @@ public:
 	virtual void update_property() override;
 	void setup_single_mode(const StringName &p_property, const String &p_base_type);
 	void setup_multiple_mode(const StringName &p_property, const StringName &p_count_property, const String &p_element_pattern, const String &p_base_type);
-	EditorPropertyTilePolygon();
+	REditorPropertyTilePolygon();
 };
 
-class EditorInspectorPluginTileData : public EditorInspectorPlugin {
-	GDCLASS(EditorInspectorPluginTileData, EditorInspectorPlugin);
+class REditorInspectorPluginTileData : public EditorInspectorPlugin {
+	GDCLASS(REditorInspectorPluginTileData, EditorInspectorPlugin);
 
 	void _occlusion_polygon_set_callback();
 	void _polygons_changed(Object *p_generic_tile_polygon_editor, Object *p_object, const String &p_path);

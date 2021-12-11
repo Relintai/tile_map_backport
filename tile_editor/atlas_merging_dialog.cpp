@@ -35,11 +35,11 @@
 #include "scene/gui/control.h"
 #include "scene/gui/split_container.h"
 
-void AtlasMergingDialog::_property_changed(const StringName &p_property, const Variant &p_value, const String &p_field, bool p_changing) {
+void RAtlasMergingDialog::_property_changed(const StringName &p_property, const Variant &p_value, const String &p_field, bool p_changing) {
 	_set(p_property, p_value);
 }
 
-void AtlasMergingDialog::_generate_merged(Vector<Ref<TileSetAtlasSource>> p_atlas_sources, int p_max_columns) {
+void RAtlasMergingDialog::_generate_merged(Vector<Ref<TileSetAtlasSource>> p_atlas_sources, int p_max_columns) {
 	merged.instantiate();
 	merged_mapping.clear();
 
@@ -124,7 +124,7 @@ void AtlasMergingDialog::_generate_merged(Vector<Ref<TileSetAtlasSource>> p_atla
 	}
 }
 
-void AtlasMergingDialog::_update_texture() {
+void RAtlasMergingDialog::_update_texture() {
 	Vector<int> selected = atlas_merging_atlases_list->get_selected_items();
 	if (selected.size() >= 2) {
 		Vector<Ref<TileSetAtlasSource>> to_merge;
@@ -148,7 +148,7 @@ void AtlasMergingDialog::_update_texture() {
 	}
 }
 
-void AtlasMergingDialog::_merge_confirmed(String p_path) {
+void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 	ERR_FAIL_COND(!merged.is_valid());
 
 	Ref<ImageTexture> output_image_texture = merged->get_texture();
@@ -190,26 +190,26 @@ void AtlasMergingDialog::_merge_confirmed(String p_path) {
 	hide();
 }
 
-void AtlasMergingDialog::ok_pressed() {
+void RAtlasMergingDialog::ok_pressed() {
 	delete_original_atlases = false;
 	editor_file_dialog->popup_file_dialog();
 }
 
-void AtlasMergingDialog::cancel_pressed() {
+void RAtlasMergingDialog::cancel_pressed() {
 	for (int i = 0; i < commited_actions_count; i++) {
 		undo_redo->undo();
 	}
 	commited_actions_count = 0;
 }
 
-void AtlasMergingDialog::custom_action(const String &p_action) {
+void RAtlasMergingDialog::custom_action(const String &p_action) {
 	if (p_action == "merge") {
 		delete_original_atlases = true;
 		editor_file_dialog->popup_file_dialog();
 	}
 }
 
-bool AtlasMergingDialog::_set(const StringName &p_name, const Variant &p_value) {
+bool RAtlasMergingDialog::_set(const StringName &p_name, const Variant &p_value) {
 	if (p_name == "next_line_after_column" && p_value.get_type() == Variant::INT) {
 		next_line_after_column = p_value;
 		_update_texture();
@@ -218,7 +218,7 @@ bool AtlasMergingDialog::_set(const StringName &p_name, const Variant &p_value) 
 	return false;
 }
 
-bool AtlasMergingDialog::_get(const StringName &p_name, Variant &r_ret) const {
+bool RAtlasMergingDialog::_get(const StringName &p_name, Variant &r_ret) const {
 	if (p_name == "next_line_after_column") {
 		r_ret = next_line_after_column;
 		return true;
@@ -226,7 +226,7 @@ bool AtlasMergingDialog::_get(const StringName &p_name, Variant &r_ret) const {
 	return false;
 }
 
-void AtlasMergingDialog::update_tile_set(Ref<TileSet> p_tile_set) {
+void RAtlasMergingDialog::update_tile_set(Ref<TileSet> p_tile_set) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	tile_set = p_tile_set;
 
@@ -250,7 +250,7 @@ void AtlasMergingDialog::update_tile_set(Ref<TileSet> p_tile_set) {
 	commited_actions_count = 0;
 }
 
-AtlasMergingDialog::AtlasMergingDialog() {
+RAtlasMergingDialog::RAtlasMergingDialog() {
 	// Atlas merging window.
 	set_title(TTR("Atlas Merging"));
 	set_hide_on_ok(false);
@@ -274,7 +274,7 @@ AtlasMergingDialog::AtlasMergingDialog() {
 	atlas_merging_atlases_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	atlas_merging_atlases_list->set_custom_minimum_size(Size2(100, 200));
 	atlas_merging_atlases_list->set_select_mode(ItemList::SELECT_MULTI);
-	atlas_merging_atlases_list->connect("multi_selected", callable_mp(this, &AtlasMergingDialog::_update_texture).unbind(2));
+	atlas_merging_atlases_list->connect("multi_selected", callable_mp(this, &RAtlasMergingDialog::_update_texture).unbind(2));
 	atlas_merging_h_split_container->add_child(atlas_merging_atlases_list);
 
 	VBoxContainer *atlas_merging_right_panel = memnew(VBoxContainer);
@@ -290,7 +290,7 @@ AtlasMergingDialog::AtlasMergingDialog() {
 	columns_editor_property->set_label(TTR("Next Line After Column"));
 	columns_editor_property->set_object_and_property(this, "next_line_after_column");
 	columns_editor_property->update_property();
-	columns_editor_property->connect("property_changed", callable_mp(this, &AtlasMergingDialog::_property_changed));
+	columns_editor_property->connect("property_changed", callable_mp(this, &RAtlasMergingDialog::_property_changed));
 	atlas_merging_right_panel->add_child(columns_editor_property);
 
 	// Preview.
@@ -318,6 +318,6 @@ AtlasMergingDialog::AtlasMergingDialog() {
 	editor_file_dialog = memnew(EditorFileDialog);
 	editor_file_dialog->set_file_mode(EditorFileDialog::FILE_MODE_SAVE_FILE);
 	editor_file_dialog->add_filter("*.png");
-	editor_file_dialog->connect("file_selected", callable_mp(this, &AtlasMergingDialog::_merge_confirmed));
+	editor_file_dialog->connect("file_selected", callable_mp(this, &RAtlasMergingDialog::_merge_confirmed));
 	add_child(editor_file_dialog);
 }

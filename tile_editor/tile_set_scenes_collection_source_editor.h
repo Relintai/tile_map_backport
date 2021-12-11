@@ -28,15 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_SET_SCENES_COLLECTION_SOURCE_EDITOR_H
-#define TILE_SET_SCENES_COLLECTION_SOURCE_EDITOR_H
+#ifndef RTILE_SET_SCENES_COLLECTION_SOURCE_EDITOR_H
+#define RTILE_SET_SCENES_COLLECTION_SOURCE_EDITOR_H
 
 #include "editor/editor_node.h"
 #include "scene/gui/box_container.h"
 #include "scene/resources/tile_set.h"
 
-class TileSetScenesCollectionSourceEditor : public HBoxContainer {
-	GDCLASS(TileSetScenesCollectionSourceEditor, HBoxContainer);
+class RTileSetScenesCollectionSourceEditor : public HBoxContainer {
+	GDCLASS(RTileSetScenesCollectionSourceEditor, HBoxContainer);
 
 private:
 	// -- Proxy object for an atlas source, needed by the inspector --
@@ -66,7 +66,7 @@ private:
 		GDCLASS(SceneTileProxyObject, Object);
 
 	private:
-		TileSetScenesCollectionSourceEditor *tile_set_scenes_collection_source_editor;
+		RTileSetScenesCollectionSourceEditor *tile_set_scenes_collection_source_editor;
 
 		TileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
 		int source_id;
@@ -83,7 +83,7 @@ private:
 		// Update the proxyed object.
 		void edit(TileSetScenesCollectionSource *p_tile_set_atlas_source, int p_scene_id);
 
-		SceneTileProxyObject(TileSetScenesCollectionSourceEditor *p_tiles_set_scenes_collection_source_editor) {
+		SceneTileProxyObject(RTileSetScenesCollectionSourceEditor *p_tiles_set_scenes_collection_source_editor) {
 			tile_set_scenes_collection_source_editor = p_tiles_set_scenes_collection_source_editor;
 		}
 	};
@@ -134,8 +134,8 @@ protected:
 
 public:
 	void edit(Ref<TileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
-	TileSetScenesCollectionSourceEditor();
-	~TileSetScenesCollectionSourceEditor();
+	RTileSetScenesCollectionSourceEditor();
+	~RTileSetScenesCollectionSourceEditor();
 };
 
 #endif

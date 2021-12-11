@@ -39,9 +39,9 @@
 #include "scene/gui/control.h"
 #include "scene/gui/tab_container.h"
 
-TileSetEditor *TileSetEditor::singleton = nullptr;
+RTileSetEditor *RTileSetEditor::singleton = nullptr;
 
-void TileSetEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
+void RTileSetEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	if (!_can_drop_data_fw(p_point, p_data, p_from)) {
@@ -81,7 +81,7 @@ void TileSetEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_data, 
 	}
 }
 
-bool TileSetEditor::_can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
+bool RTileSetEditor::_can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
 	ERR_FAIL_COND_V(!tile_set.is_valid(), false);
 
 	if (p_from == sources_list) {
@@ -114,7 +114,7 @@ bool TileSetEditor::_can_drop_data_fw(const Point2 &p_point, const Variant &p_da
 	return false;
 }
 
-void TileSetEditor::_update_sources_list(int force_selected_id) {
+void RTileSetEditor::_update_sources_list(int force_selected_id) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Get the previously selected id.
@@ -209,10 +209,10 @@ void TileSetEditor::_update_sources_list(int force_selected_id) {
 	_source_selected(sources_list->get_current());
 
 	// Synchronize the lists.
-	TilesEditorPlugin::get_singleton()->set_sources_lists_current(sources_list->get_current());
+	RTilesEditorPlugin::get_singleton()->set_sources_lists_current(sources_list->get_current());
 }
 
-void TileSetEditor::_source_selected(int p_source_index) {
+void RTileSetEditor::_source_selected(int p_source_index) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Update the selected source.
@@ -244,7 +244,7 @@ void TileSetEditor::_source_selected(int p_source_index) {
 	}
 }
 
-void TileSetEditor::_source_delete_pressed() {
+void RTileSetEditor::_source_delete_pressed() {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Update the selected source.
@@ -261,7 +261,7 @@ void TileSetEditor::_source_delete_pressed() {
 	_update_sources_list();
 }
 
-void TileSetEditor::_source_add_id_pressed(int p_id_pressed) {
+void RTileSetEditor::_source_add_id_pressed(int p_id_pressed) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	switch (p_id_pressed) {
@@ -297,7 +297,7 @@ void TileSetEditor::_source_add_id_pressed(int p_id_pressed) {
 	}
 }
 
-void TileSetEditor::_sources_advanced_menu_id_pressed(int p_id_pressed) {
+void RTileSetEditor::_sources_advanced_menu_id_pressed(int p_id_pressed) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	switch (p_id_pressed) {
@@ -312,7 +312,7 @@ void TileSetEditor::_sources_advanced_menu_id_pressed(int p_id_pressed) {
 	}
 }
 
-void TileSetEditor::_notification(int p_what) {
+void RTileSetEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED:
@@ -336,7 +336,7 @@ void TileSetEditor::_notification(int p_what) {
 	}
 }
 
-void TileSetEditor::_patterns_item_list_gui_input(const Ref<InputEvent> &p_event) {
+void RTileSetEditor::_patterns_item_list_gui_input(const Ref<InputEvent> &p_event) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	if (ED_IS_SHORTCUT("tiles_editor/delete", p_event) && p_event->is_pressed() && !p_event->is_echo()) {
@@ -352,7 +352,7 @@ void TileSetEditor::_patterns_item_list_gui_input(const Ref<InputEvent> &p_event
 	}
 }
 
-void TileSetEditor::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture2D> p_texture) {
+void RTileSetEditor::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture2D> p_texture) {
 	// TODO optimize ?
 	for (int i = 0; i < patterns_item_list->get_item_count(); i++) {
 		if (patterns_item_list->get_item_metadata(i) == p_pattern) {
@@ -362,7 +362,7 @@ void TileSetEditor::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Tex
 	}
 }
 
-void TileSetEditor::_update_patterns_list() {
+void RTileSetEditor::_update_patterns_list() {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Recreate the items.
@@ -370,23 +370,23 @@ void TileSetEditor::_update_patterns_list() {
 	for (int i = 0; i < tile_set->get_patterns_count(); i++) {
 		int id = patterns_item_list->add_item("");
 		patterns_item_list->set_item_metadata(id, tile_set->get_pattern(i));
-		TilesEditorPlugin::get_singleton()->queue_pattern_preview(tile_set, tile_set->get_pattern(i), callable_mp(this, &TileSetEditor::_pattern_preview_done));
+		RTilesEditorPlugin::get_singleton()->queue_pattern_preview(tile_set, tile_set->get_pattern(i), callable_mp(this, &RTileSetEditor::_pattern_preview_done));
 	}
 
 	// Update the label visibility.
 	patterns_help_label->set_visible(patterns_item_list->get_item_count() == 0);
 }
 
-void TileSetEditor::_tile_set_changed() {
+void RTileSetEditor::_tile_set_changed() {
 	tile_set_changed_needs_update = true;
 }
 
-void TileSetEditor::_tab_changed(int p_tab_changed) {
+void RTileSetEditor::_tab_changed(int p_tab_changed) {
 	split_container->set_visible(p_tab_changed == 0);
 	patterns_item_list->set_visible(p_tab_changed == 1);
 }
 
-void TileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p_edited, String p_array_prefix, int p_from_index, int p_to_pos) {
+void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p_edited, String p_array_prefix, int p_from_index, int p_to_pos) {
 	UndoRedo *undo_redo = Object::cast_to<UndoRedo>(p_undo_redo);
 	ERR_FAIL_COND(!undo_redo);
 
@@ -567,7 +567,7 @@ void TileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p_
 	}
 }
 
-void TileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *p_edited, String p_property, Variant p_new_value) {
+void RTileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *p_edited, String p_property, Variant p_new_value) {
 	UndoRedo *undo_redo = Object::cast_to<UndoRedo>(p_undo_redo);
 	ERR_FAIL_COND(!undo_redo);
 
@@ -607,19 +607,19 @@ void TileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *p
 #undef ADD_UNDO
 }
 
-void TileSetEditor::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_can_drop_data_fw"), &TileSetEditor::_can_drop_data_fw);
-	ClassDB::bind_method(D_METHOD("_drop_data_fw"), &TileSetEditor::_drop_data_fw);
+void RTileSetEditor::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_can_drop_data_fw"), &RTileSetEditor::_can_drop_data_fw);
+	ClassDB::bind_method(D_METHOD("_drop_data_fw"), &RTileSetEditor::_drop_data_fw);
 }
 
-void TileSetEditor::edit(Ref<TileSet> p_tile_set) {
+void RTileSetEditor::edit(Ref<TileSet> p_tile_set) {
 	if (p_tile_set == tile_set) {
 		return;
 	}
 
 	// Remove listener.
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &TileSetEditor::_tile_set_changed));
+		tile_set->disconnect("changed", callable_mp(this, &RTileSetEditor::_tile_set_changed));
 	}
 
 	// Change the edited object.
@@ -627,7 +627,7 @@ void TileSetEditor::edit(Ref<TileSet> p_tile_set) {
 
 	// Add the listener again.
 	if (tile_set.is_valid()) {
-		tile_set->connect("changed", callable_mp(this, &TileSetEditor::_tile_set_changed));
+		tile_set->connect("changed", callable_mp(this, &RTileSetEditor::_tile_set_changed));
 		_update_sources_list();
 		_update_patterns_list();
 	}
@@ -637,7 +637,7 @@ void TileSetEditor::edit(Ref<TileSet> p_tile_set) {
 	no_source_selected_label->show();
 }
 
-TileSetEditor::TileSetEditor() {
+RTileSetEditor::RTileSetEditor() {
 	singleton = this;
 
 	set_process_internal(true);
@@ -647,7 +647,7 @@ TileSetEditor::TileSetEditor() {
 	tabs_bar->set_clip_tabs(false);
 	tabs_bar->add_tab(TTR("Tiles"));
 	tabs_bar->add_tab(TTR("Patterns"));
-	tabs_bar->connect("tab_changed", callable_mp(this, &TileSetEditor::_tab_changed));
+	tabs_bar->connect("tab_changed", callable_mp(this, &RTileSetEditor::_tab_changed));
 
 	tile_set_toolbar = memnew(HBoxContainer);
 	tile_set_toolbar->set_h_size_flags(SIZE_EXPAND_FILL);
@@ -674,9 +674,9 @@ TileSetEditor::TileSetEditor() {
 	sources_list->set_fixed_icon_size(Size2i(60, 60) * EDSCALE);
 	sources_list->set_h_size_flags(SIZE_EXPAND_FILL);
 	sources_list->set_v_size_flags(SIZE_EXPAND_FILL);
-	sources_list->connect("item_selected", callable_mp(this, &TileSetEditor::_source_selected));
-	sources_list->connect("item_selected", callable_mp(TilesEditorPlugin::get_singleton(), &TilesEditorPlugin::set_sources_lists_current));
-	sources_list->connect("visibility_changed", callable_mp(TilesEditorPlugin::get_singleton(), &TilesEditorPlugin::synchronize_sources_list), varray(sources_list));
+	sources_list->connect("item_selected", callable_mp(this, &RTileSetEditor::_source_selected));
+	sources_list->connect("item_selected", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::set_sources_lists_current));
+	sources_list->connect("visibility_changed", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::synchronize_sources_list), varray(sources_list));
 	sources_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	sources_list->set_drag_forwarding(this);
 	split_container_left_side->add_child(sources_list);
@@ -688,27 +688,27 @@ TileSetEditor::TileSetEditor() {
 	sources_delete_button = memnew(Button);
 	sources_delete_button->set_flat(true);
 	sources_delete_button->set_disabled(true);
-	sources_delete_button->connect("pressed", callable_mp(this, &TileSetEditor::_source_delete_pressed));
+	sources_delete_button->connect("pressed", callable_mp(this, &RTileSetEditor::_source_delete_pressed));
 	sources_bottom_actions->add_child(sources_delete_button);
 
 	sources_add_button = memnew(MenuButton);
 	sources_add_button->set_flat(true);
 	sources_add_button->get_popup()->add_item(TTR("Atlas"));
 	sources_add_button->get_popup()->add_item(TTR("Scenes Collection"));
-	sources_add_button->get_popup()->connect("id_pressed", callable_mp(this, &TileSetEditor::_source_add_id_pressed));
+	sources_add_button->get_popup()->connect("id_pressed", callable_mp(this, &RTileSetEditor::_source_add_id_pressed));
 	sources_bottom_actions->add_child(sources_add_button);
 
 	sources_advanced_menu_button = memnew(MenuButton);
 	sources_advanced_menu_button->set_flat(true);
 	sources_advanced_menu_button->get_popup()->add_item(TTR("Open Atlas Merging Tool"));
 	sources_advanced_menu_button->get_popup()->add_item(TTR("Manage Tile Proxies"));
-	sources_advanced_menu_button->get_popup()->connect("id_pressed", callable_mp(this, &TileSetEditor::_sources_advanced_menu_id_pressed));
+	sources_advanced_menu_button->get_popup()->connect("id_pressed", callable_mp(this, &RTileSetEditor::_sources_advanced_menu_id_pressed));
 	sources_bottom_actions->add_child(sources_advanced_menu_button);
 
-	atlas_merging_dialog = memnew(AtlasMergingDialog);
+	atlas_merging_dialog = memnew(RAtlasMergingDialog);
 	add_child(atlas_merging_dialog);
 
-	tile_proxies_manager_dialog = memnew(TileProxiesManagerDialog);
+	tile_proxies_manager_dialog = memnew(RTileProxiesManagerDialog);
 	add_child(tile_proxies_manager_dialog);
 
 	// Right side container.
@@ -727,18 +727,18 @@ TileSetEditor::TileSetEditor() {
 	split_container_right_side->add_child(no_source_selected_label);
 
 	// Atlases editor.
-	tile_set_atlas_source_editor = memnew(TileSetAtlasSourceEditor);
+	tile_set_atlas_source_editor = memnew(RTileSetAtlasSourceEditor);
 	tile_set_atlas_source_editor->set_h_size_flags(SIZE_EXPAND_FILL);
 	tile_set_atlas_source_editor->set_v_size_flags(SIZE_EXPAND_FILL);
-	tile_set_atlas_source_editor->connect("source_id_changed", callable_mp(this, &TileSetEditor::_update_sources_list));
+	tile_set_atlas_source_editor->connect("source_id_changed", callable_mp(this, &RTileSetEditor::_update_sources_list));
 	split_container_right_side->add_child(tile_set_atlas_source_editor);
 	tile_set_atlas_source_editor->hide();
 
 	// Scenes collection editor.
-	tile_set_scenes_collection_source_editor = memnew(TileSetScenesCollectionSourceEditor);
+	tile_set_scenes_collection_source_editor = memnew(RTileSetScenesCollectionSourceEditor);
 	tile_set_scenes_collection_source_editor->set_h_size_flags(SIZE_EXPAND_FILL);
 	tile_set_scenes_collection_source_editor->set_v_size_flags(SIZE_EXPAND_FILL);
-	tile_set_scenes_collection_source_editor->connect("source_id_changed", callable_mp(this, &TileSetEditor::_update_sources_list));
+	tile_set_scenes_collection_source_editor->connect("source_id_changed", callable_mp(this, &RTileSetEditor::_update_sources_list));
 	split_container_right_side->add_child(tile_set_scenes_collection_source_editor);
 	tile_set_scenes_collection_source_editor->hide();
 
@@ -751,7 +751,7 @@ TileSetEditor::TileSetEditor() {
 	patterns_item_list->set_max_text_lines(2);
 	patterns_item_list->set_fixed_icon_size(Size2(thumbnail_size, thumbnail_size));
 	patterns_item_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	patterns_item_list->connect("gui_input", callable_mp(this, &TileSetEditor::_patterns_item_list_gui_input));
+	patterns_item_list->connect("gui_input", callable_mp(this, &RTileSetEditor::_patterns_item_list_gui_input));
 	add_child(patterns_item_list);
 	patterns_item_list->hide();
 
@@ -761,12 +761,12 @@ TileSetEditor::TileSetEditor() {
 	patterns_item_list->add_child(patterns_help_label);
 
 	// Registers UndoRedo inspector callback.
-	EditorNode::get_singleton()->get_editor_data().add_move_array_element_function(SNAME("TileSet"), callable_mp(this, &TileSetEditor::_move_tile_set_array_element));
-	EditorNode::get_singleton()->get_editor_data().add_undo_redo_inspector_hook_callback(callable_mp(this, &TileSetEditor::_undo_redo_inspector_callback));
+	EditorNode::get_singleton()->get_editor_data().add_move_array_element_function(SNAME("TileSet"), callable_mp(this, &RTileSetEditor::_move_tile_set_array_element));
+	EditorNode::get_singleton()->get_editor_data().add_undo_redo_inspector_hook_callback(callable_mp(this, &RTileSetEditor::_undo_redo_inspector_callback));
 }
 
-TileSetEditor::~TileSetEditor() {
+RTileSetEditor::~RTileSetEditor() {
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &TileSetEditor::_tile_set_changed));
+		tile_set->disconnect("changed", callable_mp(this, &RTileSetEditor::_tile_set_changed));
 	}
 }

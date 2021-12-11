@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_PROXIES_MANAGER_DIALOG_H
-#define TILE_PROXIES_MANAGER_DIALOG_H
+#ifndef RTILE_PROXIES_MANAGER_DIALOG_H
+#define RTILE_PROXIES_MANAGER_DIALOG_H
 
 #include "editor/editor_node.h"
 #include "editor/editor_properties.h"
@@ -38,8 +38,8 @@
 #include "scene/gui/dialogs.h"
 #include "scene/gui/item_list.h"
 
-class TileProxiesManagerDialog : public ConfirmationDialog {
-	GDCLASS(TileProxiesManagerDialog, ConfirmationDialog);
+class RTileProxiesManagerDialog : public ConfirmationDialog {
+	GDCLASS(RTileProxiesManagerDialog, ConfirmationDialog);
 
 private:
 	int commited_actions_count = 0;
@@ -84,7 +84,7 @@ protected:
 public:
 	void update_tile_set(Ref<TileSet> p_tile_set);
 
-	TileProxiesManagerDialog();
+	RTileProxiesManagerDialog();
 };
 
 #endif // TILE_PROXIES_MANAGER_DIALOG_H

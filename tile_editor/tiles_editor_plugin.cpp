@@ -45,22 +45,22 @@
 
 #include "tile_set_editor.h"
 
-TilesEditorPlugin *TilesEditorPlugin::singleton = nullptr;
+RTilesEditorPlugin *RTilesEditorPlugin::singleton = nullptr;
 
-void TilesEditorPlugin::_preview_frame_started() {
-	RS::get_singleton()->request_frame_drawn_callback(callable_mp(const_cast<TilesEditorPlugin *>(this), &TilesEditorPlugin::_pattern_preview_done));
+void RTilesEditorPlugin::_preview_frame_started() {
+	RS::get_singleton()->request_frame_drawn_callback(callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_pattern_preview_done));
 }
 
-void TilesEditorPlugin::_pattern_preview_done() {
+void RTilesEditorPlugin::_pattern_preview_done() {
 	pattern_preview_done.post();
 }
 
-void TilesEditorPlugin::_thread_func(void *ud) {
-	TilesEditorPlugin *te = (TilesEditorPlugin *)ud;
+void RTilesEditorPlugin::_thread_func(void *ud) {
+	RTilesEditorPlugin *te = (RTilesEditorPlugin *)ud;
 	te->_thread();
 }
 
-void TilesEditorPlugin::_thread() {
+void RTilesEditorPlugin::_thread() {
 	pattern_thread_exited.clear();
 	while (!pattern_thread_exit.is_set()) {
 		pattern_preview_sem.wait();
@@ -116,7 +116,7 @@ void TilesEditorPlugin::_thread() {
 				// Add the viewport at the lasst moment to avoid rendering too early.
 				EditorNode::get_singleton()->add_child(viewport);
 
-				RS::get_singleton()->connect(SNAME("frame_pre_draw"), callable_mp(const_cast<TilesEditorPlugin *>(this), &TilesEditorPlugin::_preview_frame_started), Vector<Variant>(), Object::CONNECT_ONESHOT);
+				RS::get_singleton()->connect(SNAME("frame_pre_draw"), callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_preview_frame_started), Vector<Variant>(), Object::CONNECT_ONESHOT);
 
 				pattern_preview_done.wait();
 
@@ -141,11 +141,11 @@ void TilesEditorPlugin::_thread() {
 	pattern_thread_exited.set();
 }
 
-void TilesEditorPlugin::_tile_map_changed() {
+void RTilesEditorPlugin::_tile_map_changed() {
 	tile_map_changed_needs_update = true;
 }
 
-void TilesEditorPlugin::_update_editors() {
+void RTilesEditorPlugin::_update_editors() {
 	// If tile_map is not edited, we change the edited only if we are not editing a tile_set.
 	tileset_editor->edit(tile_set);
 	TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
@@ -159,7 +159,7 @@ void TilesEditorPlugin::_update_editors() {
 	CanvasItemEditor::get_singleton()->update_viewport();
 }
 
-void TilesEditorPlugin::_notification(int p_what) {
+void RTilesEditorPlugin::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_INTERNAL_PROCESS: {
 			if (tile_map_changed_needs_update) {
@@ -174,7 +174,7 @@ void TilesEditorPlugin::_notification(int p_what) {
 	}
 }
 
-void TilesEditorPlugin::make_visible(bool p_visible) {
+void RTilesEditorPlugin::make_visible(bool p_visible) {
 	if (p_visible) {
 		// Disable and hide invalid editors.
 		TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
@@ -193,7 +193,7 @@ void TilesEditorPlugin::make_visible(bool p_visible) {
 	}
 }
 
-void TilesEditorPlugin::queue_pattern_preview(Ref<TileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback) {
+void RTilesEditorPlugin::queue_pattern_preview(Ref<TileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_pattern.is_valid());
 	{
@@ -203,11 +203,11 @@ void TilesEditorPlugin::queue_pattern_preview(Ref<TileSet> p_tile_set, Ref<TileM
 	pattern_preview_sem.post();
 }
 
-void TilesEditorPlugin::set_sources_lists_current(int p_current) {
+void RTilesEditorPlugin::set_sources_lists_current(int p_current) {
 	atlas_sources_lists_current = p_current;
 }
 
-void TilesEditorPlugin::synchronize_sources_list(Object *p_current) {
+void RTilesEditorPlugin::synchronize_sources_list(Object *p_current) {
 	ItemList *item_list = Object::cast_to<ItemList>(p_current);
 	ERR_FAIL_COND(!item_list);
 
@@ -221,13 +221,13 @@ void TilesEditorPlugin::synchronize_sources_list(Object *p_current) {
 	}
 }
 
-void TilesEditorPlugin::set_atlas_view_transform(float p_zoom, Vector2 p_scroll) {
+void RTilesEditorPlugin::set_atlas_view_transform(float p_zoom, Vector2 p_scroll) {
 	atlas_view_zoom = p_zoom;
 	atlas_view_scroll = p_scroll;
 }
 
-void TilesEditorPlugin::synchronize_atlas_view(Object *p_current) {
-	TileAtlasView *tile_atlas_view = Object::cast_to<TileAtlasView>(p_current);
+void RTilesEditorPlugin::synchronize_atlas_view(Object *p_current) {
+	RTileAtlasView *tile_atlas_view = Object::cast_to<RTileAtlasView>(p_current);
 	ERR_FAIL_COND(!tile_atlas_view);
 
 	if (tile_atlas_view->is_visible_in_tree()) {
@@ -235,11 +235,11 @@ void TilesEditorPlugin::synchronize_atlas_view(Object *p_current) {
 	}
 }
 
-void TilesEditorPlugin::edit(Object *p_object) {
+void RTilesEditorPlugin::edit(Object *p_object) {
 	// Disconnect to changes.
 	TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
 	if (tile_map) {
-		tile_map->disconnect("changed", callable_mp(this, &TilesEditorPlugin::_tile_map_changed));
+		tile_map->disconnect("changed", callable_mp(this, &RTilesEditorPlugin::_tile_map_changed));
 	}
 
 	// Update edited objects.
@@ -267,15 +267,15 @@ void TilesEditorPlugin::edit(Object *p_object) {
 
 	// Add change listener.
 	if (tile_map) {
-		tile_map->connect("changed", callable_mp(this, &TilesEditorPlugin::_tile_map_changed));
+		tile_map->connect("changed", callable_mp(this, &RTilesEditorPlugin::_tile_map_changed));
 	}
 }
 
-bool TilesEditorPlugin::handles(Object *p_object) const {
+bool RTilesEditorPlugin::handles(Object *p_object) const {
 	return p_object->is_class("TileMap") || p_object->is_class("TileSet");
 }
 
-TilesEditorPlugin::TilesEditorPlugin(EditorNode *p_node) {
+RTilesEditorPlugin::RTilesEditorPlugin(EditorNode *p_node) {
 	set_process_internal(true);
 
 	// Update the singleton.
@@ -284,14 +284,14 @@ TilesEditorPlugin::TilesEditorPlugin(EditorNode *p_node) {
 	editor_node = p_node;
 
 	// Tileset editor.
-	tileset_editor = memnew(TileSetEditor);
+	tileset_editor = memnew(RTileSetEditor);
 	tileset_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	tileset_editor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	tileset_editor->set_custom_minimum_size(Size2(0, 200) * EDSCALE);
 	tileset_editor->hide();
 
 	// Tilemap editor.
-	tilemap_editor = memnew(TileMapEditor);
+	tilemap_editor = memnew(RTileMapEditor);
 	tilemap_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	tilemap_editor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	tilemap_editor->set_custom_minimum_size(Size2(0, 200) * EDSCALE);
@@ -310,7 +310,7 @@ TilesEditorPlugin::TilesEditorPlugin(EditorNode *p_node) {
 	_update_editors();
 }
 
-TilesEditorPlugin::~TilesEditorPlugin() {
+RTilesEditorPlugin::~RTilesEditorPlugin() {
 	if (pattern_preview_thread.is_started()) {
 		pattern_thread_exit.set();
 		pattern_preview_sem.post();

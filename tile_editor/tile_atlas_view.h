@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_ATLAS_VIEW_H
-#define TILE_ATLAS_VIEW_H
+#ifndef RTILE_ATLAS_VIEW_H
+#define RTILE_ATLAS_VIEW_H
 
 #include "editor/editor_zoom_widget.h"
 #include "scene/gui/box_container.h"
@@ -41,8 +41,8 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/resources/tile_set.h"
 
-class TileAtlasView : public Control {
-	GDCLASS(TileAtlasView, Control);
+class RTileAtlasView : public Control {
+	GDCLASS(RTileAtlasView, Control);
 
 private:
 	TileSet *tile_set;
@@ -150,7 +150,7 @@ public:
 	// Update everything.
 	void update();
 
-	TileAtlasView();
+	RTileAtlasView();
 };
 
 #endif // TILE_ATLAS_VIEW

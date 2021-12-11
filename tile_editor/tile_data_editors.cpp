@@ -38,19 +38,19 @@
 #include "editor/editor_properties.h"
 #include "editor/editor_scale.h"
 
-void TileDataEditor::_tile_set_changed_plan_update() {
+void RTileDataEditor::_tile_set_changed_plan_update() {
 	_tile_set_changed_update_needed = true;
 	call_deferred("_tile_set_changed_deferred_update");
 }
 
-void TileDataEditor::_tile_set_changed_deferred_update() {
+void RTileDataEditor::_tile_set_changed_deferred_update() {
 	if (_tile_set_changed_update_needed) {
 		_tile_set_changed();
 		_tile_set_changed_update_needed = false;
 	}
 }
 
-TileData *TileDataEditor::_get_tile_data(TileMapCell p_cell) {
+TileData *RTileDataEditor::_get_tile_data(TileMapCell p_cell) {
 	ERR_FAIL_COND_V(!tile_set.is_valid(), nullptr);
 	ERR_FAIL_COND_V(!tile_set->has_source(p_cell.source_id), nullptr);
 
@@ -66,19 +66,19 @@ TileData *TileDataEditor::_get_tile_data(TileMapCell p_cell) {
 	return td;
 }
 
-void TileDataEditor::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_tile_set_changed_deferred_update"), &TileDataEditor::_tile_set_changed_deferred_update);
+void RTileDataEditor::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_tile_set_changed_deferred_update"), &RTileDataEditor::_tile_set_changed_deferred_update);
 
 	ADD_SIGNAL(MethodInfo("needs_redraw"));
 }
 
-void TileDataEditor::set_tile_set(Ref<TileSet> p_tile_set) {
+void RTileDataEditor::set_tile_set(Ref<TileSet> p_tile_set) {
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &TileDataEditor::_tile_set_changed_plan_update));
+		tile_set->disconnect("changed", callable_mp(this, &RTileDataEditor::_tile_set_changed_plan_update));
 	}
 	tile_set = p_tile_set;
 	if (tile_set.is_valid()) {
-		tile_set->connect("changed", callable_mp(this, &TileDataEditor::_tile_set_changed_plan_update));
+		tile_set->connect("changed", callable_mp(this, &RTileDataEditor::_tile_set_changed_plan_update));
 	}
 	_tile_set_changed_plan_update();
 }
@@ -866,7 +866,7 @@ void TileDataDefaultEditor::_setup_undo_redo_action(TileSetAtlasSource *p_tile_s
 	}
 }
 
-void TileDataDefaultEditor::forward_draw_over_atlas(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) {
+void TileDataDefaultEditor::forward_draw_over_atlas(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) {
 	if (drag_type == DRAG_TYPE_PAINT_RECT) {
 		Color grid_color = EditorSettings::get_singleton()->get("editors/tiles_editor/grid_color");
 		Color selection_color = Color().from_hsv(Math::fposmod(grid_color.get_h() + 0.5, 1.0), grid_color.get_s(), grid_color.get_v(), 1.0);
@@ -901,11 +901,11 @@ void TileDataDefaultEditor::forward_draw_over_atlas(TileAtlasView *p_tile_atlas_
 	}
 };
 
-void TileDataDefaultEditor::forward_draw_over_alternatives(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform){
+void TileDataDefaultEditor::forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform){
 
 };
 
-void TileDataDefaultEditor::forward_painting_atlas_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
+void TileDataDefaultEditor::forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseMotion> mm = p_event;
 	if (mm.is_valid()) {
 		if (drag_type == DRAG_TYPE_PAINT) {
@@ -995,7 +995,7 @@ void TileDataDefaultEditor::forward_painting_atlas_gui_input(TileAtlasView *p_ti
 	}
 }
 
-void TileDataDefaultEditor::forward_painting_alternatives_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
+void TileDataDefaultEditor::forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseMotion> mm = p_event;
 	if (mm.is_valid()) {
 		if (drag_type == DRAG_TYPE_PAINT) {
@@ -1079,8 +1079,8 @@ void TileDataDefaultEditor::draw_over_tile(CanvasItem *p_canvas_item, Transform2
 		Rect2 rect = p_transform.xform(Rect2(Vector2(-size / 2, -size / 2), Vector2(size, size)));
 		p_canvas_item->draw_rect(rect, value);
 	} else {
-		Ref<Font> font = TileSetEditor::get_singleton()->get_theme_font(SNAME("bold"), SNAME("EditorFonts"));
-		int font_size = TileSetEditor::get_singleton()->get_theme_font_size(SNAME("bold_size"), SNAME("EditorFonts"));
+		Ref<Font> font = RTileSetEditor::get_singleton()->get_theme_font(SNAME("bold"), SNAME("EditorFonts"));
+		int font_size = RTileSetEditor::get_singleton()->get_theme_font_size(SNAME("bold_size"), SNAME("EditorFonts"));
 		String text;
 		switch (value.get_type()) {
 			case Variant::INT:
@@ -1217,7 +1217,7 @@ void TileDataPositionEditor::draw_over_tile(CanvasItem *p_canvas_item, Transform
 		Color selection_color = Color().from_hsv(Math::fposmod(grid_color.get_h() + 0.5, 1.0), grid_color.get_s(), grid_color.get_v(), 1.0);
 		color = selection_color;
 	}
-	Ref<Texture2D> position_icon = TileSetEditor::get_singleton()->get_theme_icon(SNAME("EditorPosition"), SNAME("EditorIcons"));
+	Ref<Texture2D> position_icon = RTileSetEditor::get_singleton()->get_theme_icon(SNAME("EditorPosition"), SNAME("EditorIcons"));
 	p_canvas_item->draw_texture(position_icon, p_transform.xform(Vector2(value)) - position_icon->get_size() / 2, color);
 }
 
@@ -1231,7 +1231,7 @@ void TileDataYSortEditor::draw_over_tile(CanvasItem *p_canvas_item, Transform2D 
 		Color selection_color = Color().from_hsv(Math::fposmod(grid_color.get_h() + 0.5, 1.0), grid_color.get_s(), grid_color.get_v(), 1.0);
 		color = selection_color;
 	}
-	Ref<Texture2D> position_icon = TileSetEditor::get_singleton()->get_theme_icon(SNAME("EditorPosition"), SNAME("EditorIcons"));
+	Ref<Texture2D> position_icon = RTileSetEditor::get_singleton()->get_theme_icon(SNAME("EditorPosition"), SNAME("EditorIcons"));
 	p_canvas_item->draw_texture(position_icon, p_transform.xform(Vector2(0, tile_data->get_y_sort_origin())) - position_icon->get_size() / 2, color);
 }
 
@@ -1631,7 +1631,7 @@ void TileDataTerrainsEditor::_tile_set_changed() {
 	_update_terrain_selector();
 }
 
-void TileDataTerrainsEditor::forward_draw_over_atlas(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) {
+void TileDataTerrainsEditor::forward_draw_over_atlas(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Draw the hovered terrain bit, or the whole tile if it has the wrong terrain set.
@@ -1675,8 +1675,8 @@ void TileDataTerrainsEditor::forward_draw_over_atlas(TileAtlasView *p_tile_atlas
 	}
 
 	// Dim terrains with wrong terrain set.
-	Ref<Font> font = TileSetEditor::get_singleton()->get_theme_font(SNAME("bold"), SNAME("EditorFonts"));
-	int font_size = TileSetEditor::get_singleton()->get_theme_font_size(SNAME("bold_size"), SNAME("EditorFonts"));
+	Ref<Font> font = RTileSetEditor::get_singleton()->get_theme_font(SNAME("bold"), SNAME("EditorFonts"));
+	int font_size = RTileSetEditor::get_singleton()->get_theme_font_size(SNAME("bold_size"), SNAME("EditorFonts"));
 	for (int i = 0; i < p_tile_set_atlas_source->get_tiles_count(); i++) {
 		Vector2i coords = p_tile_set_atlas_source->get_tile_id(i);
 		if (coords != hovered_coords) {
@@ -1803,7 +1803,7 @@ void TileDataTerrainsEditor::forward_draw_over_atlas(TileAtlasView *p_tile_atlas
 	}
 }
 
-void TileDataTerrainsEditor::forward_draw_over_alternatives(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) {
+void TileDataTerrainsEditor::forward_draw_over_alternatives(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, CanvasItem *p_canvas_item, Transform2D p_transform) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Draw the hovered terrain bit, or the whole tile if it has the wrong terrain set.
@@ -1849,8 +1849,8 @@ void TileDataTerrainsEditor::forward_draw_over_alternatives(TileAtlasView *p_til
 	}
 
 	// Dim terrains with wrong terrain set.
-	Ref<Font> font = TileSetEditor::get_singleton()->get_theme_font(SNAME("bold"), SNAME("EditorFonts"));
-	int font_size = TileSetEditor::get_singleton()->get_theme_font_size(SNAME("bold_size"), SNAME("EditorFonts"));
+	Ref<Font> font = RTileSetEditor::get_singleton()->get_theme_font(SNAME("bold"), SNAME("EditorFonts"));
+	int font_size = RTileSetEditor::get_singleton()->get_theme_font_size(SNAME("bold_size"), SNAME("EditorFonts"));
 	for (int i = 0; i < p_tile_set_atlas_source->get_tiles_count(); i++) {
 		Vector2i coords = p_tile_set_atlas_source->get_tile_id(i);
 		for (int j = 1; j < p_tile_set_atlas_source->get_alternative_tiles_count(coords); j++) {
@@ -1885,7 +1885,7 @@ void TileDataTerrainsEditor::forward_draw_over_alternatives(TileAtlasView *p_til
 	p_canvas_item->draw_set_transform_matrix(Transform2D());
 }
 
-void TileDataTerrainsEditor::forward_painting_atlas_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
+void TileDataTerrainsEditor::forward_painting_atlas_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseMotion> mm = p_event;
 	if (mm.is_valid()) {
 		if (drag_type == DRAG_TYPE_PAINT_TERRAIN_SET) {
@@ -2228,7 +2228,7 @@ void TileDataTerrainsEditor::forward_painting_atlas_gui_input(TileAtlasView *p_t
 	}
 }
 
-void TileDataTerrainsEditor::forward_painting_alternatives_gui_input(TileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
+void TileDataTerrainsEditor::forward_painting_alternatives_gui_input(RTileAtlasView *p_tile_atlas_view, TileSetAtlasSource *p_tile_set_atlas_source, const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseMotion> mm = p_event;
 	if (mm.is_valid()) {
 		if (drag_type == DRAG_TYPE_PAINT_TERRAIN_SET) {

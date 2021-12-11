@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_MAP_EDITOR_H
-#define TILE_MAP_EDITOR_H
+#ifndef RTILE_MAP_EDITOR_H
+#define RTILE_MAP_EDITOR_H
 
 #include "tile_atlas_view.h"
 
@@ -40,7 +40,7 @@
 #include "scene/gui/box_container.h"
 #include "scene/gui/tab_bar.h"
 
-class TileMapEditorPlugin : public Object {
+class RTileMapEditorPlugin : public Object {
 public:
 	struct TabData {
 		Control *toolbar;
@@ -57,8 +57,8 @@ public:
 	virtual void edit(ObjectID p_tile_map_id, int p_tile_map_layer){};
 };
 
-class TileMapEditorTilesPlugin : public TileMapEditorPlugin {
-	GDCLASS(TileMapEditorTilesPlugin, TileMapEditorPlugin);
+class RTileMapEditorTilesPlugin : public RTileMapEditorPlugin {
+	GDCLASS(RTileMapEditorTilesPlugin, RTileMapEditorPlugin);
 
 private:
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -153,7 +153,7 @@ private:
 
 	// Atlas sources.
 	TileMapCell hovered_tile;
-	TileAtlasView *tile_atlas_view;
+	RTileAtlasView *tile_atlas_view;
 	HSplitContainer *atlas_sources_split_container;
 
 	bool tile_set_dragging_selection = false;
@@ -202,12 +202,12 @@ public:
 	virtual bool forward_canvas_gui_input(const Ref<InputEvent> &p_event) override;
 	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) override;
 
-	TileMapEditorTilesPlugin();
-	~TileMapEditorTilesPlugin();
+	RTileMapEditorTilesPlugin();
+	~RTileMapEditorTilesPlugin();
 };
 
-class TileMapEditorTerrainsPlugin : public TileMapEditorPlugin {
-	GDCLASS(TileMapEditorTerrainsPlugin, TileMapEditorPlugin);
+class RTileMapEditorTerrainsPlugin : public RTileMapEditorPlugin {
+	GDCLASS(RTileMapEditorTerrainsPlugin, RTileMapEditorPlugin);
 
 private:
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -288,12 +288,12 @@ public:
 	virtual bool forward_canvas_gui_input(const Ref<InputEvent> &p_event) override;
 	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) override;
 
-	TileMapEditorTerrainsPlugin();
-	~TileMapEditorTerrainsPlugin();
+	RTileMapEditorTerrainsPlugin();
+	~RTileMapEditorTerrainsPlugin();
 };
 
-class TileMapEditor : public VBoxContainer {
-	GDCLASS(TileMapEditor, VBoxContainer);
+class RTileMapEditor : public VBoxContainer {
+	GDCLASS(RTileMapEditor, VBoxContainer);
 
 private:
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -302,7 +302,7 @@ private:
 	int tile_map_layer = -1;
 
 	// Vector to keep plugins.
-	Vector<TileMapEditorPlugin *> tile_map_editor_plugins;
+	Vector<RTileMapEditorPlugin *> tile_map_editor_plugins;
 
 	// Toolbar.
 	HBoxContainer *tile_map_toolbar;
@@ -323,8 +323,8 @@ private:
 	// Bottom panel.
 	Label *missing_tileset_label;
 	TabBar *tabs_bar;
-	LocalVector<TileMapEditorPlugin::TabData> tabs_data;
-	LocalVector<TileMapEditorPlugin *> tabs_plugins;
+	LocalVector<RTileMapEditorPlugin::TabData> tabs_data;
+	LocalVector<RTileMapEditorPlugin *> tabs_plugins;
 	void _update_bottom_panel();
 
 	// TileMap.
@@ -352,8 +352,8 @@ public:
 
 	void edit(TileMap *p_tile_map);
 
-	TileMapEditor();
-	~TileMapEditor();
+	RTileMapEditor();
+	~RTileMapEditor();
 
 	// Static functions.
 	static Vector<Vector2i> get_line(TileMap *p_tile_map, Vector2i p_from_cell, Vector2i p_to_cell);
