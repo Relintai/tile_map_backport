@@ -1672,8 +1672,8 @@ void RTileSet::draw_terrains(CanvasItem *p_canvas_item, Transform2D p_transform,
 					Vector<Color> colors;
 					colors.resize(polygon.size());
 
-					for (int i = 0; i < colors.size(); ++i) {
-						colors.write[i] = Color(1.0, 1.0, 1.0, 1.0);
+					for (int j = 0; j < colors.size(); ++j) {
+						colors.write[j] = Color(1.0, 1.0, 1.0, 1.0);
 					}
 
 					Array a;
