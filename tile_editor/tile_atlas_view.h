@@ -40,6 +40,7 @@
 #include "scene/gui/scroll_container.h"
 #include "scene/gui/texture_rect.h"
 #include "../rtile_set.h"
+#include "core/os/input_event.h"
 
 #include "../vector3i.h"
 
@@ -64,7 +65,7 @@ private:
 	void _update_zoom_and_panning(bool p_zoom_on_mouse_pos = false);
 	void _zoom_widget_changed();
 	void _center_view();
-	virtual void gui_input(const Ref<InputEvent> &p_event) override;
+	virtual void gui_input(const Ref<InputEvent> &p_event);
 
 	Map<Vector2, Map<int, Rect2i>> alternative_tiles_rect_cache;
 	void _update_alternative_tiles_rect_cache();
@@ -113,6 +114,14 @@ protected:
 	static void _bind_methods();
 
 public:
+	enum Side {
+		SIDE_LEFT,
+		SIDE_TOP,
+		SIDE_RIGHT,
+		SIDE_BOTTOM
+	};
+
+
 	// Global.
 	void set_atlas_source(RTileSet *p_tile_set, RTileSetAtlasSource *p_tile_set_atlas_source, int p_source_id);
 
@@ -151,6 +160,9 @@ public:
 
 	// Update everything.
 	void update();
+
+	Rect2i rect2i_intersection(const Rect2i &a, const Rect2i &b) const;
+	bool rect2i_intersects(const Rect2i &a, const Rect2i &b) const;
 
 	RTileAtlasView();
 };
