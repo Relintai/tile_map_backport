@@ -38,7 +38,7 @@
 
 Map<Vector2i, RTileSet::CellNeighbor> RTileMap::TerrainConstraint::get_overlapping_coords_and_peering_bits() const {
 	Map<Vector2i, RTileSet::CellNeighbor> output;
-	Ref<TileSet> tile_set = tile_map->get_tileset();
+	Ref<RTileSet> tile_set = tile_map->get_tileset();
 	ERR_FAIL_COND_V(!tile_set.is_valid(), output);
 
 	RTileSet::TileShape shape = tile_set->get_tile_shape();
@@ -158,7 +158,7 @@ RTileMap::TerrainConstraint::TerrainConstraint(const RTileMap *p_tile_map, const
 	// The way we build the constraint make it easy to detect conflicting constraints.
 	tile_map = p_tile_map;
 
-	Ref<TileSet> tile_set = tile_map->get_tileset();
+	Ref<RTileSet> tile_set = tile_map->get_tileset();
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	RTileSet::TileShape shape = tile_set->get_tile_shape();
@@ -504,11 +504,11 @@ void RTileMap::_notification(int p_what) {
 	}
 }
 
-Ref<TileSet> RTileMap::get_tileset() const {
+Ref<RTileSet> RTileMap::get_tileset() const {
 	return tile_set;
 }
 
-void RTileMap::set_tileset(const Ref<TileSet> &p_tileset) {
+void RTileMap::set_tileset(const Ref<RTileSet> &p_tileset) {
 	if (p_tileset == tile_set) {
 		return;
 	}
@@ -566,7 +566,7 @@ void RTileMap::add_layer(int p_to_pos) {
 
 	emit_signal("changed");
 
-	update_configuration_warnings();
+	update_configuration_warning();
 }
 
 void RTileMap::move_layer(int p_layer, int p_to_pos) {
@@ -578,7 +578,7 @@ void RTileMap::move_layer(int p_layer, int p_to_pos) {
 
 	TileMapLayer tl = layers[p_layer];
 	layers.insert(p_to_pos, tl);
-	layers.remove_at(p_to_pos < p_layer ? p_layer + 1 : p_layer);
+	layers.remove(p_to_pos < p_layer ? p_layer + 1 : p_layer);
 	_recreate_internals();
 	notify_property_list_changed();
 
@@ -588,7 +588,7 @@ void RTileMap::move_layer(int p_layer, int p_to_pos) {
 
 	emit_signal("changed");
 
-	update_configuration_warnings();
+	update_configuration_warning();
 }
 
 void RTileMap::remove_layer(int p_layer) {
@@ -597,7 +597,7 @@ void RTileMap::remove_layer(int p_layer) {
 	// Clear before removing the layer.
 	_clear_internals();
 
-	layers.remove_at(p_layer);
+	layers.remove(p_layer);
 	_recreate_internals();
 	notify_property_list_changed();
 
@@ -607,7 +607,7 @@ void RTileMap::remove_layer(int p_layer) {
 
 	emit_signal("changed");
 
-	update_configuration_warnings();
+	update_configuration_warning();
 }
 
 void RTileMap::set_layer_name(int p_layer, String p_name) {
@@ -628,7 +628,7 @@ void RTileMap::set_layer_enabled(int p_layer, bool p_enabled) {
 	_recreate_layer_internals(p_layer);
 	emit_signal("changed");
 
-	update_configuration_warnings();
+	update_configuration_warning();
 }
 
 bool RTileMap::is_layer_enabled(int p_layer) const {
@@ -656,7 +656,7 @@ void RTileMap::set_layer_y_sort_enabled(int p_layer, bool p_y_sort_enabled) {
 	_recreate_layer_internals(p_layer);
 	emit_signal("changed");
 
-	update_configuration_warnings();
+	update_configuration_warning();
 }
 
 bool RTileMap::is_layer_y_sort_enabled(int p_layer) const {
@@ -684,7 +684,7 @@ void RTileMap::set_layer_z_index(int p_layer, int p_z_index) {
 	_recreate_layer_internals(p_layer);
 	emit_signal("changed");
 
-	update_configuration_warnings();
+	update_configuration_warning();
 }
 
 int RTileMap::get_layer_z_index(int p_layer) const {
@@ -755,7 +755,7 @@ Map<Vector2i, RTileMapQuadrant>::Element *RTileMap::_create_quadrant(int p_layer
 	// Create the debug canvas item.
 	VisualServer *rs = VisualServer::get_singleton();
 	q.debug_canvas_item = rs->canvas_item_create();
-	rs->canvas_item_set_z_index(q.debug_canvas_item, RS::CANVAS_ITEM_Z_MAX - 1);
+	rs->canvas_item_set_z_index(q.debug_canvas_item, VS::CANVAS_ITEM_Z_MAX - 1);
 	rs->canvas_item_set_parent(q.debug_canvas_item, get_canvas_item());
 
 	// Call the create_quadrant method on plugins
@@ -993,7 +993,7 @@ void RTileMap::_rendering_notification(int p_what) {
 						Transform2D xform;
 						xform.set_origin(E_cell.key);
 						for (const RID &occluder : q.occluders) {
-							RS::get_singleton()->canvas_light_occluder_set_enabled(occluder, visible);
+							VS::get_singleton()->canvas_light_occluder_set_enabled(occluder, visible);
 						}
 					}
 				}
@@ -1012,7 +1012,7 @@ void RTileMap::_rendering_notification(int p_what) {
 						Transform2D xform;
 						xform.set_origin(E_cell.key);
 						for (const RID &occluder : q.occluders) {
-							RS::get_singleton()->canvas_light_occluder_set_transform(occluder, get_global_transform() * xform);
+							VS::get_singleton()->canvas_light_occluder_set_transform(occluder, get_global_transform() * xform);
 						}
 					}
 				}
@@ -1045,8 +1045,8 @@ void RTileMap::_rendering_update_layer(int p_layer) {
 	rs->canvas_item_set_sort_children_by_y(ci, layers[p_layer].y_sort_enabled);
 	rs->canvas_item_set_use_parent_material(ci, get_use_parent_material() || get_material().is_valid());
 	rs->canvas_item_set_z_index(ci, layers[p_layer].z_index);
-	rs->canvas_item_set_default_texture_filter(ci, RS::CanvasItemTextureFilter(get_texture_filter()));
-	rs->canvas_item_set_default_texture_repeat(ci, RS::CanvasItemTextureRepeat(get_texture_repeat()));
+	rs->canvas_item_set_default_texture_filter(ci, VS::CanvasItemTextureFilter(get_texture_filter()));
+	rs->canvas_item_set_default_texture_repeat(ci, VS::CanvasItemTextureRepeat(get_texture_repeat()));
 	rs->canvas_item_set_light_mask(ci, get_light_mask());
 }
 
@@ -1155,8 +1155,8 @@ void RTileMap::_rendering_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Lis
 						rs->canvas_item_set_light_mask(canvas_item, get_light_mask());
 						rs->canvas_item_set_z_index(canvas_item, z_index);
 
-						rs->canvas_item_set_default_texture_filter(canvas_item, RS::CanvasItemTextureFilter(get_texture_filter()));
-						rs->canvas_item_set_default_texture_repeat(canvas_item, RS::CanvasItemTextureRepeat(get_texture_repeat()));
+						rs->canvas_item_set_default_texture_filter(canvas_item, VS::CanvasItemTextureFilter(get_texture_filter()));
+						rs->canvas_item_set_default_texture_repeat(canvas_item, VS::CanvasItemTextureRepeat(get_texture_repeat()));
 
 						q.canvas_items.push_back(canvas_item);
 
@@ -1209,7 +1209,7 @@ void RTileMap::_rendering_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Lis
 			for (const KeyValue<Vector2i, Vector2i> &E : world_to_map) {
 				RTileMapQuadrant &q = layers[layer].quadrant_map[E.value];
 				for (const RID &ci : q.canvas_items) {
-					RS::get_singleton()->canvas_item_set_draw_index(ci, index++);
+					VS::get_singleton()->canvas_item_set_draw_index(ci, index++);
 				}
 			}
 		}
@@ -1287,7 +1287,7 @@ void RTileMap::_rendering_draw_quadrant_debug(RTileMapQuadrant *p_quadrant) {
 	}
 }
 
-void RTileMap::draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<TileSet> p_tile_set, int p_atlas_source_id, Vector2i p_atlas_coords, int p_alternative_tile, int p_frame, Color p_modulation, const RTileData *p_tile_data_override) {
+void RTileMap::draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<RTileSet> p_tile_set, int p_atlas_source_id, Vector2i p_atlas_coords, int p_alternative_tile, int p_frame, Color p_modulation, const RTileData *p_tile_data_override) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_tile_set->has_source(p_atlas_source_id));
 	ERR_FAIL_COND(!p_tile_set->get_source(p_atlas_source_id)->has_tile(p_atlas_coords));
@@ -1400,7 +1400,8 @@ void RTileMap::_physics_notification(int p_what) {
 							Transform2D xform;
 							xform.set_origin(map_to_world(bodies_coords[body]));
 							xform = global_transform * xform;
-							PhysicsServer2D::get_singleton()->body_set_state(body, PhysicsServer2D::BODY_STATE_TRANSFORM, xform);
+							
+							Physics2DServer::get_singleton()->body_set_state(body, Physics2DServer::BODY_STATE_TRANSFORM, xform);
 						}
 					}
 				}
@@ -1423,7 +1424,7 @@ void RTileMap::_physics_notification(int p_what) {
 							xform.set_origin(map_to_world(bodies_coords[body]));
 							xform = new_transform * xform;
 
-							PhysicsServer2D::get_singleton()->body_set_state(body, PhysicsServer2D::BODY_STATE_TRANSFORM, xform);
+							Physics2DServer::get_singleton()->body_set_state(body, Physics2DServer::BODY_STATE_TRANSFORM, xform);
 						}
 					}
 				}
@@ -1444,7 +1445,7 @@ void RTileMap::_physics_update_dirty_quadrants(SelfList<RTileMapQuadrant>::List 
 	Transform2D global_transform = get_global_transform();
 	last_valid_transform = global_transform;
 	new_transform = global_transform;
-	PhysicsServer2D *ps = PhysicsServer2D::get_singleton();
+	Physics2DServer *ps = Physics2DServer::get_singleton();
 	RID space = get_world_2d()->get_space();
 
 	SelfList<RTileMapQuadrant> *q_list_element = r_dirty_quadrant_list.first();
@@ -1486,27 +1487,27 @@ void RTileMap::_physics_update_dirty_quadrants(SelfList<RTileMapQuadrant>::List 
 						// Create the body.
 						RID body = ps->body_create();
 						bodies_coords[body] = E_cell->get();
-						ps->body_set_mode(body, collision_animatable ? PhysicsServer2D::BODY_MODE_KINEMATIC : PhysicsServer2D::BODY_MODE_STATIC);
+						ps->body_set_mode(body, collision_animatable ? Physics2DServer::BODY_MODE_KINEMATIC : Physics2DServer::BODY_MODE_STATIC);
 						ps->body_set_space(body, space);
 
 						Transform2D xform;
 						xform.set_origin(map_to_world(E_cell->get()));
 						xform = global_transform * xform;
-						ps->body_set_state(body, PhysicsServer2D::BODY_STATE_TRANSFORM, xform);
+						ps->body_set_state(body, Physics2DServer::BODY_STATE_TRANSFORM, xform);
 
 						ps->body_attach_object_instance_id(body, get_instance_id());
 						ps->body_set_collision_layer(body, physics_layer);
 						ps->body_set_collision_mask(body, physics_mask);
 						ps->body_set_pickable(body, false);
-						ps->body_set_state(body, PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY, tile_data->get_constant_linear_velocity(tile_set_physics_layer));
-						ps->body_set_state(body, PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY, tile_data->get_constant_angular_velocity(tile_set_physics_layer));
+						ps->body_set_state(body, Physics2DServer::BODY_STATE_LINEAR_VELOCITY, tile_data->get_constant_linear_velocity(tile_set_physics_layer));
+						ps->body_set_state(body, Physics2DServer::BODY_STATE_ANGULAR_VELOCITY, tile_data->get_constant_angular_velocity(tile_set_physics_layer));
 
 						if (!physics_material.is_valid()) {
-							ps->body_set_param(body, PhysicsServer2D::BODY_PARAM_BOUNCE, 0);
-							ps->body_set_param(body, PhysicsServer2D::BODY_PARAM_FRICTION, 1);
+							ps->body_set_param(body, Physics2DServer::BODY_PARAM_BOUNCE, 0);
+							ps->body_set_param(body, Physics2DServer::BODY_PARAM_FRICTION, 1);
 						} else {
-							ps->body_set_param(body, PhysicsServer2D::BODY_PARAM_BOUNCE, physics_material->computed_bounce());
-							ps->body_set_param(body, PhysicsServer2D::BODY_PARAM_FRICTION, physics_material->computed_friction());
+							ps->body_set_param(body, Physics2DServer::BODY_PARAM_BOUNCE, physics_material->computed_bounce());
+							ps->body_set_param(body, Physics2DServer::BODY_PARAM_FRICTION, physics_material->computed_friction());
 						}
 
 						q.bodies.push_back(body);
@@ -1540,7 +1541,7 @@ void RTileMap::_physics_cleanup_quadrant(RTileMapQuadrant *p_quadrant) {
 	// Remove a quadrant.
 	for (RID body : p_quadrant->bodies) {
 		bodies_coords.erase(body);
-		PhysicsServer2D::get_singleton()->free(body);
+		Physics2DServer::get_singleton()->free(body);
 	}
 	p_quadrant->bodies.clear();
 }
@@ -1570,7 +1571,7 @@ void RTileMap::_physics_draw_quadrant_debug(RTileMapQuadrant *p_quadrant) {
 	}
 
 	VisualServer *rs = VisualServer::get_singleton();
-	PhysicsServer2D *ps = PhysicsServer2D::get_singleton();
+	Physics2DServer *ps = Physics2DServer::get_singleton();
 
 	Color debug_collision_color = get_tree()->get_debug_collisions_color();
 	Vector<Color> color;
@@ -1582,12 +1583,12 @@ void RTileMap::_physics_draw_quadrant_debug(RTileMapQuadrant *p_quadrant) {
 	Transform2D global_transform_inv = (get_global_transform() * qudrant_xform).affine_inverse();
 
 	for (RID body : p_quadrant->bodies) {
-		Transform2D xform = Transform2D(ps->body_get_state(body, PhysicsServer2D::BODY_STATE_TRANSFORM)) * global_transform_inv;
+		Transform2D xform = Transform2D(ps->body_get_state(body, Physics2DServer::BODY_STATE_TRANSFORM)) * global_transform_inv;
 		rs->canvas_item_add_set_transform(p_quadrant->debug_canvas_item, xform);
 		for (int shape_index = 0; shape_index < ps->body_get_shape_count(body); shape_index++) {
 			const RID &shape = ps->body_get_shape(body, shape_index);
-			PhysicsServer2D::ShapeType type = ps->shape_get_type(shape);
-			if (type == PhysicsServer2D::SHAPE_CONVEX_POLYGON) {
+			Physics2DServer::ShapeType type = ps->shape_get_type(shape);
+			if (type == Physics2DServer::SHAPE_CONVEX_POLYGON) {
 				Vector<Vector2> polygon = ps->shape_get_data(shape);
 				rs->canvas_item_add_polygon(p_quadrant->debug_canvas_item, polygon, color);
 			} else {
@@ -1616,7 +1617,8 @@ void RTileMap::_navigation_notification(int p_what) {
 								}
 								Transform2D tile_transform;
 								tile_transform.set_origin(map_to_world(E_region.key));
-								NavigationServer2D::get_singleton()->region_set_transform(region, tilemap_xform * tile_transform);
+								
+								Navigation2DServer::get_singleton()->region_set_transform(region, tilemap_xform * tile_transform);
 							}
 						}
 					}
@@ -1650,7 +1652,7 @@ void RTileMap::_navigation_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Li
 				if (!region.is_valid()) {
 					continue;
 				}
-				NavigationServer2D::get_singleton()->region_set_map(region, RID());
+				Navigation2DServer::get_singleton()->region_set_map(region, RID());
 			}
 		}
 		q.navigation_regions.clear();
@@ -1685,10 +1687,10 @@ void RTileMap::_navigation_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Li
 							Transform2D tile_transform;
 							tile_transform.set_origin(map_to_world(E_cell->get()));
 
-							RID region = NavigationServer2D::get_singleton()->region_create();
-							NavigationServer2D::get_singleton()->region_set_map(region, get_world_2d()->get_navigation_map());
-							NavigationServer2D::get_singleton()->region_set_transform(region, tilemap_xform * tile_transform);
-							NavigationServer2D::get_singleton()->region_set_navpoly(region, navpoly);
+							RID region = Navigation2DServer::get_singleton()->region_create();
+							Navigation2DServer::get_singleton()->region_set_map(region, get_world_2d()->get_navigation_map());
+							Navigation2DServer::get_singleton()->region_set_transform(region, tilemap_xform * tile_transform);
+							Navigation2DServer::get_singleton()->region_set_navpoly(region, navpoly);
 							q.navigation_regions[E_cell->get()].write[layer_index] = region;
 						}
 					}
@@ -1708,7 +1710,7 @@ void RTileMap::_navigation_cleanup_quadrant(RTileMapQuadrant *p_quadrant) {
 			if (!region.is_valid()) {
 				continue;
 			}
-			NavigationServer2D::get_singleton()->free(region);
+			Navigation2DServer::get_singleton()->free(region);
 		}
 	}
 	p_quadrant->navigation_regions.clear();
@@ -2641,7 +2643,7 @@ bool RTileMap::_set(const StringName &p_name, const Variant &p_value) {
 
 			notify_property_list_changed();
 			emit_signal("changed");
-			update_configuration_warnings();
+			update_configuration_warning();
 		}
 
 		if (components[1] == "name") {
@@ -3413,7 +3415,7 @@ void RTileMap::set_material(const Ref<Material> &p_material) {
 		for (KeyValue<Vector2i, RTileMapQuadrant> &E : layers[layer].quadrant_map) {
 			RTileMapQuadrant &q = E.value;
 			for (const RID &ci : q.canvas_items) {
-				RS::get_singleton()->canvas_item_set_use_parent_material(ci, get_use_parent_material() || get_material().is_valid());
+				VS::get_singleton()->canvas_item_set_use_parent_material(ci, get_use_parent_material() || get_material().is_valid());
 			}
 		}
 		_rendering_update_layer(layer);
@@ -3429,7 +3431,7 @@ void RTileMap::set_use_parent_material(bool p_use_parent_material) {
 		for (KeyValue<Vector2i, RTileMapQuadrant> &E : layers[layer].quadrant_map) {
 			RTileMapQuadrant &q = E.value;
 			for (const RID &ci : q.canvas_items) {
-				RS::get_singleton()->canvas_item_set_use_parent_material(ci, get_use_parent_material() || get_material().is_valid());
+				VS::get_singleton()->canvas_item_set_use_parent_material(ci, get_use_parent_material() || get_material().is_valid());
 			}
 		}
 		_rendering_update_layer(layer);
@@ -3444,7 +3446,7 @@ void RTileMap::set_texture_filter(TextureFilter p_texture_filter) {
 		for (Map<Vector2i, RTileMapQuadrant>::Element *F = layers[layer].quadrant_map.front(); F; F = F->next()) {
 			RTileMapQuadrant &q = F->get();
 			for (const RID &ci : q.canvas_items) {
-				VisualServer::get_singleton()->canvas_item_set_default_texture_filter(ci, RS::CanvasItemTextureFilter(p_texture_filter));
+				VisualServer::get_singleton()->canvas_item_set_default_texture_filter(ci, VS::CanvasItemTextureFilter(p_texture_filter));
 				_make_quadrant_dirty(F);
 			}
 		}
@@ -3459,7 +3461,7 @@ void RTileMap::set_texture_repeat(CanvasItem::TextureRepeat p_texture_repeat) {
 		for (Map<Vector2i, RTileMapQuadrant>::Element *F = layers[layer].quadrant_map.front(); F; F = F->next()) {
 			RTileMapQuadrant &q = F->get();
 			for (const RID &ci : q.canvas_items) {
-				VisualServer::get_singleton()->canvas_item_set_default_texture_repeat(ci, RS::CanvasItemTextureRepeat(p_texture_repeat));
+				VisualServer::get_singleton()->canvas_item_set_default_texture_repeat(ci, VS::CanvasItemTextureRepeat(p_texture_repeat));
 				_make_quadrant_dirty(F);
 			}
 		}
