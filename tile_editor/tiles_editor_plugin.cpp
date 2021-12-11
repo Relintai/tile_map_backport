@@ -148,7 +148,7 @@ void RTilesEditorPlugin::_tile_map_changed() {
 void RTilesEditorPlugin::_update_editors() {
 	// If tile_map is not edited, we change the edited only if we are not editing a tile_set.
 	tileset_editor->edit(tile_set);
-	TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
+	RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 	if (tile_map) {
 		tilemap_editor->edit(tile_map);
 	} else {

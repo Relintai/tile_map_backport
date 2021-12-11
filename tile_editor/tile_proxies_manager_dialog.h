@@ -56,10 +56,10 @@ private:
 	ItemList *alternative_level_list;
 
 	EditorPropertyInteger *source_from_property_editor;
-	EditorPropertyVector2i *coords_from_property_editor;
+	EditorPropertyVector2 *coords_from_property_editor;
 	EditorPropertyInteger *alternative_from_property_editor;
 	EditorPropertyInteger *source_to_property_editor;
-	EditorPropertyVector2i *coords_to_property_editor;
+	EditorPropertyVector2 *coords_to_property_editor;
 	EditorPropertyInteger *alternative_to_property_editor;
 
 	PopupMenu *popup_menu;

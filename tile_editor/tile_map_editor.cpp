@@ -40,7 +40,7 @@
 #include "scene/gui/center_container.h"
 #include "scene/gui/split_container.h"
 
-#include "core/input/input.h"
+#include "core/os/input.h"
 #include "../geometry_2d.h"
 #include "core/os/keyboard.h"
 

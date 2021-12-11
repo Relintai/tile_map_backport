@@ -82,7 +82,7 @@ private:
 	ItemList *patterns_item_list;
 	Label *patterns_help_label;
 	void _patterns_item_list_gui_input(const Ref<InputEvent> &p_event);
-	void _pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture);
+	void _pattern_preview_done(Ref<RTileMapPattern> p_pattern, Ref<Texture> p_texture);
 	bool select_last_pattern = false;
 	void _update_patterns_list();
 

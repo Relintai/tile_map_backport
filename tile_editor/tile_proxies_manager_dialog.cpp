@@ -388,7 +388,7 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	source_from_property_editor->setup(-1, 99999, 1, true, false);
 	vboxcontainer_from->add_child(source_from_property_editor);
 
-	coords_from_property_editor = memnew(EditorPropertyVector2i);
+	coords_from_property_editor = memnew(EditorPropertyVector2);
 	coords_from_property_editor->set_label(TTR("From Coords"));
 	coords_from_property_editor->set_object_and_property(this, "from_coords");
 	coords_from_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
@@ -422,7 +422,7 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	source_to_property_editor->setup(-1, 99999, 1, true, false);
 	vboxcontainer_to->add_child(source_to_property_editor);
 
-	coords_to_property_editor = memnew(EditorPropertyVector2i);
+	coords_to_property_editor = memnew(EditorPropertyVector2);
 	coords_to_property_editor->set_label(TTR("To Coords"));
 	coords_to_property_editor->set_object_and_property(this, "to_coords");
 	coords_to_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));

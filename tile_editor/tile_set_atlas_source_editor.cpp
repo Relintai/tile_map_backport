@@ -96,9 +96,9 @@ bool RTileSetAtlasSourceEditor::RTileSetAtlasSourceProxyObject::_get(const Strin
 void RTileSetAtlasSourceEditor::RTileSetAtlasSourceProxyObject::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::STRING, "name", PROPERTY_HINT_NONE, ""));
 	p_list->push_back(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"));
-	p_list->push_back(PropertyInfo(Variant::VECTOR2I, "margins", PROPERTY_HINT_NONE, ""));
-	p_list->push_back(PropertyInfo(Variant::VECTOR2I, "separation", PROPERTY_HINT_NONE, ""));
-	p_list->push_back(PropertyInfo(Variant::VECTOR2I, "texture_region_size", PROPERTY_HINT_NONE, ""));
+	p_list->push_back(PropertyInfo(Variant::VECTOR2, "margins", PROPERTY_HINT_NONE, ""));
+	p_list->push_back(PropertyInfo(Variant::VECTOR2, "separation", PROPERTY_HINT_NONE, ""));
+	p_list->push_back(PropertyInfo(Variant::VECTOR2, "texture_region_size", PROPERTY_HINT_NONE, ""));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "use_texture_padding", PROPERTY_HINT_NONE, ""));
 }
 

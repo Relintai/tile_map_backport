@@ -45,7 +45,7 @@ private:
 
 	private:
 		Ref<RTileSet> tile_set;
-		TileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
+		RTileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
 		int source_id = -1;
 
 	protected:
@@ -68,7 +68,7 @@ private:
 	private:
 		RTileSetScenesCollectionSourceEditor *tile_set_scenes_collection_source_editor;
 
-		TileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
+		RTileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
 		int source_id;
 		int scene_id;
 
@@ -81,7 +81,7 @@ private:
 
 	public:
 		// Update the proxyed object.
-		void edit(TileSetScenesCollectionSource *p_tile_set_atlas_source, int p_scene_id);
+		void edit(RTileSetScenesCollectionSource *p_tile_set_atlas_source, int p_scene_id);
 
 		SceneTileProxyObject(RTileSetScenesCollectionSourceEditor *p_tiles_set_scenes_collection_source_editor) {
 			tile_set_scenes_collection_source_editor = p_tiles_set_scenes_collection_source_editor;
@@ -90,7 +90,7 @@ private:
 
 private:
 	Ref<RTileSet> tile_set;
-	TileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
+	RTileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
 	int tile_set_source_id = -1;
 
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
@@ -133,7 +133,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void edit(Ref<RTileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
+	void edit(Ref<RTileSet> p_tile_set, RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
 	RTileSetScenesCollectionSourceEditor();
 	~RTileSetScenesCollectionSourceEditor();
 };

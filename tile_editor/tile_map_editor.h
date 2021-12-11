@@ -127,7 +127,7 @@ private:
 	void _set_tile_map_selection(const TypedArray<Vector2i> &p_selection);
 	TypedArray<Vector2i> _get_tile_map_selection() const;
 
-	Set<TileMapCell> tile_set_selection;
+	Set<RTileMapCell> tile_set_selection;
 
 	void _update_selection_pattern_from_tilemap_selection();
 	void _update_selection_pattern_from_tileset_tiles_selection();
@@ -152,7 +152,7 @@ private:
 	void _update_source_display();
 
 	// Atlas sources.
-	TileMapCell hovered_tile;
+	RTileMapCell hovered_tile;
 	RTileAtlasView *tile_atlas_view;
 	HSplitContainer *atlas_sources_split_container;
 
@@ -253,14 +253,14 @@ private:
 	bool drag_erasing = false;
 	Vector2 drag_start_mouse_pos;
 	Vector2 drag_last_mouse_pos;
-	Map<Vector2i, TileMapCell> drag_modified;
+	Map<Vector2i, RTileMapCell> drag_modified;
 
 	// Painting
-	Map<Vector2i, TileMapCell> _draw_terrains(const Map<Vector2i, RTileSet::TerrainsPattern> &p_to_paint, int p_terrain_set) const;
-	Map<Vector2i, TileMapCell> _draw_line(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
-	Map<Vector2i, TileMapCell> _draw_rect(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
+	Map<Vector2i, RTileMapCell> _draw_terrains(const Map<Vector2i, RTileSet::TerrainsPattern> &p_to_paint, int p_terrain_set) const;
+	Map<Vector2i, RTileMapCell> _draw_line(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
+	Map<Vector2i, RTileMapCell> _draw_rect(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
 	Set<Vector2i> _get_cells_for_bucket_fill(Vector2i p_coords, bool p_contiguous);
-	Map<Vector2i, TileMapCell> _draw_bucket_fill(Vector2i p_coords, bool p_contiguous, bool p_erase);
+	Map<Vector2i, RTileMapCell> _draw_bucket_fill(Vector2i p_coords, bool p_contiguous, bool p_erase);
 	void _stop_dragging();
 
 	int selected_terrain_set = -1;
@@ -350,13 +350,13 @@ public:
 	bool forward_canvas_gui_input(const Ref<InputEvent> &p_event);
 	void forward_canvas_draw_over_viewport(Control *p_overlay);
 
-	void edit(TileMap *p_tile_map);
+	void edit(RTileMap *p_tile_map);
 
 	RTileMapEditor();
 	~RTileMapEditor();
 
 	// Static functions.
-	static Vector<Vector2i> get_line(TileMap *p_tile_map, Vector2i p_from_cell, Vector2i p_to_cell);
+	static Vector<Vector2i> get_line(RTileMap *p_tile_map, Vector2i p_from_cell, Vector2i p_to_cell);
 };
 
 #endif // TILE_MAP_EDITOR_PLUGIN_H

@@ -54,7 +54,7 @@ private:
 	RTileMapEditor *tilemap_editor;
 
 	Button *tileset_editor_button;
-	RRTileSetEditor *tileset_editor;
+	RTileSetEditor *tileset_editor;
 
 	void _update_editors();
 
