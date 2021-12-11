@@ -31,7 +31,7 @@
 #ifndef GEOMETRY_2D_H
 #define GEOMETRY_2D_H
 
-#include "delaunay_2d.h"
+#include "core/math/delaunay.h"
 #include "core/math/triangulate.h"
 #include "vector3i.h"
 #include "core/vector.h"
