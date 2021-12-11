@@ -31,7 +31,7 @@
 #ifndef RTILE_ATLAS_VIEW_H
 #define RTILE_ATLAS_VIEW_H
 
-#include "editor/editor_zoom_widget.h"
+#include "editor_zoom_widget.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
 #include "scene/gui/center_container.h"
