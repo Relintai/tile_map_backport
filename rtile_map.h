@@ -185,6 +185,7 @@ private:
 	bool used_rect_cache_dirty = true;
 
 	bool _y_sort_enabled;
+	RID _nav_map;
 
 	// TileMap layers.
 	struct TileMapLayer {

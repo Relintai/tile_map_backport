@@ -1376,14 +1376,16 @@ void RTileMap::draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<RTile
 			real_t time = 0.0;
 			for (int frame = 0; frame < atlas_source->get_tile_animation_frames_count(p_atlas_coords); frame++) {
 				real_t frame_duration = atlas_source->get_tile_animation_frame_duration(p_atlas_coords, frame) / speed;
-				VisualServer::get_singleton()->canvas_item_add_animation_slice(p_canvas_item, animation_duration, time, time + frame_duration, 0.0);
+				//TODO
+				//VisualServer::get_singleton()->canvas_item_add_animation_slice(p_canvas_item, animation_duration, time, time + frame_duration, 0.0);
 
 				Rect2i source_rect = atlas_source->get_runtime_tile_texture_region(p_atlas_coords, frame);
-				tex->draw_rect_region(p_canvas_item, dest_rect, source_rect, modulate, transpose, p_tile_set->is_uv_clipping());
+				tex->draw_rect_region(p_canvas_item, dest_rect, source_rect, modulate, transpose, Ref<Texture>(), p_tile_set->is_uv_clipping());
 
 				time += frame_duration;
 			}
-			VisualServer::get_singleton()->canvas_item_add_animation_slice(p_canvas_item, 1.0, 0.0, 1.0, 0.0);
+			//TODO
+			//VisualServer::get_singleton()->canvas_item_add_animation_slice(p_canvas_item, 1.0, 0.0, 1.0, 0.0);
 		}
 	}
 }
@@ -1713,7 +1715,13 @@ void RTileMap::_navigation_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Li
 							tile_transform.set_origin(map_to_world(E_cell->get()));
 
 							RID region = Navigation2DServer::get_singleton()->region_create();
-							Navigation2DServer::get_singleton()->region_set_map(region, get_world_2d()->get_navigation_map());
+
+							if (_nav_map == RID()) {
+								_nav_map = Navigation2DServer::get_singleton()->map_create();
+							}
+
+							//Navigation2DServer::get_singleton()->region_set_map(region, get_world_2d()->get_navigation_map());
+							Navigation2DServer::get_singleton()->region_set_map(region, _nav_map);
 							Navigation2DServer::get_singleton()->region_set_transform(region, tilemap_xform * tile_transform);
 							Navigation2DServer::get_singleton()->region_set_navpoly(region, navpoly);
 							q.navigation_regions[E_cell->get()].write[layer_index] = region;
