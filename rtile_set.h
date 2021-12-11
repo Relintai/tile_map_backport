@@ -901,6 +901,8 @@ public:
 	Variant get_custom_data(String p_layer_name) const;
 	void set_custom_data_by_layer_id(int p_layer_id, Variant p_value);
 	Variant get_custom_data_by_layer_id(int p_layer_id) const;
+
+	void property_list_changed_notify();
 };
 
 VARIANT_ENUM_CAST(RTileSet::CellNeighbor);
