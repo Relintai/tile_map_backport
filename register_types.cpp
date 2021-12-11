@@ -22,6 +22,8 @@ SOFTWARE.
 
 #include "register_types.h"
 
+#include "rtile_set.h"
+
 #ifdef TOOLS_ENABLED
 #endif
 
@@ -29,6 +31,13 @@ void register_rtile_map_types() {
 #ifdef TOOLS_ENABLED
 //	EditorPlugins::add_by_type<ModuleSkeletonEditorPlugin>();
 #endif
+
+    ClassDB::register_class<RTileMapPattern>();
+    ClassDB::register_class<RTileSet>();
+    ClassDB::register_virtual_class<RTileSetSource>();
+    ClassDB::register_class<RTileSetAtlasSource>();
+    ClassDB::register_class<RTileSetScenesCollectionSource>();
+    ClassDB::register_class<RTileData>();
 }
 
 void unregister_rtile_map_types() {
