@@ -323,12 +323,12 @@ public:
 	// Cells accessors.
 	void set_cell(int p_layer, const Vector2 &p_coords, int p_source_id = -1, const Vector2 p_atlas_coords = RTileSetSource::INVALID_ATLAS_COORDSV, int p_alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE);
 	int get_cell_source_id(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
-	Vector2i get_cell_atlas_coords(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
+	Vector2 get_cell_atlas_coords(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
 	int get_cell_alternative_tile(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
 
 	// Patterns.
 	Ref<RTileMapPattern> get_pattern(int p_layer, Vector<Vector2> p_coords_array);
-	Vector2i map_pattern(Vector2 p_position_in_tilemap, Vector2 p_coords_in_pattern, Ref<RTileMapPattern> p_pattern);
+	Vector2 map_pattern(Vector2 p_position_in_tilemap, Vector2 p_coords_in_pattern, Ref<RTileMapPattern> p_pattern);
 	void set_pattern(int p_layer, Vector2 p_position, const Ref<RTileMapPattern> p_pattern);
 
 	// Terrains.
