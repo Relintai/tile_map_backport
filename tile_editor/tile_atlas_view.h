@@ -39,15 +39,15 @@
 #include "scene/gui/margin_container.h"
 #include "scene/gui/scroll_container.h"
 #include "scene/gui/texture_rect.h"
-#include "scene/resources/tile_set.h"
+#include "../rtile_set.h"
 
 class RTileAtlasView : public Control {
 	GDCLASS(RTileAtlasView, Control);
 
 private:
-	TileSet *tile_set;
-	TileSetAtlasSource *tile_set_atlas_source;
-	int source_id = TileSet::INVALID_SOURCE;
+	RTileSet *tile_set;
+	RTileSetAtlasSource *tile_set_atlas_source;
+	int source_id = RTileSet::INVALID_SOURCE;
 
 	enum DragType {
 		DRAG_TYPE_NONE,
@@ -112,7 +112,7 @@ protected:
 
 public:
 	// Global.
-	void set_atlas_source(TileSet *p_tile_set, TileSetAtlasSource *p_tile_set_atlas_source, int p_source_id);
+	void set_atlas_source(RTileSet *p_tile_set, RTileSetAtlasSource *p_tile_set_atlas_source, int p_source_id);
 
 	float get_zoom() const;
 	void set_transform(float p_zoom, Vector2i p_panning);

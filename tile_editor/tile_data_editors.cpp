@@ -32,7 +32,7 @@
 
 #include "tile_set_editor.h"
 
-#include "core/math/geometry_2d.h"
+#include "../geometry_2d.h"
 #include "core/os/keyboard.h"
 
 #include "editor/editor_properties.h"

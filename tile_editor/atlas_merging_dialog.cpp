@@ -39,7 +39,7 @@ void RAtlasMergingDialog::_property_changed(const StringName &p_property, const 
 	_set(p_property, p_value);
 }
 
-void RAtlasMergingDialog::_generate_merged(Vector<Ref<TileSetAtlasSource>> p_atlas_sources, int p_max_columns) {
+void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_atlas_sources, int p_max_columns) {
 	merged.instantiate();
 	merged_mapping.clear();
 
@@ -51,15 +51,15 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<TileSetAtlasSource>> p_atl
 		// Compute the new texture region size.
 		Vector2i new_texture_region_size;
 		for (int source_index = 0; source_index < p_atlas_sources.size(); source_index++) {
-			Ref<TileSetAtlasSource> atlas_source = p_atlas_sources[source_index];
+			Ref<RTileSetAtlasSource> atlas_source = p_atlas_sources[source_index];
 			new_texture_region_size = new_texture_region_size.max(atlas_source->get_texture_region_size());
 		}
 
-		// Generate the merged TileSetAtlasSource.
+		// Generate the merged RTileSetAtlasSource.
 		Vector2i atlas_offset;
 		int line_height = 0;
 		for (int source_index = 0; source_index < p_atlas_sources.size(); source_index++) {
-			Ref<TileSetAtlasSource> atlas_source = p_atlas_sources[source_index];
+			Ref<RTileSetAtlasSource> atlas_source = p_atlas_sources[source_index];
 			merged_mapping.push_back(Map<Vector2i, Vector2i>());
 
 			// Layout the tiles.
@@ -127,7 +127,7 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<TileSetAtlasSource>> p_atl
 void RAtlasMergingDialog::_update_texture() {
 	Vector<int> selected = atlas_merging_atlases_list->get_selected_items();
 	if (selected.size() >= 2) {
-		Vector<Ref<TileSetAtlasSource>> to_merge;
+		Vector<Ref<RTileSetAtlasSource>> to_merge;
 		for (int i = 0; i < selected.size(); i++) {
 			int source_id = atlas_merging_atlases_list->get_item_metadata(selected[i]);
 			to_merge.push_back(tile_set->get_source(source_id));
@@ -139,7 +139,7 @@ void RAtlasMergingDialog::_update_texture() {
 		get_ok_button()->set_disabled(false);
 		merge_button->set_disabled(false);
 	} else {
-		_generate_merged(Vector<Ref<TileSetAtlasSource>>(), next_line_after_column);
+		_generate_merged(Vector<Ref<RTileSetAtlasSource>>(), next_line_after_column);
 		preview->set_texture(Ref<Texture2D>());
 		preview->hide();
 		select_2_atlases_label->show();
@@ -157,7 +157,7 @@ void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 	Ref<Texture2D> new_texture_resource = ResourceLoader::load(p_path, "Texture2D");
 	merged->set_texture(new_texture_resource);
 
-	undo_redo->create_action(TTR("Merge TileSetAtlasSource"));
+	undo_redo->create_action(TTR("Merge RTileSetAtlasSource"));
 	int next_id = tile_set->get_next_source_id();
 	undo_redo->add_do_method(*tile_set, "add_source", merged, next_id);
 	undo_redo->add_undo_method(*tile_set, "remove_source", next_id);
@@ -167,7 +167,7 @@ void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 		Vector<int> selected = atlas_merging_atlases_list->get_selected_items();
 		for (int i = 0; i < selected.size(); i++) {
 			int source_id = atlas_merging_atlases_list->get_item_metadata(selected[i]);
-			Ref<TileSetAtlasSource> tas = tile_set->get_source(source_id);
+			Ref<RTileSetAtlasSource> tas = tile_set->get_source(source_id);
 			undo_redo->add_do_method(*tile_set, "remove_source", source_id);
 			undo_redo->add_undo_method(*tile_set, "add_source", tas, source_id);
 
@@ -226,14 +226,14 @@ bool RAtlasMergingDialog::_get(const StringName &p_name, Variant &r_ret) const {
 	return false;
 }
 
-void RAtlasMergingDialog::update_tile_set(Ref<TileSet> p_tile_set) {
+void RAtlasMergingDialog::update_tile_set(Ref<RTileSet> p_tile_set) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	tile_set = p_tile_set;
 
 	atlas_merging_atlases_list->clear();
 	for (int i = 0; i < p_tile_set->get_source_count(); i++) {
 		int source_id = p_tile_set->get_source_id(i);
-		Ref<TileSetAtlasSource> atlas_source = p_tile_set->get_source(source_id);
+		Ref<RTileSetAtlasSource> atlas_source = p_tile_set->get_source(source_id);
 		if (atlas_source.is_valid()) {
 			Ref<Texture2D> texture = atlas_source->get_texture();
 			if (texture.is_valid()) {

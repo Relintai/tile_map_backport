@@ -30,9 +30,9 @@
 
 #include "tile_atlas_view.h"
 
-#include "core/input/input.h"
+#include "core/os/input.h"
 #include "core/os/keyboard.h"
-#include "scene/2d/tile_map.h"
+#include "../rtile_map.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/label.h"
 #include "scene/gui/panel.h"
@@ -57,13 +57,13 @@ void RTileAtlasView::gui_input(const Ref<InputEvent> &p_event) {
 					panning.x += 32 * mb->get_factor() * scroll_vec.x;
 				}
 
-				emit_signal(SNAME("transform_changed"), zoom_widget->get_zoom(), panning);
+				emit_signal(("transform_changed"), zoom_widget->get_zoom(), panning);
 				_update_zoom_and_panning(true);
 				accept_event();
 
 			} else if (!mb->is_shift_pressed()) {
 				zoom_widget->set_zoom_by_increments(scroll_vec.y * 2);
-				emit_signal(SNAME("transform_changed"), zoom_widget->get_zoom(), panning);
+				emit_signal(("transform_changed"), zoom_widget->get_zoom(), panning);
 				_update_zoom_and_panning(true);
 				accept_event();
 			}
@@ -84,7 +84,7 @@ void RTileAtlasView::gui_input(const Ref<InputEvent> &p_event) {
 		if (drag_type == DRAG_TYPE_PAN) {
 			panning += mm->get_relative();
 			_update_zoom_and_panning();
-			emit_signal(SNAME("transform_changed"), zoom_widget->get_zoom(), panning);
+			emit_signal(("transform_changed"), zoom_widget->get_zoom(), panning);
 			accept_event();
 		}
 	}
@@ -93,7 +93,7 @@ void RTileAtlasView::gui_input(const Ref<InputEvent> &p_event) {
 Size2i RTileAtlasView::_compute_base_tiles_control_size() {
 	// Update the texture.
 	Vector2i size;
-	Ref<Texture2D> texture = tile_set_atlas_source->get_texture();
+	Ref<Texture> texture = tile_set_atlas_source->get_texture();
 	if (texture.is_valid()) {
 		size = texture->get_size();
 	}
@@ -131,7 +131,7 @@ void RTileAtlasView::_update_zoom_and_panning(bool p_zoom_on_mouse_pos) {
 	alternative_tiles_root_control->set_custom_minimum_size(Vector2(alternative_tiles_control_size) * zoom);
 
 	// Set the texture for the base tiles.
-	Ref<Texture2D> texture = tile_set_atlas_source->get_texture();
+	Ref<Texture> texture = tile_set_atlas_source->get_texture();
 
 	// Set the scales.
 	if (base_tiles_control_size.x > 0 && base_tiles_control_size.y > 0) {
@@ -174,14 +174,14 @@ void RTileAtlasView::_update_zoom_and_panning(bool p_zoom_on_mouse_pos) {
 
 void RTileAtlasView::_zoom_widget_changed() {
 	_update_zoom_and_panning();
-	emit_signal(SNAME("transform_changed"), zoom_widget->get_zoom(), panning);
+	emit_signal(("transform_changed"), zoom_widget->get_zoom(), panning);
 }
 
 void RTileAtlasView::_center_view() {
 	panning = Vector2();
 	button_center_view->set_disabled(true);
 	_update_zoom_and_panning();
-	emit_signal(SNAME("transform_changed"), zoom_widget->get_zoom(), panning);
+	emit_signal(("transform_changed"), zoom_widget->get_zoom(), panning);
 }
 
 void RTileAtlasView::_base_tiles_root_control_gui_input(const Ref<InputEvent> &p_event) {
@@ -191,9 +191,9 @@ void RTileAtlasView::_base_tiles_root_control_gui_input(const Ref<InputEvent> &p
 	if (mm.is_valid()) {
 		Transform2D xform = base_tiles_drawing_root->get_transform().affine_inverse();
 		Vector2i coords = get_atlas_tile_coords_at_pos(xform.xform(mm->get_position()));
-		if (coords != TileSetSource::INVALID_ATLAS_COORDS) {
+		if (coords != RTileSetSource::INVALID_ATLAS_COORDS) {
 			coords = tile_set_atlas_source->get_tile_at_coords(coords);
-			if (coords != TileSetSource::INVALID_ATLAS_COORDS) {
+			if (coords != RTileSetSource::INVALID_ATLAS_COORDS) {
 				base_tiles_root_control->set_tooltip(vformat(TTR("Source: %d\nAtlas coordinates: %s\nAlternative: 0"), source_id, coords));
 			}
 		}
@@ -201,7 +201,7 @@ void RTileAtlasView::_base_tiles_root_control_gui_input(const Ref<InputEvent> &p
 }
 
 void RTileAtlasView::_draw_base_tiles() {
-	Ref<Texture2D> texture = tile_set_atlas_source->get_texture();
+	Ref<Texture> texture = tile_set_atlas_source->get_texture();
 	if (texture.is_valid()) {
 		Vector2i margins = tile_set_atlas_source->get_margins();
 		Vector2i separation = tile_set_atlas_source->get_separation();
@@ -212,7 +212,7 @@ void RTileAtlasView::_draw_base_tiles() {
 		for (int x = 0; x < grid_size.x; x++) {
 			for (int y = 0; y < grid_size.y; y++) {
 				Vector2i coords = Vector2i(x, y);
-				if (tile_set_atlas_source->get_tile_at_coords(coords) == TileSetSource::INVALID_ATLAS_COORDS) {
+				if (tile_set_atlas_source->get_tile_at_coords(coords) == RTileSetSource::INVALID_ATLAS_COORDS) {
 					Rect2i rect = Rect2i((texture_region_size + separation) * coords + margins, texture_region_size + separation);
 					rect = rect.intersection(Rect2i(Vector2(), texture->get_size()));
 					if (rect.size.x > 0 && rect.size.y > 0) {
@@ -292,7 +292,7 @@ void RTileAtlasView::_draw_base_tiles() {
 }
 
 void RTileAtlasView::_draw_base_tiles_texture_grid() {
-	Ref<Texture2D> texture = tile_set_atlas_source->get_texture();
+	Ref<Texture> texture = tile_set_atlas_source->get_texture();
 	if (texture.is_valid()) {
 		Vector2i margins = tile_set_atlas_source->get_margins();
 		Vector2i separation = tile_set_atlas_source->get_separation();
@@ -305,7 +305,7 @@ void RTileAtlasView::_draw_base_tiles_texture_grid() {
 			for (int y = 0; y < grid_size.y; y++) {
 				Vector2i origin = margins + (Vector2i(x, y) * (texture_region_size + separation));
 				Vector2i base_tile_coords = tile_set_atlas_source->get_tile_at_coords(Vector2i(x, y));
-				if (base_tile_coords != TileSetSource::INVALID_ATLAS_COORDS) {
+				if (base_tile_coords != RTileSetSource::INVALID_ATLAS_COORDS) {
 					if (base_tile_coords == Vector2i(x, y)) {
 						// Draw existing tile.
 						Vector2i size_in_atlas = tile_set_atlas_source->get_tile_size_in_atlas(base_tile_coords);
@@ -352,7 +352,7 @@ void RTileAtlasView::_alternative_tiles_root_control_gui_input(const Ref<InputEv
 		Vector3i coords3 = get_alternative_tile_at_pos(xform.xform(mm->get_position()));
 		Vector2i coords = Vector2i(coords3.x, coords3.y);
 		int alternative_id = coords3.z;
-		if (coords != TileSetSource::INVALID_ATLAS_COORDS && alternative_id != TileSetSource::INVALID_TILE_ALTERNATIVE) {
+		if (coords != RTileSetSource::INVALID_ATLAS_COORDS && alternative_id != RTileSetSource::INVALID_TILE_ALTERNATIVE) {
 			alternative_tiles_root_control->set_tooltip(vformat(TTR("Source: %d\nAtlas coordinates: %s\nAlternative: %d"), source_id, coords, alternative_id));
 		}
 	}
@@ -360,7 +360,7 @@ void RTileAtlasView::_alternative_tiles_root_control_gui_input(const Ref<InputEv
 
 void RTileAtlasView::_draw_alternatives() {
 	// Draw the alternative tiles.
-	Ref<Texture2D> texture = tile_set_atlas_source->get_texture();
+	Ref<Texture> texture = tile_set_atlas_source->get_texture();
 	if (texture.is_valid()) {
 		Vector2 current_pos;
 		for (int i = 0; i < tile_set_atlas_source->get_tiles_count(); i++) {
@@ -398,18 +398,18 @@ void RTileAtlasView::_draw_alternatives() {
 }
 
 void RTileAtlasView::_draw_background_left() {
-	Ref<Texture2D> texture = get_theme_icon(SNAME("Checkerboard"), SNAME("EditorIcons"));
+	Ref<Texture> texture = get_theme_icon(SNAME("Checkerboard"), SNAME("EditorIcons"));
 	background_left->set_size(base_tiles_root_control->get_custom_minimum_size());
 	background_left->draw_texture_rect(texture, Rect2(Vector2(), background_left->get_size()), true);
 }
 
 void RTileAtlasView::_draw_background_right() {
-	Ref<Texture2D> texture = get_theme_icon(SNAME("Checkerboard"), SNAME("EditorIcons"));
+	Ref<Texture> texture = get_theme_icon(SNAME("Checkerboard"), SNAME("EditorIcons"));
 	background_right->set_size(alternative_tiles_root_control->get_custom_minimum_size());
 	background_right->draw_texture_rect(texture, Rect2(Vector2(), background_right->get_size()), true);
 }
 
-void RTileAtlasView::set_atlas_source(TileSet *p_tile_set, TileSetAtlasSource *p_tile_set_atlas_source, int p_source_id) {
+void RTileAtlasView::set_atlas_source(RTileSet *p_tile_set, RTileSetAtlasSource *p_tile_set_atlas_source, int p_source_id) {
 	ERR_FAIL_COND(!p_tile_set);
 	ERR_FAIL_COND(!p_tile_set_atlas_source);
 	ERR_FAIL_COND(p_source_id < 0);
@@ -472,7 +472,7 @@ void RTileAtlasView::set_padding(Side p_side, int p_padding) {
 }
 
 Vector2i RTileAtlasView::get_atlas_tile_coords_at_pos(const Vector2 p_pos) const {
-	Ref<Texture2D> texture = tile_set_atlas_source->get_texture();
+	Ref<Texture> texture = tile_set_atlas_source->get_texture();
 	if (texture.is_valid()) {
 		Vector2i margins = tile_set_atlas_source->get_margins();
 		Vector2i separation = tile_set_atlas_source->get_separation();
@@ -485,7 +485,7 @@ Vector2i RTileAtlasView::get_atlas_tile_coords_at_pos(const Vector2 p_pos) const
 		return ret;
 	}
 
-	return TileSetSource::INVALID_ATLAS_COORDS;
+	return RTileSetSource::INVALID_ATLAS_COORDS;
 }
 
 void RTileAtlasView::_update_alternative_tiles_rect_cache() {
@@ -527,7 +527,7 @@ Vector3i RTileAtlasView::get_alternative_tile_at_pos(const Vector2 p_pos) const 
 		}
 	}
 
-	return Vector3i(TileSetSource::INVALID_ATLAS_COORDS.x, TileSetSource::INVALID_ATLAS_COORDS.y, TileSetSource::INVALID_TILE_ALTERNATIVE);
+	return Vector3i(RTileSetSource::INVALID_ATLAS_COORDS.x, RTileSetSource::INVALID_ATLAS_COORDS.y, RTileSetSource::INVALID_TILE_ALTERNATIVE);
 }
 
 Rect2i RTileAtlasView::get_alternative_tile_rect(const Vector2i p_coords, int p_alternative_tile) {

@@ -110,18 +110,18 @@ void RTileProxiesManagerDialog::_update_lists() {
 }
 
 void RTileProxiesManagerDialog::_update_enabled_property_editors() {
-	if (from.source_id == TileSet::INVALID_SOURCE) {
-		from.set_atlas_coords(TileSetSource::INVALID_ATLAS_COORDS);
-		to.set_atlas_coords(TileSetSource::INVALID_ATLAS_COORDS);
-		from.alternative_tile = TileSetSource::INVALID_TILE_ALTERNATIVE;
-		to.alternative_tile = TileSetSource::INVALID_TILE_ALTERNATIVE;
+	if (from.source_id == RTileSet::INVALID_SOURCE) {
+		from.set_atlas_coords(RTileSetSource::INVALID_ATLAS_COORDS);
+		to.set_atlas_coords(RTileSetSource::INVALID_ATLAS_COORDS);
+		from.alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE;
+		to.alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE;
 		coords_from_property_editor->hide();
 		coords_to_property_editor->hide();
 		alternative_from_property_editor->hide();
 		alternative_to_property_editor->hide();
 	} else if (from.get_atlas_coords().x == -1 || from.get_atlas_coords().y == -1) {
-		from.alternative_tile = TileSetSource::INVALID_TILE_ALTERNATIVE;
-		to.alternative_tile = TileSetSource::INVALID_TILE_ALTERNATIVE;
+		from.alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE;
+		to.alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE;
 		coords_from_property_editor->show();
 		coords_to_property_editor->show();
 		alternative_from_property_editor->hide();
@@ -146,11 +146,11 @@ void RTileProxiesManagerDialog::_property_changed(const String &p_path, const Va
 }
 
 void RTileProxiesManagerDialog::_add_button_pressed() {
-	if (from.source_id != TileSet::INVALID_SOURCE && to.source_id != TileSet::INVALID_SOURCE) {
+	if (from.source_id != RTileSet::INVALID_SOURCE && to.source_id != RTileSet::INVALID_SOURCE) {
 		Vector2i from_coords = from.get_atlas_coords();
 		Vector2i to_coords = to.get_atlas_coords();
 		if (from_coords.x >= 0 && from_coords.y >= 0 && to_coords.x >= 0 && to_coords.y >= 0) {
-			if (from.alternative_tile != TileSetSource::INVALID_TILE_ALTERNATIVE && to.alternative_tile != TileSetSource::INVALID_TILE_ALTERNATIVE) {
+			if (from.alternative_tile != RTileSetSource::INVALID_TILE_ALTERNATIVE && to.alternative_tile != RTileSetSource::INVALID_TILE_ALTERNATIVE) {
 				undo_redo->create_action(TTR("Create Alternative-level Tile Proxy"));
 				undo_redo->add_do_method(*tile_set, "set_alternative_level_tile_proxy", from.source_id, from.get_atlas_coords(), from.alternative_tile, to.source_id, to.get_atlas_coords(), to.alternative_tile);
 				if (tile_set->has_alternative_level_tile_proxy(from.source_id, from.get_atlas_coords(), from.alternative_tile)) {
@@ -304,7 +304,7 @@ void RTileProxiesManagerDialog::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_unhandled_key_input"), &RTileProxiesManagerDialog::_unhandled_key_input);
 }
 
-void RTileProxiesManagerDialog::update_tile_set(Ref<TileSet> p_tile_set) {
+void RTileProxiesManagerDialog::update_tile_set(Ref<RTileSet> p_tile_set) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	tile_set = p_tile_set;
 	commited_actions_count = 0;

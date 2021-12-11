@@ -33,7 +33,7 @@
 
 #include "editor/editor_node.h"
 #include "scene/gui/box_container.h"
-#include "scene/resources/tile_set.h"
+#include "../rtile_set.h"
 
 class RTileSetScenesCollectionSourceEditor : public HBoxContainer {
 	GDCLASS(RTileSetScenesCollectionSourceEditor, HBoxContainer);
@@ -44,7 +44,7 @@ private:
 		GDCLASS(TileSetScenesCollectionProxyObject, Object);
 
 	private:
-		Ref<TileSet> tile_set;
+		Ref<RTileSet> tile_set;
 		TileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
 		int source_id = -1;
 
@@ -58,7 +58,7 @@ private:
 		void set_id(int p_id);
 		int get_id();
 
-		void edit(Ref<TileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
+		void edit(Ref<RTileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
 	};
 
 	// -- Proxy object for a tile, needed by the inspector --
@@ -89,7 +89,7 @@ private:
 	};
 
 private:
-	Ref<TileSet> tile_set;
+	Ref<RTileSet> tile_set;
 	TileSetScenesCollectionSource *tile_set_scenes_collection_source = nullptr;
 	int tile_set_source_id = -1;
 
@@ -133,7 +133,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void edit(Ref<TileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
+	void edit(Ref<RTileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
 	RTileSetScenesCollectionSourceEditor();
 	~RTileSetScenesCollectionSourceEditor();
 };

@@ -38,12 +38,12 @@
 
 #include "core/core_string_names.h"
 
-void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::set_id(int p_id) {
+void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::set_id(int p_id) {
 	ERR_FAIL_COND(p_id < 0);
 	if (source_id == p_id) {
 		return;
 	}
-	ERR_FAIL_COND_MSG(tile_set->has_source(p_id), vformat("Cannot change TileSet Scenes Collection source ID. Another TileSet source exists with id %d.", p_id));
+	ERR_FAIL_COND_MSG(tile_set->has_source(p_id), vformat("Cannot change RTileSet Scenes Collection source ID. Another RTileSet source exists with id %d.", p_id));
 
 	int previous_source = source_id;
 	source_id = p_id; // source_id must be updated before, because it's used by the source list update.
@@ -51,11 +51,11 @@ void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::s
 	emit_signal(SNAME("changed"), "id");
 }
 
-int RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::get_id() {
+int RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::get_id() {
 	return source_id;
 }
 
-bool RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_set(const StringName &p_name, const Variant &p_value) {
+bool RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_set(const StringName &p_name, const Variant &p_value) {
 	String name = p_name;
 	if (name == "name") {
 		// Use the resource_name property to store the source's name.
@@ -69,7 +69,7 @@ bool RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_
 	return valid;
 }
 
-bool RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_get(const StringName &p_name, Variant &r_ret) const {
+bool RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_get(const StringName &p_name, Variant &r_ret) const {
 	if (!tile_set_scenes_collection_source) {
 		return false;
 	}
@@ -83,21 +83,21 @@ bool RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_
 	return valid;
 }
 
-void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_get_property_list(List<PropertyInfo> *p_list) const {
+void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::STRING, "name", PROPERTY_HINT_NONE, ""));
 }
 
-void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_bind_methods() {
+void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_bind_methods() {
 	// -- Shape and layout --
-	ClassDB::bind_method(D_METHOD("set_id", "id"), &RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::set_id);
-	ClassDB::bind_method(D_METHOD("get_id"), &RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::get_id);
+	ClassDB::bind_method(D_METHOD("set_id", "id"), &RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::set_id);
+	ClassDB::bind_method(D_METHOD("get_id"), &RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::get_id);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "id"), "set_id", "get_id");
 
 	ADD_SIGNAL(MethodInfo("changed", PropertyInfo(Variant::STRING, "what")));
 }
 
-void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::edit(Ref<TileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id) {
+void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::edit(Ref<RTileSet> p_tile_set, RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_tile_set_scenes_collection_source);
 	ERR_FAIL_COND(p_source_id < 0);
@@ -188,7 +188,7 @@ void RTileSetScenesCollectionSourceEditor::SceneTileProxyObject::_get_property_l
 	p_list->push_back(PropertyInfo(Variant::BOOL, "display_placeholder", PROPERTY_HINT_NONE, ""));
 }
 
-void RTileSetScenesCollectionSourceEditor::SceneTileProxyObject::edit(TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_scene_id) {
+void RTileSetScenesCollectionSourceEditor::SceneTileProxyObject::edit(RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_scene_id) {
 	ERR_FAIL_COND(!p_tile_set_scenes_collection_source);
 	ERR_FAIL_COND(!p_tile_set_scenes_collection_source->has_scene_tile_id(p_scene_id));
 
@@ -353,7 +353,7 @@ void RTileSetScenesCollectionSourceEditor::_notification(int p_what) {
 	}
 }
 
-void RTileSetScenesCollectionSourceEditor::edit(Ref<TileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id) {
+void RTileSetScenesCollectionSourceEditor::edit(Ref<RTileSet> p_tile_set, RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_tile_set_scenes_collection_source);
 	ERR_FAIL_COND(p_source_id < 0);
@@ -472,7 +472,7 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 	scenes_collection_source_inspector_label->set_text(TTR("Scenes collection properties:"));
 	middle_vbox_container->add_child(scenes_collection_source_inspector_label);
 
-	scenes_collection_source_proxy_object = memnew(TileSetScenesCollectionProxyObject());
+	scenes_collection_source_proxy_object = memnew(RTileSetScenesCollectionProxyObject());
 	scenes_collection_source_proxy_object->connect("changed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_scenes_collection_source_proxy_object_changed));
 
 	scenes_collection_source_inspector = memnew(EditorInspector);

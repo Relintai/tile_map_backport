@@ -36,12 +36,12 @@
 #include "editor/editor_scale.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
 
-#include "scene/2d/tile_map.h"
+#include "../rtile_map.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
 #include "scene/gui/separator.h"
-#include "scene/resources/tile_set.h"
+#include "../rtile_set.h"
 
 #include "tile_set_editor.h"
 
@@ -98,7 +98,7 @@ void RTilesEditorPlugin::_thread() {
 					encompassing_rect.expand_to(world_pos);
 
 					// Texture.
-					Ref<TileSetAtlasSource> atlas_source = tile_set->get_source(tile_map->get_cell_source_id(0, cell));
+					Ref<RTileSetAtlasSource> atlas_source = tile_set->get_source(tile_map->get_cell_source_id(0, cell));
 					if (atlas_source.is_valid()) {
 						Vector2i coords = tile_map->get_cell_atlas_coords(0, cell);
 						int alternative = tile_map->get_cell_alternative_tile(0, cell);
@@ -193,7 +193,7 @@ void RTilesEditorPlugin::make_visible(bool p_visible) {
 	}
 }
 
-void RTilesEditorPlugin::queue_pattern_preview(Ref<TileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback) {
+void RTilesEditorPlugin::queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_pattern.is_valid());
 	{
@@ -243,15 +243,15 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 	}
 
 	// Update edited objects.
-	tile_set = Ref<TileSet>();
+	tile_set = Ref<RTileSet>();
 	if (p_object) {
 		if (p_object->is_class("TileMap")) {
 			tile_map_id = p_object->get_instance_id();
 			tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
 			tile_set = tile_map->get_tileset();
 			editor_node->make_bottom_panel_item_visible(tilemap_editor);
-		} else if (p_object->is_class("TileSet")) {
-			tile_set = Ref<TileSet>(p_object);
+		} else if (p_object->is_class("RTileSet")) {
+			tile_set = Ref<RTileSet>(p_object);
 			if (tile_map) {
 				if (tile_map->get_tileset() != tile_set || !tile_map->is_inside_tree()) {
 					tile_map = nullptr;
@@ -272,7 +272,7 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 }
 
 bool RTilesEditorPlugin::handles(Object *p_object) const {
-	return p_object->is_class("TileMap") || p_object->is_class("TileSet");
+	return p_object->is_class("TileMap") || p_object->is_class("RTileSet");
 }
 
 RTilesEditorPlugin::RTilesEditorPlugin(EditorNode *p_node) {
@@ -301,7 +301,7 @@ RTilesEditorPlugin::RTilesEditorPlugin(EditorNode *p_node) {
 	pattern_preview_thread.start(_thread_func, this);
 
 	// Bottom buttons.
-	tileset_editor_button = p_node->add_bottom_panel_item(TTR("TileSet"), tileset_editor);
+	tileset_editor_button = p_node->add_bottom_panel_item(TTR("RTileSet"), tileset_editor);
 	tileset_editor_button->hide();
 	tilemap_editor_button = p_node->add_bottom_panel_item(TTR("TileMap"), tilemap_editor);
 	tilemap_editor_button->hide();

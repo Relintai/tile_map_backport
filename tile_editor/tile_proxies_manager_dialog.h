@@ -34,7 +34,7 @@
 #include "editor/editor_node.h"
 #include "editor/editor_properties.h"
 
-#include "scene/2d/tile_map.h"
+#include "../rtile_map.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/item_list.h"
 
@@ -43,7 +43,7 @@ class RTileProxiesManagerDialog : public ConfirmationDialog {
 
 private:
 	int commited_actions_count = 0;
-	Ref<TileSet> tile_set;
+	Ref<RTileSet> tile_set;
 
 	UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
 
@@ -82,7 +82,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void update_tile_set(Ref<TileSet> p_tile_set);
+	void update_tile_set(Ref<RTileSet> p_tile_set);
 
 	RTileProxiesManagerDialog();
 };

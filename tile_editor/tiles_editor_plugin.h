@@ -48,13 +48,13 @@ private:
 
 	bool tile_map_changed_needs_update = false;
 	ObjectID tile_map_id;
-	Ref<TileSet> tile_set;
+	Ref<RTileSet> tile_set;
 
 	Button *tilemap_editor_button;
 	RTileMapEditor *tilemap_editor;
 
 	Button *tileset_editor_button;
-	RTileSetEditor *tileset_editor;
+	RRTileSetEditor *tileset_editor;
 
 	void _update_editors();
 
@@ -67,7 +67,7 @@ private:
 
 	// Patterns preview generation.
 	struct QueueItem {
-		Ref<TileSet> tile_set;
+		Ref<RTileSet> tile_set;
 		Ref<TileMapPattern> pattern;
 		Callable callback;
 	};
@@ -93,7 +93,7 @@ public:
 	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) override { tilemap_editor->forward_canvas_draw_over_viewport(p_overlay); }
 
 	// Pattern preview API.
-	void queue_pattern_preview(Ref<TileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback);
+	void queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<TileMapPattern> p_pattern, Callable p_callback);
 
 	// To synchronize the atlas sources lists.
 	void set_sources_lists_current(int p_current);

@@ -36,9 +36,9 @@
 
 #include "editor/editor_node.h"
 #include "scene/gui/split_container.h"
-#include "scene/resources/tile_set.h"
+#include "../rtile_set.h"
 
-class TileSet;
+class RTileSet;
 
 class RTileSetAtlasSourceEditor : public HBoxContainer {
 	GDCLASS(RTileSetAtlasSourceEditor, HBoxContainer);
@@ -46,8 +46,8 @@ class RTileSetAtlasSourceEditor : public HBoxContainer {
 public:
 	// A class to store which tiles are selected.
 	struct TileSelection {
-		Vector2i tile = TileSetSource::INVALID_ATLAS_COORDS;
-		int alternative = TileSetSource::INVALID_TILE_ALTERNATIVE;
+		Vector2i tile = RTileSetSource::INVALID_ATLAS_COORDS;
+		int alternative = RTileSetSource::INVALID_TILE_ALTERNATIVE;
 
 		bool operator<(const TileSelection &p_other) const {
 			if (tile == p_other.tile) {
@@ -59,13 +59,13 @@ public:
 	};
 
 	// -- Proxy object for an atlas source, needed by the inspector --
-	class TileSetAtlasSourceProxyObject : public Object {
-		GDCLASS(TileSetAtlasSourceProxyObject, Object);
+	class RTileSetAtlasSourceProxyObject : public Object {
+		GDCLASS(RTileSetAtlasSourceProxyObject, Object);
 
 	private:
-		Ref<TileSet> tile_set;
-		TileSetAtlasSource *tile_set_atlas_source = nullptr;
-		int source_id = TileSet::INVALID_SOURCE;
+		Ref<RTileSet> tile_set;
+		RTileSetAtlasSource *tile_set_atlas_source = nullptr;
+		int source_id = RTileSet::INVALID_SOURCE;
 
 	protected:
 		bool _set(const StringName &p_name, const Variant &p_value);
@@ -77,8 +77,8 @@ public:
 		void set_id(int p_id);
 		int get_id();
 
-		void edit(Ref<TileSet> p_tile_set, TileSetAtlasSource *p_tile_set_atlas_source, int p_source_id);
-		TileSetAtlasSource *get_edited() { return tile_set_atlas_source; };
+		void edit(Ref<RTileSet> p_tile_set, RTileSetAtlasSource *p_tile_set_atlas_source, int p_source_id);
+		RTileSetAtlasSource *get_edited() { return tile_set_atlas_source; };
 	};
 
 	// -- Proxy object for a tile, needed by the inspector --
@@ -88,7 +88,7 @@ public:
 	private:
 		RTileSetAtlasSourceEditor *tiles_set_atlas_source_editor;
 
-		TileSetAtlasSource *tile_set_atlas_source = nullptr;
+		RTileSetAtlasSource *tile_set_atlas_source = nullptr;
 		Set<TileSelection> tiles = Set<TileSelection>();
 
 	protected:
@@ -99,11 +99,11 @@ public:
 		static void _bind_methods();
 
 	public:
-		TileSetAtlasSource *get_edited_tile_set_atlas_source() const { return tile_set_atlas_source; };
+		RTileSetAtlasSource *get_edited_tile_set_atlas_source() const { return tile_set_atlas_source; };
 		Set<TileSelection> get_edited_tiles() const { return tiles; };
 
 		// Update the proxyed object.
-		void edit(TileSetAtlasSource *p_tile_set_atlas_source, Set<TileSelection> p_tiles = Set<TileSelection>());
+		void edit(RTileSetAtlasSource *p_tile_set_atlas_source, Set<TileSelection> p_tiles = Set<TileSelection>());
 
 		AtlasTileProxyObject(RTileSetAtlasSourceEditor *p_tiles_set_atlas_source_editor) {
 			tiles_set_atlas_source_editor = p_tiles_set_atlas_source_editor;
@@ -111,9 +111,9 @@ public:
 	};
 
 private:
-	Ref<TileSet> tile_set;
-	TileSetAtlasSource *tile_set_atlas_source = nullptr;
-	int tile_set_atlas_source_id = TileSet::INVALID_SOURCE;
+	Ref<RTileSet> tile_set;
+	RTileSetAtlasSource *tile_set_atlas_source = nullptr;
+	int tile_set_atlas_source_id = RTileSet::INVALID_SOURCE;
 
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
@@ -143,7 +143,7 @@ private:
 	String selected_property;
 	void _inspector_property_selected(String p_property);
 
-	TileSetAtlasSourceProxyObject *atlas_source_proxy_object;
+	RTileSetAtlasSourceProxyObject *atlas_source_proxy_object;
 	Label *atlas_source_inspector_label;
 	EditorInspector *atlas_source_inspector;
 
@@ -186,7 +186,7 @@ private:
 	Set<Vector2i> drag_modified_tiles;
 	void _end_dragging();
 
-	Map<Vector2i, List<const PropertyInfo *>> _group_properties_per_tiles(const List<PropertyInfo> &r_list, const TileSetAtlasSource *p_atlas);
+	Map<Vector2i, List<const PropertyInfo *>> _group_properties_per_tiles(const List<PropertyInfo> &r_list, const RTileSetAtlasSource *p_atlas);
 
 	// Popup functions.
 	enum MenuOptions {
@@ -198,7 +198,7 @@ private:
 		ADVANCED_AUTO_REMOVE_TILES,
 	};
 	Vector2i menu_option_coords;
-	int menu_option_alternative = TileSetSource::INVALID_TILE_ALTERNATIVE;
+	int menu_option_alternative = RTileSetSource::INVALID_TILE_ALTERNATIVE;
 	void _menu_option(int p_option);
 
 	// Tool buttons.
@@ -222,7 +222,7 @@ private:
 	Array _get_selection_as_array();
 
 	// A control on the tile atlas to draw and handle input events.
-	Vector2i hovered_base_tile_coords = TileSetSource::INVALID_ATLAS_COORDS;
+	Vector2i hovered_base_tile_coords = RTileSetSource::INVALID_ATLAS_COORDS;
 
 	PopupMenu *base_tile_popup_menu;
 	PopupMenu *empty_base_tile_popup_menu;
@@ -237,7 +237,7 @@ private:
 	void _tile_atlas_view_transform_changed();
 
 	// A control over the alternative tiles.
-	Vector3i hovered_alternative_tile_coords = Vector3i(TileSetSource::INVALID_ATLAS_COORDS.x, TileSetSource::INVALID_ATLAS_COORDS.y, TileSetSource::INVALID_TILE_ALTERNATIVE);
+	Vector3i hovered_alternative_tile_coords = Vector3i(RTileSetSource::INVALID_ATLAS_COORDS.x, RTileSetSource::INVALID_ATLAS_COORDS.y, RTileSetSource::INVALID_TILE_ALTERNATIVE);
 
 	PopupMenu *alternative_tile_popup_menu;
 	Control *alternative_tiles_control;
@@ -278,7 +278,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void edit(Ref<TileSet> p_tile_set, TileSetAtlasSource *p_tile_set_source, int p_source_id);
+	void edit(Ref<RTileSet> p_tile_set, RTileSetAtlasSource *p_tile_set_source, int p_source_id);
 	void init_source();
 
 	RTileSetAtlasSourceEditor();

@@ -36,7 +36,7 @@
 #include "core/os/thread.h"
 #include "core/typedefs.h"
 #include "editor/editor_node.h"
-#include "scene/2d/tile_map.h"
+#include "../rtile_map.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/tab_bar.h"
 
@@ -256,7 +256,7 @@ private:
 	Map<Vector2i, TileMapCell> drag_modified;
 
 	// Painting
-	Map<Vector2i, TileMapCell> _draw_terrains(const Map<Vector2i, TileSet::TerrainsPattern> &p_to_paint, int p_terrain_set) const;
+	Map<Vector2i, TileMapCell> _draw_terrains(const Map<Vector2i, RTileSet::TerrainsPattern> &p_to_paint, int p_terrain_set) const;
 	Map<Vector2i, TileMapCell> _draw_line(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
 	Map<Vector2i, TileMapCell> _draw_rect(Vector2i p_start_cell, Vector2i p_end_cell, bool p_erase);
 	Set<Vector2i> _get_cells_for_bucket_fill(Vector2i p_coords, bool p_contiguous);
@@ -264,7 +264,7 @@ private:
 	void _stop_dragging();
 
 	int selected_terrain_set = -1;
-	TileSet::TerrainsPattern selected_terrains_pattern;
+	RTileSet::TerrainsPattern selected_terrains_pattern;
 	void _update_selection();
 
 	// Bottom panel.
@@ -272,7 +272,7 @@ private:
 	ItemList *terrains_tile_list;
 
 	// Cache.
-	LocalVector<LocalVector<Set<TileSet::TerrainsPattern>>> per_terrain_terrains_patterns;
+	LocalVector<LocalVector<Set<RTileSet::TerrainsPattern>>> per_terrain_terrains_patterns;
 
 	// Update functions.
 	void _update_terrains_cache();
@@ -344,7 +344,7 @@ private:
 
 protected:
 	void _notification(int p_what);
-	void _draw_shape(Control *p_control, Rect2 p_region, TileSet::TileShape p_shape, TileSet::TileOffsetAxis p_offset_axis, Color p_color);
+	void _draw_shape(Control *p_control, Rect2 p_region, RTileSet::TileShape p_shape, RTileSet::TileOffsetAxis p_offset_axis, Color p_color);
 
 public:
 	bool forward_canvas_gui_input(const Ref<InputEvent> &p_event);

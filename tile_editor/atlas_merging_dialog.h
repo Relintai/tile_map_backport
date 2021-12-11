@@ -37,7 +37,7 @@
 #include "scene/gui/dialogs.h"
 #include "scene/gui/item_list.h"
 #include "scene/gui/texture_rect.h"
-#include "scene/resources/tile_set.h"
+#include "../rtile_set.h"
 
 class RAtlasMergingDialog : public ConfirmationDialog {
 	GDCLASS(RAtlasMergingDialog, ConfirmationDialog);
@@ -45,9 +45,9 @@ class RAtlasMergingDialog : public ConfirmationDialog {
 private:
 	int commited_actions_count = 0;
 	bool delete_original_atlases = true;
-	Ref<TileSetAtlasSource> merged;
+	Ref<RTileSetAtlasSource> merged;
 	LocalVector<Map<Vector2i, Vector2i>> merged_mapping;
-	Ref<TileSet> tile_set;
+	Ref<RTileSet> tile_set;
 
 	UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
 
@@ -65,7 +65,7 @@ private:
 
 	void _property_changed(const StringName &p_property, const Variant &p_value, const String &p_field, bool p_changing);
 
-	void _generate_merged(Vector<Ref<TileSetAtlasSource>> p_atlas_sources, int p_max_columns);
+	void _generate_merged(Vector<Ref<RTileSetAtlasSource>> p_atlas_sources, int p_max_columns);
 	void _update_texture();
 	void _merge_confirmed(String p_path);
 
@@ -78,7 +78,7 @@ protected:
 	bool _get(const StringName &p_name, Variant &r_ret) const;
 
 public:
-	void update_tile_set(Ref<TileSet> p_tile_set);
+	void update_tile_set(Ref<RTileSet> p_tile_set);
 
 	RAtlasMergingDialog();
 };

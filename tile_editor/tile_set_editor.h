@@ -33,7 +33,7 @@
 
 #include "atlas_merging_dialog.h"
 #include "scene/gui/box_container.h"
-#include "scene/resources/tile_set.h"
+#include "../rtile_set.h"
 #include "tile_proxies_manager_dialog.h"
 #include "tile_set_atlas_source_editor.h"
 #include "tile_set_scenes_collection_source_editor.h"
@@ -44,7 +44,7 @@ class RTileSetEditor : public VBoxContainer {
 	static RTileSetEditor *singleton;
 
 private:
-	Ref<TileSet> tile_set;
+	Ref<RTileSet> tile_set;
 	bool tile_set_changed_needs_update = false;
 	HSplitContainer *split_container;
 
