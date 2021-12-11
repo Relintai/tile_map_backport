@@ -171,11 +171,13 @@ PoolVector2Array RTileMapPattern::get_used_cells() const {
 	return a;
 }
 
-Vector2i RTileMapPattern::get_size() const {
-	return size;
+Vector2 RTileMapPattern::get_size() const {
+	return Vector2(size);
 }
 
-void RTileMapPattern::set_size(const Vector2i &p_size) {
+void RTileMapPattern::set_size(const Vector2 &p_sizev) {
+	const Vector2i &p_size = p_sizev;
+
 	for (const Map<Vector2i, RTileMapCell>::Element *E = pattern.front(); E; E = E->next()) {
 		Vector2i coords = E->key();
 		if (p_size.x <= coords.x || p_size.y <= coords.y) {
@@ -384,14 +386,14 @@ RTileSet::TileOffsetAxis RTileSet::get_tile_offset_axis() const {
 	return tile_offset_axis;
 }
 
-void RTileSet::set_tile_size(Size2i p_size) {
+void RTileSet::set_tile_size(Size2 p_size) {
 	ERR_FAIL_COND(p_size.x < 1 || p_size.y < 1);
 	tile_size = p_size;
 	terrain_bits_meshes_dirty = true;
 	tile_meshes_dirty = true;
 	emit_changed();
 }
-Size2i RTileSet::get_tile_size() const {
+Size2 RTileSet::get_tile_size() const {
 	return tile_size;
 }
 
@@ -1807,7 +1809,7 @@ void RTileSet::_source_changed() {
 	emit_changed();
 }
 
-Vector<Point2> RTileSet::_get_square_corner_or_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit) {
+Vector<Point2> RTileSet::_get_square_corner_or_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit) {
 	Rect2 bit_rect;
 	bit_rect.size = Vector2(p_size) / 3;
 	switch (p_bit) {
@@ -1850,7 +1852,7 @@ Vector<Point2> RTileSet::_get_square_corner_or_side_terrain_bit_polygon(Vector2i
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_square_corner_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit) {
+Vector<Point2> RTileSet::_get_square_corner_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit) {
 	Vector2 unit = Vector2(p_size) / 6.0;
 	Vector<Vector2> polygon;
 	switch (p_bit) {
@@ -1892,7 +1894,7 @@ Vector<Point2> RTileSet::_get_square_corner_terrain_bit_polygon(Vector2i p_size,
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_square_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit) {
+Vector<Point2> RTileSet::_get_square_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit) {
 	Vector2 unit = Vector2(p_size) / 6.0;
 	Vector<Vector2> polygon;
 	switch (p_bit) {
@@ -1926,7 +1928,7 @@ Vector<Point2> RTileSet::_get_square_side_terrain_bit_polygon(Vector2i p_size, R
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_isometric_corner_or_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit) {
+Vector<Point2> RTileSet::_get_isometric_corner_or_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit) {
 	Vector2 unit = Vector2(p_size) / 6.0;
 	Vector<Vector2> polygon;
 	switch (p_bit) {
@@ -1984,7 +1986,7 @@ Vector<Point2> RTileSet::_get_isometric_corner_or_side_terrain_bit_polygon(Vecto
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_isometric_corner_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit) {
+Vector<Point2> RTileSet::_get_isometric_corner_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit) {
 	Vector2 unit = Vector2(p_size) / 6.0;
 	Vector<Vector2> polygon;
 	switch (p_bit) {
@@ -2026,7 +2028,7 @@ Vector<Point2> RTileSet::_get_isometric_corner_terrain_bit_polygon(Vector2i p_si
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_isometric_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit) {
+Vector<Point2> RTileSet::_get_isometric_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit) {
 	Vector2 unit = Vector2(p_size) / 6.0;
 	Vector<Vector2> polygon;
 	switch (p_bit) {
@@ -2060,7 +2062,7 @@ Vector<Point2> RTileSet::_get_isometric_side_terrain_bit_polygon(Vector2i p_size
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_half_offset_corner_or_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis) {
+Vector<Point2> RTileSet::_get_half_offset_corner_or_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis) {
 	Vector<Vector2> point_list;
 	point_list.push_back(Vector2(3, (3.0 * (1.0 - p_overlap * 2.0)) / 2.0));
 	point_list.push_back(Vector2(3, 3.0 * (1.0 - p_overlap * 2.0)));
@@ -2220,7 +2222,7 @@ Vector<Point2> RTileSet::_get_half_offset_corner_or_side_terrain_bit_polygon(Vec
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_half_offset_corner_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis) {
+Vector<Point2> RTileSet::_get_half_offset_corner_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis) {
 	Vector<Vector2> point_list;
 	point_list.push_back(Vector2(3, 0));
 	point_list.push_back(Vector2(3, 3.0 * (1.0 - p_overlap * 2.0)));
@@ -2326,7 +2328,7 @@ Vector<Point2> RTileSet::_get_half_offset_corner_terrain_bit_polygon(Vector2i p_
 	return polygon;
 }
 
-Vector<Point2> RTileSet::_get_half_offset_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis) {
+Vector<Point2> RTileSet::_get_half_offset_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis) {
 	Vector<Vector2> point_list;
 	point_list.push_back(Vector2(3, 3.0 * (1.0 - p_overlap * 2.0)));
 	point_list.push_back(Vector2(0, 3));
@@ -3636,7 +3638,7 @@ Ref<Texture> RTileSetAtlasSource::get_texture() const {
 	return texture;
 }
 
-void RTileSetAtlasSource::set_margins(Vector2i p_margins) {
+void RTileSetAtlasSource::set_margins(Vector2 p_margins) {
 	if (p_margins.x < 0 || p_margins.y < 0) {
 		WARN_PRINT("Atlas source margins should be positive.");
 		margins = Vector2i(MAX(0, p_margins.x), MAX(0, p_margins.y));
@@ -3649,11 +3651,11 @@ void RTileSetAtlasSource::set_margins(Vector2i p_margins) {
 	emit_changed();
 }
 
-Vector2i RTileSetAtlasSource::get_margins() const {
+Vector2 RTileSetAtlasSource::get_margins() const {
 	return margins;
 }
 
-void RTileSetAtlasSource::set_separation(Vector2i p_separation) {
+void RTileSetAtlasSource::set_separation(Vector2 p_separation) {
 	if (p_separation.x < 0 || p_separation.y < 0) {
 		WARN_PRINT("Atlas source separation should be positive.");
 		separation = Vector2i(MAX(0, p_separation.x), MAX(0, p_separation.y));
@@ -3666,11 +3668,11 @@ void RTileSetAtlasSource::set_separation(Vector2i p_separation) {
 	emit_changed();
 }
 
-Vector2i RTileSetAtlasSource::get_separation() const {
+Vector2 RTileSetAtlasSource::get_separation() const {
 	return separation;
 }
 
-void RTileSetAtlasSource::set_texture_region_size(Vector2i p_tile_size) {
+void RTileSetAtlasSource::set_texture_region_size(Vector2 p_tile_size) {
 	if (p_tile_size.x <= 0 || p_tile_size.y <= 0) {
 		WARN_PRINT("Atlas source tile_size should be strictly positive.");
 		texture_region_size = Vector2i(MAX(1, p_tile_size.x), MAX(1, p_tile_size.y));
@@ -3683,7 +3685,7 @@ void RTileSetAtlasSource::set_texture_region_size(Vector2i p_tile_size) {
 	emit_changed();
 }
 
-Vector2i RTileSetAtlasSource::get_texture_region_size() const {
+Vector2 RTileSetAtlasSource::get_texture_region_size() const {
 	return texture_region_size;
 }
 
@@ -3700,7 +3702,7 @@ bool RTileSetAtlasSource::get_use_texture_padding() const {
 	return use_texture_padding;
 }
 
-Vector2i RTileSetAtlasSource::get_atlas_grid_size() const {
+Vector2 RTileSetAtlasSource::get_atlas_grid_size() const {
 	Ref<Texture> texture = get_texture();
 	if (!texture.is_valid()) {
 		return Vector2i();
@@ -3805,7 +3807,7 @@ bool RTileSetAtlasSource::_get(const StringName &p_name, Variant &r_ret) const {
 			if (components.size() >= 2) {
 				// Properties.
 				if (components[1] == "size_in_atlas") {
-					r_ret = tiles[coords].size_in_atlas;
+					r_ret = Vector2(tiles[coords].size_in_atlas);
 					return true;
 				} else if (components[1] == "next_alternative_id") {
 					r_ret = tiles[coords].next_alternative_id;
@@ -3937,7 +3939,7 @@ void RTileSetAtlasSource::_get_property_list(List<PropertyInfo> *p_list) const {
 	}
 }
 
-void RTileSetAtlasSource::create_tile(const Vector2i p_atlas_coords, const Vector2i p_size) {
+void RTileSetAtlasSource::create_tile(const Vector2 p_atlas_coords, const Vector2 p_size) {
 	// Create a tile if it does not exists.
 	ERR_FAIL_COND(p_atlas_coords.x < 0 || p_atlas_coords.y < 0);
 	ERR_FAIL_COND(p_size.x <= 0 || p_size.y <= 0);
@@ -3967,7 +3969,7 @@ void RTileSetAtlasSource::create_tile(const Vector2i p_atlas_coords, const Vecto
 	emit_signal("changed");
 }
 
-void RTileSetAtlasSource::remove_tile(Vector2i p_atlas_coords) {
+void RTileSetAtlasSource::remove_tile(Vector2 p_atlas_coords) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 
 	// Remove all covered positions from the mapping cache
@@ -3988,11 +3990,15 @@ void RTileSetAtlasSource::remove_tile(Vector2i p_atlas_coords) {
 	emit_signal("changed");
 }
 
-bool RTileSetAtlasSource::has_tile(Vector2i p_atlas_coords) const {
+bool RTileSetAtlasSource::has_tile(Vector2 p_atlas_coordsv) const {
+	Vector2i p_atlas_coords = p_atlas_coordsv;
+
 	return tiles.has(p_atlas_coords);
 }
 
-Vector2i RTileSetAtlasSource::get_tile_at_coords(Vector2i p_atlas_coords) const {
+Vector2 RTileSetAtlasSource::get_tile_at_coords(Vector2 p_atlas_coordsv) const {
+	Vector2i p_atlas_coords = p_atlas_coordsv;
+
 	if (!_coords_mapping_cache.has(p_atlas_coords)) {
 		return INVALID_ATLAS_COORDS;
 	}
@@ -4000,7 +4006,7 @@ Vector2i RTileSetAtlasSource::get_tile_at_coords(Vector2i p_atlas_coords) const 
 	return _coords_mapping_cache[p_atlas_coords];
 }
 
-void RTileSetAtlasSource::set_tile_animation_columns(const Vector2i p_atlas_coords, int p_frame_columns) {
+void RTileSetAtlasSource::set_tile_animation_columns(const Vector2 p_atlas_coords, int p_frame_columns) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_COND(p_frame_columns < 0);
 
@@ -4018,12 +4024,12 @@ void RTileSetAtlasSource::set_tile_animation_columns(const Vector2i p_atlas_coor
 	emit_signal("changed");
 }
 
-int RTileSetAtlasSource::get_tile_animation_columns(const Vector2i p_atlas_coords) const {
+int RTileSetAtlasSource::get_tile_animation_columns(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), 1, vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	return tiles[p_atlas_coords].animation_columns;
 }
 
-void RTileSetAtlasSource::set_tile_animation_separation(const Vector2i p_atlas_coords, const Vector2i p_separation) {
+void RTileSetAtlasSource::set_tile_animation_separation(const Vector2 p_atlas_coords, const Vector2 p_separation) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_COND(p_separation.x < 0 || p_separation.y < 0);
 
@@ -4041,12 +4047,12 @@ void RTileSetAtlasSource::set_tile_animation_separation(const Vector2i p_atlas_c
 	emit_signal("changed");
 }
 
-Vector2i RTileSetAtlasSource::get_tile_animation_separation(const Vector2i p_atlas_coords) const {
+Vector2 RTileSetAtlasSource::get_tile_animation_separation(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Vector2i(), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	return tiles[p_atlas_coords].animation_separation;
 }
 
-void RTileSetAtlasSource::set_tile_animation_speed(const Vector2i p_atlas_coords, real_t p_speed) {
+void RTileSetAtlasSource::set_tile_animation_speed(const Vector2 p_atlas_coords, real_t p_speed) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_COND(p_speed <= 0);
 
@@ -4055,12 +4061,12 @@ void RTileSetAtlasSource::set_tile_animation_speed(const Vector2i p_atlas_coords
 	emit_signal("changed");
 }
 
-real_t RTileSetAtlasSource::get_tile_animation_speed(const Vector2i p_atlas_coords) const {
+real_t RTileSetAtlasSource::get_tile_animation_speed(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), 1.0, vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	return tiles[p_atlas_coords].animation_speed;
 }
 
-void RTileSetAtlasSource::set_tile_animation_frames_count(const Vector2i p_atlas_coords, int p_frames_count) {
+void RTileSetAtlasSource::set_tile_animation_frames_count(const Vector2 p_atlas_coords, int p_frames_count) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_COND(p_frames_count < 1);
 
@@ -4088,12 +4094,12 @@ void RTileSetAtlasSource::set_tile_animation_frames_count(const Vector2i p_atlas
 	emit_signal("changed");
 }
 
-int RTileSetAtlasSource::get_tile_animation_frames_count(const Vector2i p_atlas_coords) const {
+int RTileSetAtlasSource::get_tile_animation_frames_count(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), 1, vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	return tiles[p_atlas_coords].animation_frames_durations.size();
 }
 
-void RTileSetAtlasSource::set_tile_animation_frame_duration(const Vector2i p_atlas_coords, int p_frame_index, real_t p_duration) {
+void RTileSetAtlasSource::set_tile_animation_frame_duration(const Vector2 p_atlas_coords, int p_frame_index, real_t p_duration) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_INDEX(p_frame_index, (int)tiles[p_atlas_coords].animation_frames_durations.size());
 	ERR_FAIL_COND(p_duration <= 0.0);
@@ -4103,13 +4109,13 @@ void RTileSetAtlasSource::set_tile_animation_frame_duration(const Vector2i p_atl
 	emit_signal("changed");
 }
 
-real_t RTileSetAtlasSource::get_tile_animation_frame_duration(const Vector2i p_atlas_coords, int p_frame_index) const {
+real_t RTileSetAtlasSource::get_tile_animation_frame_duration(const Vector2 p_atlas_coords, int p_frame_index) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), 1, vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_INDEX_V(p_frame_index, (int)tiles[p_atlas_coords].animation_frames_durations.size(), 0.0);
 	return tiles[p_atlas_coords].animation_frames_durations[p_frame_index];
 }
 
-real_t RTileSetAtlasSource::get_tile_animation_total_duration(const Vector2i p_atlas_coords) const {
+real_t RTileSetAtlasSource::get_tile_animation_total_duration(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), 1, vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 
 	real_t sum = 0.0;
@@ -4119,8 +4125,8 @@ real_t RTileSetAtlasSource::get_tile_animation_total_duration(const Vector2i p_a
 	return sum;
 }
 
-Vector2i RTileSetAtlasSource::get_tile_size_in_atlas(Vector2i p_atlas_coords) const {
-	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Vector2i(-1, -1), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
+Vector2 RTileSetAtlasSource::get_tile_size_in_atlas(Vector2 p_atlas_coords) const {
+	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Vector2(-1, -1), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 
 	return tiles[p_atlas_coords].size_in_atlas;
 }
@@ -4129,12 +4135,12 @@ int RTileSetAtlasSource::get_tiles_count() const {
 	return tiles_ids.size();
 }
 
-Vector2i RTileSetAtlasSource::get_tile_id(int p_index) const {
-	ERR_FAIL_INDEX_V(p_index, tiles_ids.size(), RTileSetSource::INVALID_ATLAS_COORDS);
-	return tiles_ids[p_index];
+Vector2 RTileSetAtlasSource::get_tile_id(int p_index) const {
+	ERR_FAIL_INDEX_V(p_index, tiles_ids.size(), RTileSetSource::INVALID_ATLAS_COORDSV);
+	return Vector2(tiles_ids[p_index]);
 }
 
-bool RTileSetAtlasSource::has_room_for_tile(Vector2i p_atlas_coords, Vector2i p_size, int p_animation_columns, Vector2i p_animation_separation, int p_frames_count, Vector2i p_ignored_tile) const {
+bool RTileSetAtlasSource::has_room_for_tile(Vector2 p_atlas_coords, Vector2 p_size, int p_animation_columns, Vector2 p_animation_separation, int p_frames_count, Vector2 p_ignored_tile) const {
 	if (p_atlas_coords.x < 0 || p_atlas_coords.y < 0) {
 		return false;
 	}
@@ -4159,7 +4165,7 @@ bool RTileSetAtlasSource::has_room_for_tile(Vector2i p_atlas_coords, Vector2i p_
 	return true;
 }
 
-Vector<Vector2> RTileSetAtlasSource::get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2i p_margins, Vector2i p_separation, Vector2i p_texture_region_size) {
+Vector<Vector2> RTileSetAtlasSource::get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2 p_margins, Vector2 p_separation, Vector2 p_texture_region_size) {
 	ERR_FAIL_COND_V(p_margins.x < 0 || p_margins.y < 0, Vector<Vector2>());
 	ERR_FAIL_COND_V(p_separation.x < 0 || p_separation.y < 0, Vector<Vector2>());
 	ERR_FAIL_COND_V(p_texture_region_size.x <= 0 || p_texture_region_size.y <= 0, Vector<Vector2>());
@@ -4190,8 +4196,8 @@ Vector<Vector2> RTileSetAtlasSource::get_tiles_to_be_removed_on_change(Ref<Textu
 	return output;
 }
 
-Rect2i RTileSetAtlasSource::get_tile_texture_region(Vector2i p_atlas_coords, int p_frame) const {
-	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Rect2i(), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
+Rect2 RTileSetAtlasSource::get_tile_texture_region(Vector2 p_atlas_coords, int p_frame) const {
+	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Rect2(), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_INDEX_V(p_frame, (int)tiles[p_atlas_coords].animation_frames_durations.size(), Rect2i());
 
 	const TileAlternativesData &tad = tiles[p_atlas_coords];
@@ -4205,8 +4211,8 @@ Rect2i RTileSetAtlasSource::get_tile_texture_region(Vector2i p_atlas_coords, int
 	return Rect2(origin, region_size);
 }
 
-Vector2i RTileSetAtlasSource::get_tile_effective_texture_offset(Vector2i p_atlas_coords, int p_alternative_tile) const {
-	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Vector2i(), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
+Vector2 RTileSetAtlasSource::get_tile_effective_texture_offset(Vector2 p_atlas_coords, int p_alternative_tile) const {
+	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Vector2(), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	ERR_FAIL_COND_V_MSG(!has_alternative_tile(p_atlas_coords, p_alternative_tile), Vector2i(), vformat("TileSetAtlasSource has no alternative tile with id %d at %s.", p_alternative_tile, String(p_atlas_coords)));
 	ERR_FAIL_COND_V(!tile_set, Vector2i());
 
@@ -4229,8 +4235,8 @@ Ref<Texture> RTileSetAtlasSource::get_runtime_texture() const {
 	}
 }
 
-Rect2i RTileSetAtlasSource::get_runtime_tile_texture_region(Vector2i p_atlas_coords, int p_frame) const {
-	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Rect2i(), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
+Rect2 RTileSetAtlasSource::get_runtime_tile_texture_region(Vector2 p_atlas_coords, int p_frame) const {
+	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), Rect2(), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_INDEX_V(p_frame, (int)tiles[p_atlas_coords].animation_frames_durations.size(), Rect2i());
 
 	Rect2i src_rect = get_tile_texture_region(p_atlas_coords, p_frame);
@@ -4239,13 +4245,15 @@ Rect2i RTileSetAtlasSource::get_runtime_tile_texture_region(Vector2i p_atlas_coo
 		Vector2i frame_coords = p_atlas_coords + (tad.size_in_atlas + tad.animation_separation) * ((tad.animation_columns > 0) ? Vector2i(p_frame % tad.animation_columns, p_frame / tad.animation_columns) : Vector2i(p_frame, 0));
 		Vector2i base_pos = frame_coords * (texture_region_size + Vector2i(2, 2)) + Vector2i(1, 1);
 
-		return Rect2i(base_pos, src_rect.size);
+		return Rect2(base_pos, src_rect.size);
 	} else {
 		return src_rect;
 	}
 }
 
-void RTileSetAtlasSource::move_tile_in_atlas(Vector2i p_atlas_coords, Vector2i p_new_atlas_coords, Vector2i p_new_size) {
+void RTileSetAtlasSource::move_tile_in_atlas(Vector2 p_atlas_coords, Vector2 p_new_atlas_coords, Vector2 p_new_sizev) {
+	Vector2i p_new_size = p_new_sizev;
+
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 
 	TileAlternativesData &tad = tiles[p_atlas_coords];
@@ -4280,7 +4288,7 @@ void RTileSetAtlasSource::move_tile_in_atlas(Vector2i p_atlas_coords, Vector2i p
 	emit_signal("changed");
 }
 
-int RTileSetAtlasSource::create_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_id_override) {
+int RTileSetAtlasSource::create_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_id_override) {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE, vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_COND_V_MSG(p_alternative_id_override >= 0 && tiles[p_atlas_coords].alternatives.has(p_alternative_id_override), RTileSetSource::INVALID_TILE_ALTERNATIVE, vformat("Cannot create alternative tile. Another alternative exists with id %d.", p_alternative_id_override));
 
@@ -4299,7 +4307,7 @@ int RTileSetAtlasSource::create_alternative_tile(const Vector2i p_atlas_coords, 
 	return new_alternative_id;
 }
 
-void RTileSetAtlasSource::remove_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) {
+void RTileSetAtlasSource::remove_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_COND_MSG(!tiles[p_atlas_coords].alternatives.has(p_alternative_tile), vformat("TileSetAtlasSource has no alternative with id %d for tile coords %s.", p_alternative_tile, String(p_atlas_coords)));
 	ERR_FAIL_COND_MSG(p_alternative_tile == 0, "Cannot remove the alternative with id 0, the base tile alternative cannot be removed.");
@@ -4312,7 +4320,7 @@ void RTileSetAtlasSource::remove_alternative_tile(const Vector2i p_atlas_coords,
 	emit_signal("changed");
 }
 
-void RTileSetAtlasSource::set_alternative_tile_id(const Vector2i p_atlas_coords, int p_alternative_tile, int p_new_id) {
+void RTileSetAtlasSource::set_alternative_tile_id(const Vector2 p_atlas_coords, int p_alternative_tile, int p_new_id) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_COND_MSG(!tiles[p_atlas_coords].alternatives.has(p_alternative_tile), vformat("TileSetAtlasSource has no alternative with id %d for tile coords %s.", p_alternative_tile, String(p_atlas_coords)));
 	ERR_FAIL_COND_MSG(p_alternative_tile == 0, "Cannot change the alternative with id 0, the base tile alternative cannot be modified.");
@@ -4329,29 +4337,29 @@ void RTileSetAtlasSource::set_alternative_tile_id(const Vector2i p_atlas_coords,
 	emit_signal("changed");
 }
 
-bool RTileSetAtlasSource::has_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) const {
+bool RTileSetAtlasSource::has_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), false, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
 	return tiles[p_atlas_coords].alternatives.has(p_alternative_tile);
 }
 
-int RTileSetAtlasSource::get_next_alternative_tile_id(const Vector2i p_atlas_coords) const {
+int RTileSetAtlasSource::get_next_alternative_tile_id(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
 	return tiles[p_atlas_coords].next_alternative_id;
 }
 
-int RTileSetAtlasSource::get_alternative_tiles_count(const Vector2i p_atlas_coords) const {
+int RTileSetAtlasSource::get_alternative_tiles_count(const Vector2 p_atlas_coords) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), -1, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
 	return tiles[p_atlas_coords].alternatives_ids.size();
 }
 
-int RTileSetAtlasSource::get_alternative_tile_id(const Vector2i p_atlas_coords, int p_index) const {
+int RTileSetAtlasSource::get_alternative_tile_id(const Vector2 p_atlas_coords, int p_index) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), RTileSetSource::INVALID_TILE_ALTERNATIVE, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_INDEX_V(p_index, tiles[p_atlas_coords].alternatives_ids.size(), RTileSetSource::INVALID_TILE_ALTERNATIVE);
 
 	return tiles[p_atlas_coords].alternatives_ids[p_index];
 }
 
-Object *RTileSetAtlasSource::get_tile_data(const Vector2i p_atlas_coords, int p_alternative_tile) const {
+Object *RTileSetAtlasSource::get_tile_data(const Vector2 p_atlas_coords, int p_alternative_tile) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), nullptr, vformat("The TileSetAtlasSource atlas has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_COND_V_MSG(!tiles[p_atlas_coords].alternatives.has(p_alternative_tile), nullptr, vformat("TileSetAtlasSource has no alternative with id %d for tile coords %s.", p_alternative_tile, String(p_atlas_coords)));
 
@@ -4427,21 +4435,21 @@ RTileSetAtlasSource::~RTileSetAtlasSource() {
 	}
 }
 
-RTileData *RTileSetAtlasSource::_get_atlas_tile_data(Vector2i p_atlas_coords, int p_alternative_tile) {
+RTileData *RTileSetAtlasSource::_get_atlas_tile_data(Vector2 p_atlas_coords, int p_alternative_tile) {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), nullptr, vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_COND_V_MSG(!tiles[p_atlas_coords].alternatives.has(p_alternative_tile), nullptr, vformat("TileSetAtlasSource has no alternative with id %d for tile coords %s.", p_alternative_tile, String(p_atlas_coords)));
 
 	return tiles[p_atlas_coords].alternatives[p_alternative_tile];
 }
 
-const RTileData *RTileSetAtlasSource::_get_atlas_tile_data(Vector2i p_atlas_coords, int p_alternative_tile) const {
+const RTileData *RTileSetAtlasSource::_get_atlas_tile_data(Vector2 p_atlas_coords, int p_alternative_tile) const {
 	ERR_FAIL_COND_V_MSG(!tiles.has(p_atlas_coords), nullptr, vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 	ERR_FAIL_COND_V_MSG(!tiles[p_atlas_coords].alternatives.has(p_alternative_tile), nullptr, vformat("TileSetAtlasSource has no alternative with id %d for tile coords %s.", p_alternative_tile, String(p_atlas_coords)));
 
 	return tiles[p_atlas_coords].alternatives[p_alternative_tile];
 }
 
-void RTileSetAtlasSource::_compute_next_alternative_id(const Vector2i p_atlas_coords) {
+void RTileSetAtlasSource::_compute_next_alternative_id(const Vector2 p_atlas_coords) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", String(p_atlas_coords)));
 
 	while (tiles[p_atlas_coords].alternatives.has(tiles[p_atlas_coords].next_alternative_id)) {
@@ -4449,7 +4457,7 @@ void RTileSetAtlasSource::_compute_next_alternative_id(const Vector2i p_atlas_co
 	};
 }
 
-void RTileSetAtlasSource::_clear_coords_mapping_cache(Vector2i p_atlas_coords) {
+void RTileSetAtlasSource::_clear_coords_mapping_cache(Vector2 p_atlas_coords) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 	TileAlternativesData &tad = tiles[p_atlas_coords];
 	for (int frame = 0; frame < (int)tad.animation_frames_durations.size(); frame++) {
@@ -4470,7 +4478,7 @@ void RTileSetAtlasSource::_clear_coords_mapping_cache(Vector2i p_atlas_coords) {
 	}
 }
 
-void RTileSetAtlasSource::_create_coords_mapping_cache(Vector2i p_atlas_coords) {
+void RTileSetAtlasSource::_create_coords_mapping_cache(Vector2 p_atlas_coords) {
 	ERR_FAIL_COND_MSG(!tiles.has(p_atlas_coords), vformat("TileSetAtlasSource has no tile at %s.", Vector2(p_atlas_coords)));
 
 	TileAlternativesData &tad = tiles[p_atlas_coords];
@@ -4577,27 +4585,27 @@ int RTileSetScenesCollectionSource::get_tiles_count() const {
 	return 1;
 }
 
-Vector2i RTileSetScenesCollectionSource::get_tile_id(int p_tile_index) const {
+Vector2 RTileSetScenesCollectionSource::get_tile_id(int p_tile_index) const {
 	ERR_FAIL_COND_V(p_tile_index != 0, RTileSetSource::INVALID_ATLAS_COORDS);
-	return Vector2i();
+	return Vector2();
 }
 
-bool RTileSetScenesCollectionSource::has_tile(Vector2i p_atlas_coords) const {
-	return p_atlas_coords == Vector2i();
+bool RTileSetScenesCollectionSource::has_tile(Vector2 p_atlas_coords) const {
+	return p_atlas_coords == Vector2();
 }
 
-int RTileSetScenesCollectionSource::get_alternative_tiles_count(const Vector2i p_atlas_coords) const {
+int RTileSetScenesCollectionSource::get_alternative_tiles_count(const Vector2 p_atlas_coords) const {
 	return scenes_ids.size();
 }
 
-int RTileSetScenesCollectionSource::get_alternative_tile_id(const Vector2i p_atlas_coords, int p_index) const {
+int RTileSetScenesCollectionSource::get_alternative_tile_id(const Vector2 p_atlas_coords, int p_index) const {
 	ERR_FAIL_COND_V(p_atlas_coords != Vector2i(), RTileSetSource::INVALID_TILE_ALTERNATIVE);
 	ERR_FAIL_INDEX_V(p_index, scenes_ids.size(), RTileSetSource::INVALID_TILE_ALTERNATIVE);
 
 	return scenes_ids[p_index];
 }
 
-bool RTileSetScenesCollectionSource::has_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) const {
+bool RTileSetScenesCollectionSource::has_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile) const {
 	ERR_FAIL_COND_V(p_atlas_coords != Vector2i(), false);
 	return scenes.has(p_alternative_tile);
 }
@@ -5017,12 +5025,12 @@ bool RTileData::get_transpose() const {
 	return transpose;
 }
 
-void RTileData::set_texture_offset(Vector2i p_texture_offset) {
+void RTileData::set_texture_offset(Vector2 p_texture_offset) {
 	tex_offset = p_texture_offset;
 	emit_signal("changed");
 }
 
-Vector2i RTileData::get_texture_offset() const {
+Vector2 RTileData::get_texture_offset() const {
 	return tex_offset;
 }
 

@@ -79,11 +79,11 @@ union RTileMapCell {
 		alternative_tile = p_alternative_tile;
 	}
 
-	Vector2i get_atlas_coords() const {
-		return Vector2i(coord_x, coord_y);
+	Vector2 get_atlas_coords() const {
+		return Vector2(coord_x, coord_y);
 	}
 
-	void set_atlas_coords(const Vector2i &r_coords) {
+	void set_atlas_coords(const Vector2 &r_coords) {
 		coord_x = r_coords.x;
 		coord_y = r_coords.y;
 	}
@@ -135,8 +135,8 @@ public:
 
 	PoolVector2Array get_used_cells() const;
 
-	Vector2i get_size() const;
-	void set_size(const Vector2i &p_size);
+	Vector2 get_size() const;
+	void set_size(const Vector2 &p_size);
 	bool is_empty() const;
 
 	void clear();
@@ -366,17 +366,17 @@ private:
 	Map<Array, Array> alternative_level_proxies;
 
 	// Helpers
-	Vector<Point2> _get_square_corner_or_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit);
-	Vector<Point2> _get_square_corner_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit);
-	Vector<Point2> _get_square_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit);
+	Vector<Point2> _get_square_corner_or_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit);
+	Vector<Point2> _get_square_corner_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit);
+	Vector<Point2> _get_square_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit);
 
-	Vector<Point2> _get_isometric_corner_or_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit);
-	Vector<Point2> _get_isometric_corner_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit);
-	Vector<Point2> _get_isometric_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit);
+	Vector<Point2> _get_isometric_corner_or_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit);
+	Vector<Point2> _get_isometric_corner_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit);
+	Vector<Point2> _get_isometric_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit);
 
-	Vector<Point2> _get_half_offset_corner_or_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis);
-	Vector<Point2> _get_half_offset_corner_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis);
-	Vector<Point2> _get_half_offset_side_terrain_bit_polygon(Vector2i p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis);
+	Vector<Point2> _get_half_offset_corner_or_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis);
+	Vector<Point2> _get_half_offset_corner_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis);
+	Vector<Point2> _get_half_offset_side_terrain_bit_polygon(Vector2 p_size, RTileSet::CellNeighbor p_bit, float p_overlap, RTileSet::TileOffsetAxis p_offset_axis);
 
 protected:
 	static void _bind_methods();
@@ -394,8 +394,8 @@ public:
 	TileLayout get_tile_layout() const;
 	void set_tile_offset_axis(TileOffsetAxis p_alignment);
 	TileOffsetAxis get_tile_offset_axis() const;
-	void set_tile_size(Size2i p_size);
-	Size2i get_tile_size() const;
+	void set_tile_size(Size2 p_size);
+	Size2 get_tile_size() const;
 
 	// -- Sources management --
 	int get_next_source_id() const;
@@ -564,13 +564,13 @@ public:
 
 	// Tiles.
 	virtual int get_tiles_count() const = 0;
-	virtual Vector2i get_tile_id(int tile_index) const = 0;
-	virtual bool has_tile(Vector2i p_atlas_coords) const = 0;
+	virtual Vector2 get_tile_id(int tile_index) const = 0;
+	virtual bool has_tile(Vector2 p_atlas_coords) const = 0;
 
 	// Alternative tiles.
-	virtual int get_alternative_tiles_count(const Vector2i p_atlas_coords) const = 0;
-	virtual int get_alternative_tile_id(const Vector2i p_atlas_coords, int p_index) const = 0;
-	virtual bool has_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) const = 0;
+	virtual int get_alternative_tiles_count(const Vector2 p_atlas_coords) const = 0;
+	virtual int get_alternative_tile_id(const Vector2 p_atlas_coords, int p_index) const = 0;
+	virtual bool has_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile) const = 0;
 };
 
 class RTileSetAtlasSource : public RTileSetSource {
@@ -602,13 +602,13 @@ private:
 	Vector<Vector2i> tiles_ids;
 	Map<Vector2i, Vector2i> _coords_mapping_cache; // Maps any coordinate to the including tile
 
-	RTileData *_get_atlas_tile_data(Vector2i p_atlas_coords, int p_alternative_tile);
-	const RTileData *_get_atlas_tile_data(Vector2i p_atlas_coords, int p_alternative_tile) const;
+	RTileData *_get_atlas_tile_data(Vector2 p_atlas_coords, int p_alternative_tile);
+	const RTileData *_get_atlas_tile_data(Vector2 p_atlas_coords, int p_alternative_tile) const;
 
-	void _compute_next_alternative_id(const Vector2i p_atlas_coords);
+	void _compute_next_alternative_id(const Vector2 p_atlas_coords);
 
-	void _clear_coords_mapping_cache(Vector2i p_atlas_coords);
-	void _create_coords_mapping_cache(Vector2i p_atlas_coords);
+	void _clear_coords_mapping_cache(Vector2 p_atlas_coords);
+	void _create_coords_mapping_cache(Vector2 p_atlas_coords);
 
 	void _clear_tiles_outside_texture();
 
@@ -653,65 +653,65 @@ public:
 	// Base properties.
 	void set_texture(Ref<Texture> p_texture);
 	Ref<Texture> get_texture() const;
-	void set_margins(Vector2i p_margins);
-	Vector2i get_margins() const;
-	void set_separation(Vector2i p_separation);
-	Vector2i get_separation() const;
-	void set_texture_region_size(Vector2i p_tile_size);
-	Vector2i get_texture_region_size() const;
+	void set_margins(Vector2 p_margins);
+	Vector2 get_margins() const;
+	void set_separation(Vector2 p_separation);
+	Vector2 get_separation() const;
+	void set_texture_region_size(Vector2 p_tile_size);
+	Vector2 get_texture_region_size() const;
 
 	// Padding.
 	void set_use_texture_padding(bool p_use_padding);
 	bool get_use_texture_padding() const;
 
 	// Base tiles.
-	void create_tile(const Vector2i p_atlas_coords, const Vector2i p_size = Vector2i(1, 1));
-	void remove_tile(Vector2i p_atlas_coords);
-	virtual bool has_tile(Vector2i p_atlas_coords) const override;
-	void move_tile_in_atlas(Vector2i p_atlas_coords, Vector2i p_new_atlas_coords = INVALID_ATLAS_COORDS, Vector2i p_new_size = Vector2i(-1, -1));
-	Vector2i get_tile_size_in_atlas(Vector2i p_atlas_coords) const;
+	void create_tile(const Vector2 p_atlas_coords, const Vector2 p_size = Vector2(1, 1));
+	void remove_tile(Vector2 p_atlas_coords);
+	virtual bool has_tile(Vector2 p_atlas_coords) const override;
+	void move_tile_in_atlas(Vector2 p_atlas_coords, Vector2 p_new_atlas_coords = INVALID_ATLAS_COORDSV, Vector2 p_new_size = Vector2(-1, -1));
+	Vector2 get_tile_size_in_atlas(Vector2 p_atlas_coords) const;
 
 	virtual int get_tiles_count() const override;
-	virtual Vector2i get_tile_id(int p_index) const override;
+	virtual Vector2 get_tile_id(int p_index) const override;
 
-	bool has_room_for_tile(Vector2i p_atlas_coords, Vector2i p_size, int p_animation_columns, Vector2i p_animation_separation, int p_frames_count, Vector2i p_ignored_tile = INVALID_ATLAS_COORDS) const;
-	Vector<Vector2> get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2i p_margins, Vector2i p_separation, Vector2i p_texture_region_size);
-	Vector2i get_tile_at_coords(Vector2i p_atlas_coords) const;
+	bool has_room_for_tile(Vector2 p_atlas_coords, Vector2 p_size, int p_animation_columns, Vector2 p_animation_separation, int p_frames_count, Vector2 p_ignored_tile = INVALID_ATLAS_COORDSV) const;
+	Vector<Vector2> get_tiles_to_be_removed_on_change(Ref<Texture> p_texture, Vector2 p_margins, Vector2 p_separation, Vector2 p_texture_region_size);
+	Vector2 get_tile_at_coords(Vector2 p_atlas_coords) const;
 
 	// Animation.
-	void set_tile_animation_columns(const Vector2i p_atlas_coords, int p_frame_columns);
-	int get_tile_animation_columns(const Vector2i p_atlas_coords) const;
-	void set_tile_animation_separation(const Vector2i p_atlas_coords, const Vector2i p_separation);
-	Vector2i get_tile_animation_separation(const Vector2i p_atlas_coords) const;
-	void set_tile_animation_speed(const Vector2i p_atlas_coords, real_t p_speed);
-	real_t get_tile_animation_speed(const Vector2i p_atlas_coords) const;
-	void set_tile_animation_frames_count(const Vector2i p_atlas_coords, int p_frames_count);
-	int get_tile_animation_frames_count(const Vector2i p_atlas_coords) const;
-	void set_tile_animation_frame_duration(const Vector2i p_atlas_coords, int p_frame_index, real_t p_duration);
-	real_t get_tile_animation_frame_duration(const Vector2i p_atlas_coords, int p_frame_index) const;
-	real_t get_tile_animation_total_duration(const Vector2i p_atlas_coords) const;
+	void set_tile_animation_columns(const Vector2 p_atlas_coords, int p_frame_columns);
+	int get_tile_animation_columns(const Vector2 p_atlas_coords) const;
+	void set_tile_animation_separation(const Vector2 p_atlas_coords, const Vector2 p_separation);
+	Vector2 get_tile_animation_separation(const Vector2 p_atlas_coords) const;
+	void set_tile_animation_speed(const Vector2 p_atlas_coords, real_t p_speed);
+	real_t get_tile_animation_speed(const Vector2 p_atlas_coords) const;
+	void set_tile_animation_frames_count(const Vector2 p_atlas_coords, int p_frames_count);
+	int get_tile_animation_frames_count(const Vector2 p_atlas_coords) const;
+	void set_tile_animation_frame_duration(const Vector2 p_atlas_coords, int p_frame_index, real_t p_duration);
+	real_t get_tile_animation_frame_duration(const Vector2 p_atlas_coords, int p_frame_index) const;
+	real_t get_tile_animation_total_duration(const Vector2 p_atlas_coords) const;
 
 	// Alternative tiles.
-	int create_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_id_override = -1);
-	void remove_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile);
-	void set_alternative_tile_id(const Vector2i p_atlas_coords, int p_alternative_tile, int p_new_id);
-	virtual bool has_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) const override;
-	int get_next_alternative_tile_id(const Vector2i p_atlas_coords) const;
+	int create_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_id_override = -1);
+	void remove_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile);
+	void set_alternative_tile_id(const Vector2 p_atlas_coords, int p_alternative_tile, int p_new_id);
+	virtual bool has_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile) const override;
+	int get_next_alternative_tile_id(const Vector2 p_atlas_coords) const;
 
-	virtual int get_alternative_tiles_count(const Vector2i p_atlas_coords) const override;
-	virtual int get_alternative_tile_id(const Vector2i p_atlas_coords, int p_index) const override;
+	virtual int get_alternative_tiles_count(const Vector2 p_atlas_coords) const override;
+	virtual int get_alternative_tile_id(const Vector2 p_atlas_coords, int p_index) const override;
 
 	// Get data associated to a tile.
-	Object *get_tile_data(const Vector2i p_atlas_coords, int p_alternative_tile) const;
+	Object *get_tile_data(const Vector2 p_atlas_coords, int p_alternative_tile) const;
 
 	// Helpers.
-	Vector2i get_atlas_grid_size() const;
-	Rect2i get_tile_texture_region(Vector2i p_atlas_coords, int p_frame = 0) const;
-	Vector2i get_tile_effective_texture_offset(Vector2i p_atlas_coords, int p_alternative_tile) const;
+	Vector2 get_atlas_grid_size() const;
+	Rect2 get_tile_texture_region(Vector2 p_atlas_coords, int p_frame = 0) const;
+	Vector2 get_tile_effective_texture_offset(Vector2 p_atlas_coords, int p_alternative_tile) const;
 
 	// Getters for texture and tile region (padded or not)
 	Ref<Texture> get_runtime_texture() const;
-	Rect2i get_runtime_tile_texture_region(Vector2i p_atlas_coords, int p_frame = 0) const;
+	Rect2 get_runtime_tile_texture_region(Vector2 p_atlas_coords, int p_frame = 0) const;
 
 	~RTileSetAtlasSource();
 };
@@ -740,18 +740,18 @@ protected:
 public:
 	// Tiles.
 	int get_tiles_count() const override;
-	Vector2i get_tile_id(int p_tile_index) const override;
-	bool has_tile(Vector2i p_atlas_coords) const override;
+	Vector2 get_tile_id(int p_tile_index) const override;
+	bool has_tile(Vector2 p_atlas_coords) const override;
 
 	// Alternative tiles.
-	int get_alternative_tiles_count(const Vector2i p_atlas_coords) const override;
-	int get_alternative_tile_id(const Vector2i p_atlas_coords, int p_index) const override;
-	bool has_alternative_tile(const Vector2i p_atlas_coords, int p_alternative_tile) const override;
+	int get_alternative_tiles_count(const Vector2 p_atlas_coords) const override;
+	int get_alternative_tile_id(const Vector2 p_atlas_coords, int p_index) const override;
+	bool has_alternative_tile(const Vector2 p_atlas_coords, int p_alternative_tile) const override;
 
 	// Scenes accessors. Lot are similar to "Alternative tiles".
-	int get_scene_tiles_count() { return get_alternative_tiles_count(Vector2i()); }
-	int get_scene_tile_id(int p_index) { return get_alternative_tile_id(Vector2i(), p_index); };
-	bool has_scene_tile_id(int p_id) { return has_alternative_tile(Vector2i(), p_id); };
+	int get_scene_tiles_count() { return get_alternative_tiles_count(Vector2()); }
+	int get_scene_tile_id(int p_index) { return get_alternative_tile_id(Vector2(), p_index); };
+	bool has_scene_tile_id(int p_id) { return has_alternative_tile(Vector2(), p_id); };
 	int create_scene_tile(Ref<PackedScene> p_packed_scene = Ref<PackedScene>(), int p_id_override = -1);
 	void set_scene_tile_id(int p_id, int p_new_id);
 	void set_scene_tile_scene(int p_id, Ref<PackedScene> p_packed_scene);
@@ -852,8 +852,8 @@ public:
 	void set_transpose(bool p_transpose);
 	bool get_transpose() const;
 
-	void set_texture_offset(Vector2i p_texture_offset);
-	Vector2i get_texture_offset() const;
+	void set_texture_offset(Vector2 p_texture_offset);
+	Vector2 get_texture_offset() const;
 	void set_material(Ref<ShaderMaterial> p_material);
 	Ref<ShaderMaterial> get_material() const;
 	void set_modulate(Color p_modulate);
