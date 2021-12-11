@@ -226,8 +226,8 @@ void RTileMapPattern::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_tile_data", "data"), &RTileMapPattern::_set_tile_data);
 	ClassDB::bind_method(D_METHOD("_get_tile_data"), &RTileMapPattern::_get_tile_data);
 
-	ClassDB::bind_method(D_METHOD("set_cell", "coords_x", "coords_Y", "source_id", "atlas_coords_x", "atlas_coords_y", "alternative_tile"), &RTileMapPattern::set_cell, DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS.x), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS.y), DEFVAL(RTileSetSource::INVALID_TILE_ALTERNATIVE));
-	ClassDB::bind_method(D_METHOD("has_cell", "coords_x", "coords_y"), &RTileMapPattern::has_cell);
+	ClassDB::bind_method(D_METHOD("set_cell", "coords", "source_id", "atlas_coords", "alternative_tile"), &RTileMapPattern::set_cell, DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSet::INVALID_SOURCE), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS.x), DEFVAL(RTileSetSource::INVALID_ATLAS_COORDS.y), DEFVAL(RTileSetSource::INVALID_TILE_ALTERNATIVE));
+	ClassDB::bind_method(D_METHOD("has_cell", "coords"), &RTileMapPattern::has_cell);
 	ClassDB::bind_method(D_METHOD("remove_cell", "coords", "update_size"), &RTileMapPattern::remove_cell);
 	ClassDB::bind_method(D_METHOD("get_cell_source_id", "coords"), &RTileMapPattern::get_cell_source_id);
 	ClassDB::bind_method(D_METHOD("get_cell_atlas_coords", "coords"), &RTileMapPattern::get_cell_atlas_coords);
