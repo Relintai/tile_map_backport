@@ -515,7 +515,7 @@ void RTileMap::set_tileset(const Ref<RTileSet> &p_tileset) {
 
 	// Set the tileset, registering to its changes.
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &RTileMap::_tile_set_changed));
+		tile_set->disconnect("changed", this, "_tile_set_changed");
 	}
 
 	if (!p_tileset.is_valid()) {
@@ -525,7 +525,7 @@ void RTileMap::set_tileset(const Ref<RTileSet> &p_tileset) {
 	tile_set = p_tileset;
 
 	if (tile_set.is_valid()) {
-		tile_set->connect("changed", callable_mp(this, &RTileMap::_tile_set_changed));
+		tile_set->connect("changed", this, "_tile_set_changed");
 		_clear_internals();
 		_recreate_internals();
 	}
@@ -1056,8 +1056,9 @@ void RTileMap::_rendering_update_layer(int p_layer) {
 	rs->canvas_item_set_sort_children_by_y(ci, layers[p_layer].y_sort_enabled);
 	rs->canvas_item_set_use_parent_material(ci, get_use_parent_material() || get_material().is_valid());
 	rs->canvas_item_set_z_index(ci, layers[p_layer].z_index);
-	rs->canvas_item_set_default_texture_filter(ci, VS::CanvasItemTextureFilter(get_texture_filter()));
-	rs->canvas_item_set_default_texture_repeat(ci, VS::CanvasItemTextureRepeat(get_texture_repeat()));
+	//TODO
+	//rs->canvas_item_set_default_texture_filter(ci, VS::CanvasItemTextureFilter(get_texture_filter()));
+	//rs->canvas_item_set_default_texture_repeat(ci, VS::CanvasItemTextureRepeat(get_texture_repeat()));
 	rs->canvas_item_set_light_mask(ci, get_light_mask());
 }
 
@@ -1084,14 +1085,14 @@ void RTileMap::_rendering_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Lis
 		VisualServer *rs = VisualServer::get_singleton();
 
 		// Free the canvas items.
-		for (const RID &ci : q.canvas_items) {
-			rs->free(ci);
+		for (List<RID>::Element *ci = q.canvas_items.front(); ci; ci = ci->next()) {
+			rs->free(ci->get());
 		}
 		q.canvas_items.clear();
 
 		// Free the occluders.
-		for (const RID &occluder : q.occluders) {
-			rs->free(occluder);
+		for (List<RID>::Element *occluder = q.occluders.front(); occluder; occluder = occluder->next()) {
+			rs->free(occluder->get());
 		}
 		q.occluders.clear();
 
@@ -1166,8 +1167,9 @@ void RTileMap::_rendering_update_dirty_quadrants(SelfList<RTileMapQuadrant>::Lis
 						rs->canvas_item_set_light_mask(canvas_item, get_light_mask());
 						rs->canvas_item_set_z_index(canvas_item, z_index);
 
-						rs->canvas_item_set_default_texture_filter(canvas_item, VS::CanvasItemTextureFilter(get_texture_filter()));
-						rs->canvas_item_set_default_texture_repeat(canvas_item, VS::CanvasItemTextureRepeat(get_texture_repeat()));
+						//TODO
+						//rs->canvas_item_set_default_texture_filter(canvas_item, VS::CanvasItemTextureFilter(get_texture_filter()));
+						//rs->canvas_item_set_default_texture_repeat(canvas_item, VS::CanvasItemTextureRepeat(get_texture_repeat()));
 
 						q.canvas_items.push_back(canvas_item);
 
@@ -1314,7 +1316,7 @@ void RTileMap::draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<RTile
 		}
 
 		// Get the texture.
-		Ref<Texture2D> tex = atlas_source->get_runtime_texture();
+		Ref<Texture> tex = atlas_source->get_runtime_texture();
 		if (!tex.is_valid()) {
 			return;
 		}
@@ -2082,7 +2084,7 @@ Ref<RTileMapPattern> RTileMap::get_pattern(int p_layer, Vector<Vector2> p_coords
 
 	Vector2i min = Vector2i(p_coords_array[0]);
 	for (int i = 1; i < p_coords_array.size(); i++) {
-		min = min.min(p_coords_array[i]);
+		min =  Vector2i(MIN(min.x, p_coords_array[i].x), MIN(min.y, p_coords_array[i].y));
 	}
 
 	Vector<Vector2i> coords_in_pattern_array;
@@ -2124,7 +2126,10 @@ Ref<RTileMapPattern> RTileMap::get_pattern(int p_layer, Vector<Vector2> p_coords
 	return output;
 }
 
-Vector2 RTileMap::map_pattern(Vector2 p_position_in_tilemap, Vector2 p_coords_in_pattern, Ref<RTileMapPattern> p_pattern) {
+Vector2 RTileMap::map_pattern(Vector2 p_position_in_tilemapv, Vector2 p_coords_in_patternv, Ref<RTileMapPattern> p_pattern) {
+	Vector2i p_position_in_tilemap = p_position_in_tilemapv;
+	Vector2i p_coords_in_pattern = p_coords_in_patternv;
+
 	ERR_FAIL_COND_V(!p_pattern->has_cell(p_coords_in_pattern), Vector2i());
 
 	Vector2i output = p_position_in_tilemap + p_coords_in_pattern;
@@ -3423,8 +3428,8 @@ void RTileMap::set_light_mask(int p_light_mask) {
 	CanvasItem::set_light_mask(p_light_mask);
 	for (unsigned int layer = 0; layer < layers.size(); layer++) {
 		for (Map<Vector2i, RTileMapQuadrant>::Element *E = layers[layer].quadrant_map.front(); E; E = E->next()) {
-			for (const RID &ci : E->value().canvas_items) {
-				VisualServer::get_singleton()->canvas_item_set_light_mask(ci, get_light_mask());
+			for (List<RID>::Element *ci = E->value().canvas_items.front(); ci; ci = ci->next()) {
+				VisualServer::get_singleton()->canvas_item_set_light_mask(ci->get(), get_light_mask());
 			}
 		}
 		_rendering_update_layer(layer);
@@ -3684,6 +3689,7 @@ void RTileMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_get_tile_data", "layer"), &RTileMap::_get_tile_data);
 
 	ClassDB::bind_method(D_METHOD("_tile_set_changed_deferred_update"), &RTileMap::_tile_set_changed_deferred_update);
+	ClassDB::bind_method(D_METHOD("_tile_set_changed"), &RTileMap::_tile_set_changed);
 
 	//GDVIRTUAL_BIND(_use_tile_data_runtime_update, "layer", "coords");
 	//GDVIRTUAL_BIND(_tile_data_runtime_update, "layer", "coords", "tile_data");
@@ -3734,7 +3740,7 @@ RTileMap::RTileMap() {
 
 RTileMap::~RTileMap() {
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &RTileMap::_tile_set_changed));
+		tile_set->disconnect("changed", this, "_tile_set_changed");
 	}
 
 	_clear_internals();
