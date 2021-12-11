@@ -321,21 +321,21 @@ public:
 	VisibilityMode get_navigation_visibility_mode();
 
 	// Cells accessors.
-	void set_cell(int p_layer, const Vector2i &p_coords, int p_source_id = -1, const Vector2i p_atlas_coords = RTileSetSource::INVALID_ATLAS_COORDS, int p_alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE);
-	int get_cell_source_id(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
-	Vector2i get_cell_atlas_coords(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
-	int get_cell_alternative_tile(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
+	void set_cell(int p_layer, const Vector2 &p_coords, int p_source_id = -1, const Vector2 p_atlas_coords = RTileSetSource::INVALID_ATLAS_COORDSV, int p_alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE);
+	int get_cell_source_id(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
+	Vector2i get_cell_atlas_coords(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
+	int get_cell_alternative_tile(int p_layer, const Vector2 &p_coords, bool p_use_proxies = false) const;
 
 	// Patterns.
-	Ref<RTileMapPattern> get_pattern(int p_layer, TypedArray<Vector2i> p_coords_array);
-	Vector2i map_pattern(Vector2i p_position_in_tilemap, Vector2i p_coords_in_pattern, Ref<RTileMapPattern> p_pattern);
-	void set_pattern(int p_layer, Vector2i p_position, const Ref<RTileMapPattern> p_pattern);
+	Ref<RTileMapPattern> get_pattern(int p_layer, Vector<Vector2> p_coords_array);
+	Vector2i map_pattern(Vector2 p_position_in_tilemap, Vector2 p_coords_in_pattern, Ref<RTileMapPattern> p_pattern);
+	void set_pattern(int p_layer, Vector2 p_position, const Ref<RTileMapPattern> p_pattern);
 
 	// Terrains.
 	Set<TerrainConstraint> get_terrain_constraints_from_removed_cells_list(int p_layer, const Set<Vector2i> &p_to_replace, int p_terrain_set, bool p_ignore_empty_terrains = true) const; // Not exposed.
 	Set<TerrainConstraint> get_terrain_constraints_from_added_tile(Vector2i p_position, int p_terrain_set, RTileSet::TerrainsPattern p_terrains_pattern) const; // Not exposed.
 	Map<Vector2i, RTileSet::TerrainsPattern> terrain_wave_function_collapse(const Set<Vector2i> &p_to_replace, int p_terrain_set, const Set<TerrainConstraint> p_constraints); // Not exposed.
-	void set_cells_from_surrounding_terrains(int p_layer, TypedArray<Vector2i> p_coords_array, int p_terrain_set, bool p_ignore_empty_terrains = true);
+	void set_cells_from_surrounding_terrains(int p_layer, Vector<Vector2> p_coords_array, int p_terrain_set, bool p_ignore_empty_terrains = true);
 
 	// Not exposed to users
 	RTileMapCell get_cell(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
@@ -343,7 +343,7 @@ public:
 	int get_effective_quadrant_size(int p_layer) const;
 	//---
 
-	virtual void set_y_sort_enabled(bool p_enable) override;
+	virtual void set_y_sort_enabled(bool p_enable);
 
 	Vector2 map_to_world(const Vector2i &p_pos) const;
 	Vector2i world_to_map(const Vector2 &p_pos) const;
@@ -351,15 +351,15 @@ public:
 	bool is_existing_neighbor(RTileSet::CellNeighbor p_cell_neighbor) const;
 	Vector2i get_neighbor_cell(const Vector2i &p_coords, RTileSet::CellNeighbor p_cell_neighbor) const;
 
-	TypedArray<Vector2i> get_used_cells(int p_layer) const;
+	Vector<Vector2> get_used_cells(int p_layer) const;
 	Rect2 get_used_rect(); // Not const because of cache
 
 	// Override some methods of the CanvasItem class to pass the changes to the quadrants CanvasItems
 	virtual void set_light_mask(int p_light_mask) override;
 	virtual void set_material(const Ref<Material> &p_material) override;
 	virtual void set_use_parent_material(bool p_use_parent_material) override;
-	virtual void set_texture_filter(CanvasItem::TextureFilter p_texture_filter) override;
-	virtual void set_texture_repeat(CanvasItem::TextureRepeat p_texture_repeat) override;
+	//virtual void set_texture_filter(CanvasItem::TextureFilter p_texture_filter) override;
+	//virtual void set_texture_repeat(CanvasItem::TextureRepeat p_texture_repeat) override;
 
 	// For finding tiles from collision.
 	Vector2i get_coords_for_body_rid(RID p_physics_body);
@@ -375,18 +375,18 @@ public:
 	void force_update(int p_layer = -1);
 
 	// Helpers?
-	TypedArray<Vector2i> get_surrounding_tiles(Vector2i coords);
+	Vector<Vector2> get_surrounding_tiles(Vector2 coords);
 	void draw_cells_outline(Control *p_control, Set<Vector2i> p_cells, Color p_color, Transform2D p_transform = Transform2D());
 
 	// Virtual function to modify the TileData at runtime
-	GDVIRTUAL2R(bool, _use_tile_data_runtime_update, int, Vector2i);
-	GDVIRTUAL3(_tile_data_runtime_update, int, Vector2i, RTileData *);
+	//GDVIRTUAL2R(bool, _use_tile_data_runtime_update, int, Vector2i);
+	//GDVIRTUAL3(_tile_data_runtime_update, int, Vector2i, RTileData *);
 
 	// Configuration warnings.
-	TypedArray<String> get_configuration_warnings() const override;
+	Vector<String> get_configuration_warnings() const;
 
-	TileMap();
-	~TileMap();
+	RTileMap();
+	~RTileMap();
 };
 
 VARIANT_ENUM_CAST(RTileMap::VisibilityMode);
