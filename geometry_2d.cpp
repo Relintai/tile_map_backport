@@ -32,7 +32,7 @@
 
 #include "thirdparty/misc/clipper.hpp"
 #include "polypartition.h"
-#define STB_RECT_PACK_IMPLEMENTATION
+//#define STB_RECT_PACK_IMPLEMENTATION
 #include "thirdparty/stb_rect_pack/stb_rect_pack.h"
 
 #define SCALE_FACTOR 100000.0 // Based on CMP_EPSILON.
