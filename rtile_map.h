@@ -349,11 +349,11 @@ public:
 	virtual bool is_y_sort_enabled() const;
 	virtual void set_y_sort_enabled(bool p_enable);
 
-	Vector2 map_to_world(const Vector2i &p_pos) const;
-	Vector2i world_to_map(const Vector2 &p_pos) const;
+	Vector2 map_to_world(const Vector2 &p_pos) const;
+	Vector2 world_to_map(const Vector2 &p_pos) const;
 
 	bool is_existing_neighbor(RTileSet::CellNeighbor p_cell_neighbor) const;
-	Vector2i get_neighbor_cell(const Vector2i &p_coords, RTileSet::CellNeighbor p_cell_neighbor) const;
+	Vector2 get_neighbor_cell(const Vector2 &p_coords, RTileSet::CellNeighbor p_cell_neighbor) const;
 
 	Vector<Vector2> get_used_cells(int p_layer) const;
 	Rect2 get_used_rect(); // Not const because of cache
@@ -366,7 +366,7 @@ public:
 	//virtual void set_texture_repeat(CanvasItem::TextureRepeat p_texture_repeat) override;
 
 	// For finding tiles from collision.
-	Vector2i get_coords_for_body_rid(RID p_physics_body);
+	Vector2 get_coords_for_body_rid(RID p_physics_body);
 
 	// Fixing a nclearing methods.
 	void fix_invalid_tiles();

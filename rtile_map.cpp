@@ -2444,8 +2444,8 @@ Map<Vector2i, RTileMapQuadrant> *RTileMap::get_quadrant_map(int p_layer) {
 	return &layers[p_layer].quadrant_map;
 }
 
-Vector2i RTileMap::get_coords_for_body_rid(RID p_physics_body) {
-	ERR_FAIL_COND_V_MSG(!bodies_coords.has(p_physics_body), Vector2i(), vformat("No tiles for the given body RID %d.", p_physics_body));
+Vector2 RTileMap::get_coords_for_body_rid(RID p_physics_body) {
+	ERR_FAIL_COND_V_MSG(!bodies_coords.has(p_physics_body), Vector2(), vformat("No tiles for the given body RID %d.", p_physics_body));
 	return bodies_coords[p_physics_body];
 }
 
@@ -2771,7 +2771,7 @@ void RTileMap::_get_property_list(List<PropertyInfo> *p_list) const {
 	}
 }
 
-Vector2 RTileMap::map_to_world(const Vector2i &p_pos) const {
+Vector2 RTileMap::map_to_world(const Vector2 &p_pos) const {
 	// SHOULD RETURN THE CENTER OF THE TILE
 	ERR_FAIL_COND_V(!tile_set.is_valid(), Vector2());
 
@@ -2848,7 +2848,7 @@ Vector2 RTileMap::map_to_world(const Vector2i &p_pos) const {
 	return (ret + Vector2(0.5, 0.5)) * tile_set->get_tile_size();
 }
 
-Vector2i RTileMap::world_to_map(const Vector2 &p_pos) const {
+Vector2 RTileMap::world_to_map(const Vector2 &p_pos) const {
 	ERR_FAIL_COND_V(!tile_set.is_valid(), Vector2i());
 
 	Vector2 ret = p_pos;
@@ -3057,7 +3057,9 @@ bool RTileMap::is_existing_neighbor(RTileSet::CellNeighbor p_cell_neighbor) cons
 	}
 }
 
-Vector2i RTileMap::get_neighbor_cell(const Vector2i &p_coords, RTileSet::CellNeighbor p_cell_neighbor) const {
+Vector2 RTileMap::get_neighbor_cell(const Vector2 &p_coordsv, RTileSet::CellNeighbor p_cell_neighbor) const {
+	Vector2i p_coords = p_coordsv;
+
 	ERR_FAIL_COND_V(!tile_set.is_valid(), p_coords);
 
 	RTileSet::TileShape shape = tile_set->get_tile_shape();
