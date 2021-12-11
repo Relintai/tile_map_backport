@@ -113,7 +113,7 @@ private:
 	int drag_polygon_index;
 	int drag_point_index;
 	Vector2 drag_last_pos;
-	PackedVector2Array drag_old_polygon;
+	PoolVector2Array drag_old_polygon;
 
 	HBoxContainer *toolbar;
 	Ref<ButtonGroup> tools_button_group;
@@ -272,7 +272,7 @@ private:
 	// UI
 	RGenericTilePolygonEditor *polygon_editor;
 
-	void _polygon_changed(PackedVector2Array p_polygon);
+	void _polygon_changed(PoolVector2Array p_polygon);
 
 	virtual Variant _get_painted_value() override;
 	virtual void _set_painted_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;
@@ -386,12 +386,12 @@ class RTileDataNavigationEditor : public RTileDataDefaultEditor {
 
 private:
 	int navigation_layer = -1;
-	PackedVector2Array navigation_polygon;
+	PoolVector2Array navigation_polygon;
 
 	// UI
 	RGenericTilePolygonEditor *polygon_editor;
 
-	void _polygon_changed(PackedVector2Array p_polygon);
+	void _polygon_changed(PoolVector2Array p_polygon);
 
 	virtual Variant _get_painted_value() override;
 	virtual void _set_painted_value(RTileSetAtlasSource *p_tile_set_atlas_source, Vector2 p_coords, int p_alternative_tile) override;

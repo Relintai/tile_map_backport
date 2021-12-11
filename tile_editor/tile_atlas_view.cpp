@@ -109,7 +109,7 @@ Size2i RTileAtlasView::_compute_alternative_tiles_control_size() {
 		Size2i texture_region_size = tile_set_atlas_source->get_tile_texture_region(tile_id).size;
 		for (int j = 1; j < alternatives_count; j++) {
 			int alternative_id = tile_set_atlas_source->get_alternative_tile_id(tile_id, j);
-			bool transposed = Object::cast_to<TileData>(tile_set_atlas_source->get_tile_data(tile_id, alternative_id))->get_transpose();
+			bool transposed = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(tile_id, alternative_id))->get_transpose();
 			line_size.x += transposed ? texture_region_size.y : texture_region_size.x;
 			line_size.y = MAX(line_size.y, transposed ? texture_region_size.x : texture_region_size.y);
 		}
@@ -266,7 +266,7 @@ void RTileAtlasView::_draw_base_tiles() {
 				Vector2i offset_pos = base_frame_rect.get_center() + tile_set_atlas_source->get_tile_effective_texture_offset(atlas_coords, 0);
 
 				// Draw the tile.
-				TileMap::draw_tile(base_tiles_draw->get_canvas_item(), offset_pos, tile_set, source_id, atlas_coords, 0, frame);
+				RTileMap::draw_tile(base_tiles_draw->get_canvas_item(), offset_pos, tile_set, source_id, atlas_coords, 0, frame);
 
 				// Draw, the texture in the separation areas
 				if (separation.x > 0) {
@@ -371,7 +371,7 @@ void RTileAtlasView::_draw_alternatives() {
 			int alternatives_count = tile_set_atlas_source->get_alternative_tiles_count(atlas_coords);
 			for (int j = 1; j < alternatives_count; j++) {
 				int alternative_id = tile_set_atlas_source->get_alternative_tile_id(atlas_coords, j);
-				TileData *tile_data = Object::cast_to<TileData>(tile_set_atlas_source->get_tile_data(atlas_coords, alternative_id));
+				RTileData *tile_data = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(atlas_coords, alternative_id));
 				bool transposed = tile_data->get_transpose();
 
 				// Update the y to max value.
@@ -385,7 +385,7 @@ void RTileAtlasView::_draw_alternatives() {
 				}
 
 				// Draw the tile.
-				TileMap::draw_tile(alternatives_draw->get_canvas_item(), offset_pos, tile_set, source_id, atlas_coords, alternative_id);
+				RTileMap::draw_tile(alternatives_draw->get_canvas_item(), offset_pos, tile_set, source_id, atlas_coords, alternative_id);
 
 				// Increment the x position.
 				current_pos.x += transposed ? texture_region_size.y : texture_region_size.x;
@@ -398,13 +398,13 @@ void RTileAtlasView::_draw_alternatives() {
 }
 
 void RTileAtlasView::_draw_background_left() {
-	Ref<Texture> texture = get_theme_icon(SNAME("Checkerboard"), SNAME("EditorIcons"));
+	Ref<Texture> texture = get_theme_icon(("Checkerboard"), ("EditorIcons"));
 	background_left->set_size(base_tiles_root_control->get_custom_minimum_size());
 	background_left->draw_texture_rect(texture, Rect2(Vector2(), background_left->get_size()), true);
 }
 
 void RTileAtlasView::_draw_background_right() {
-	Ref<Texture> texture = get_theme_icon(SNAME("Checkerboard"), SNAME("EditorIcons"));
+	Ref<Texture> texture = get_theme_icon(("Checkerboard"), ("EditorIcons"));
 	background_right->set_size(alternative_tiles_root_control->get_custom_minimum_size());
 	background_right->draw_texture_rect(texture, Rect2(Vector2(), background_right->get_size()), true);
 }
@@ -499,7 +499,7 @@ void RTileAtlasView::_update_alternative_tiles_rect_cache() {
 		int line_height = 0;
 		for (int j = 1; j < alternatives_count; j++) {
 			int alternative_id = tile_set_atlas_source->get_alternative_tile_id(tile_id, j);
-			TileData *tile_data = Object::cast_to<TileData>(tile_set_atlas_source->get_tile_data(tile_id, alternative_id));
+			RTileData *tile_data = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(tile_id, alternative_id));
 			bool transposed = tile_data->get_transpose();
 			current.size = transposed ? Vector2i(texture_region_size.y, texture_region_size.x) : texture_region_size;
 
@@ -549,7 +549,7 @@ void RTileAtlasView::update() {
 void RTileAtlasView::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY:
-			button_center_view->set_icon(get_theme_icon(SNAME("CenterView"), SNAME("EditorIcons")));
+			button_center_view->set_icon(get_theme_icon(("CenterView"), ("EditorIcons")));
 			break;
 	}
 }
@@ -559,7 +559,7 @@ void RTileAtlasView::_bind_methods() {
 }
 
 RTileAtlasView::RTileAtlasView() {
-	set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
+	//set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 
 	Panel *panel = memnew(Panel);
 	panel->set_clip_contents(true);
@@ -576,7 +576,7 @@ RTileAtlasView::RTileAtlasView() {
 	zoom_widget->connect("zoom_changed", callable_mp(this, &RTileAtlasView::_zoom_widget_changed).unbind(1));
 
 	button_center_view = memnew(Button);
-	button_center_view->set_icon(get_theme_icon(SNAME("CenterView"), SNAME("EditorIcons")));
+	button_center_view->set_icon(get_theme_icon(("CenterView"), ("EditorIcons")));
 	button_center_view->set_anchors_and_offsets_preset(Control::PRESET_TOP_RIGHT, Control::PRESET_MODE_MINSIZE, 5);
 	button_center_view->connect("pressed", callable_mp(this, &RTileAtlasView::_center_view));
 	button_center_view->set_flat(true);

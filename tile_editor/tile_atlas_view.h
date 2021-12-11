@@ -41,6 +41,8 @@
 #include "scene/gui/texture_rect.h"
 #include "../rtile_set.h"
 
+#include "../vector3i.h"
+
 class RTileAtlasView : public Control {
 	GDCLASS(RTileAtlasView, Control);
 

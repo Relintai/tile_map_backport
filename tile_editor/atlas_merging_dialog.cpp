@@ -40,12 +40,12 @@ void RAtlasMergingDialog::_property_changed(const StringName &p_property, const 
 }
 
 void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_atlas_sources, int p_max_columns) {
-	merged.instantiate();
+	merged.instance();
 	merged_mapping.clear();
 
 	if (p_atlas_sources.size() >= 2) {
 		Ref<Image> output_image;
-		output_image.instantiate();
+		output_image.instance();
 		output_image->create(1, 1, false, Image::FORMAT_RGBA8);
 
 		// Compute the new texture region size.
@@ -81,7 +81,7 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_at
 					}
 
 					// Copy the properties.
-					TileData *original_tile_data = Object::cast_to<TileData>(atlas_source->get_tile_data(tile_id, alternative_id));
+					RTileData *original_tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(tile_id, alternative_id));
 					List<PropertyInfo> properties;
 					original_tile_data->get_property_list(&properties);
 					for (List<PropertyInfo>::Element *E = properties.front(); E; E = E->next()) {
@@ -115,7 +115,7 @@ void RAtlasMergingDialog::_generate_merged(Vector<Ref<RTileSetAtlasSource>> p_at
 		}
 
 		Ref<ImageTexture> output_image_texture;
-		output_image_texture.instantiate();
+		output_image_texture.instance();
 		output_image_texture->create_from_image(output_image);
 
 		merged->set_name(p_atlas_sources[0]->get_name());
@@ -152,7 +152,7 @@ void RAtlasMergingDialog::_merge_confirmed(String p_path) {
 	ERR_FAIL_COND(!merged.is_valid());
 
 	Ref<ImageTexture> output_image_texture = merged->get_texture();
-	output_image_texture->get_image()->save_png(p_path);
+	output_image_texture->get_data()->save_png(p_path);
 
 	Ref<Texture> new_texture_resource = ResourceLoader::load(p_path, "Texture");
 	merged->set_texture(new_texture_resource);
@@ -271,7 +271,7 @@ RAtlasMergingDialog::RAtlasMergingDialog() {
 	atlas_merging_atlases_list->set_fixed_icon_size(Size2i(60, 60) * EDSCALE);
 	atlas_merging_atlases_list->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	atlas_merging_atlases_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	atlas_merging_atlases_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
+	//atlas_merging_atlases_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	atlas_merging_atlases_list->set_custom_minimum_size(Size2(100, 200));
 	atlas_merging_atlases_list->set_select_mode(ItemList::SELECT_MULTI);
 	atlas_merging_atlases_list->connect("multi_selected", callable_mp(this, &RAtlasMergingDialog::_update_texture).unbind(2));

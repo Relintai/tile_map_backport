@@ -166,7 +166,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 		// Scene collection source.
 		TileSetScenesCollectionSource *scene_collection_source = Object::cast_to<TileSetScenesCollectionSource>(source);
 		if (scene_collection_source) {
-			texture = get_theme_icon(SNAME("PackedScene"), SNAME("EditorIcons"));
+			texture = get_theme_icon(("PackedScene"), ("EditorIcons"));
 			if (item_text.is_empty()) {
 				item_text = vformat(TTR("Scene Collection Source (ID:%d)"), source_id);
 			}
@@ -190,7 +190,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 			if ((int)sources_list->get_item_metadata(i) == to_select) {
 				sources_list->set_current(i);
 				if (old_selected != to_select) {
-					sources_list->emit_signal(SNAME("item_selected"), sources_list->get_current());
+					sources_list->emit_signal(("item_selected"), sources_list->get_current());
 				}
 				break;
 			}
@@ -201,7 +201,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 	if (sources_list->get_current() < 0 && sources_list->get_item_count() > 0) {
 		sources_list->set_current(0);
 		if (old_selected != int(sources_list->get_item_metadata(0))) {
-			sources_list->emit_signal(SNAME("item_selected"), sources_list->get_current());
+			sources_list->emit_signal(("item_selected"), sources_list->get_current());
 		}
 	}
 
@@ -316,10 +316,10 @@ void RTileSetEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED:
-			sources_delete_button->set_icon(get_theme_icon(SNAME("Remove"), SNAME("EditorIcons")));
-			sources_add_button->set_icon(get_theme_icon(SNAME("Add"), SNAME("EditorIcons")));
-			sources_advanced_menu_button->set_icon(get_theme_icon(SNAME("GuiTabMenuHl"), SNAME("EditorIcons")));
-			missing_texture_texture = get_theme_icon(SNAME("TileSet"), SNAME("EditorIcons"));
+			sources_delete_button->set_icon(get_theme_icon(("Remove"), ("EditorIcons")));
+			sources_add_button->set_icon(get_theme_icon(("Add"), ("EditorIcons")));
+			sources_advanced_menu_button->set_icon(get_theme_icon(("GuiTabMenuHl"), ("EditorIcons")));
+			missing_texture_texture = get_theme_icon(("TileSet"), ("EditorIcons"));
 			break;
 		case NOTIFICATION_INTERNAL_PROCESS:
 			if (tile_set_changed_needs_update) {
@@ -761,7 +761,7 @@ RTileSetEditor::RTileSetEditor() {
 	patterns_item_list->add_child(patterns_help_label);
 
 	// Registers UndoRedo inspector callback.
-	EditorNode::get_singleton()->get_editor_data().add_move_array_element_function(SNAME("TileSet"), callable_mp(this, &RTileSetEditor::_move_tile_set_array_element));
+	EditorNode::get_singleton()->get_editor_data().add_move_array_element_function(("TileSet"), callable_mp(this, &RTileSetEditor::_move_tile_set_array_element));
 	EditorNode::get_singleton()->get_editor_data().add_undo_redo_inspector_hook_callback(callable_mp(this, &RTileSetEditor::_undo_redo_inspector_callback));
 }
 

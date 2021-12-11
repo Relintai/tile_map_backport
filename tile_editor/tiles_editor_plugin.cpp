@@ -116,13 +116,13 @@ void RTilesEditorPlugin::_thread() {
 				// Add the viewport at the lasst moment to avoid rendering too early.
 				EditorNode::get_singleton()->add_child(viewport);
 
-				RS::get_singleton()->connect(SNAME("frame_pre_draw"), callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_preview_frame_started), Vector<Variant>(), Object::CONNECT_ONESHOT);
+				RS::get_singleton()->connect(("frame_pre_draw"), callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_preview_frame_started), Vector<Variant>(), Object::CONNECT_ONESHOT);
 
 				pattern_preview_done.wait();
 
 				Ref<Image> image = viewport->get_texture()->get_image();
 				Ref<ImageTexture> image_texture;
-				image_texture.instantiate();
+				image_texture.instance();
 				image_texture->create_from_image(image);
 
 				// Find the index for the given pattern. TODO: optimize.
@@ -216,7 +216,7 @@ void RTilesEditorPlugin::synchronize_sources_list(Object *p_current) {
 			item_list->deselect_all();
 		} else {
 			item_list->set_current(atlas_sources_lists_current);
-			item_list->emit_signal(SNAME("item_selected"), atlas_sources_lists_current);
+			item_list->emit_signal(("item_selected"), atlas_sources_lists_current);
 		}
 	}
 }
