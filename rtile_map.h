@@ -28,16 +28,16 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TILE_MAP_H
-#define TILE_MAP_H
+#ifndef RTILE_MAP_H
+#define RTILE_MAP_H
 
 #include "scene/2d/node_2d.h"
 #include "scene/gui/control.h"
-#include "scene/resources/tile_set.h"
+#include "rtile_set.h"
 
-class TileSetAtlasSource;
+class RTileSetAtlasSource;
 
-struct TileMapQuadrant {
+struct RTileMapQuadrant {
 	struct CoordsWorldComparator {
 		_ALWAYS_INLINE_ bool operator()(const Vector2i &p_a, const Vector2i &p_b) const {
 			// We sort the cells by their world coords, as it is needed by rendering.
@@ -50,7 +50,7 @@ struct TileMapQuadrant {
 	};
 
 	// Dirty list element
-	SelfList<TileMapQuadrant> dirty_list_element;
+	SelfList<RTileMapQuadrant> dirty_list_element;
 
 	// Quadrant layer and coords.
 	int layer = -1;
@@ -80,9 +80,9 @@ struct TileMapQuadrant {
 	Map<Vector2i, String> scenes;
 
 	// Runtime TileData cache.
-	Map<Vector2i, TileData *> runtime_tile_data_cache;
+	Map<Vector2i, RTileData *> runtime_tile_data_cache;
 
-	void operator=(const TileMapQuadrant &q) {
+	void operator=(const RTileMapQuadrant &q) {
 		layer = q.layer;
 		coords = q.coords;
 		debug_canvas_item = q.debug_canvas_item;
@@ -92,7 +92,7 @@ struct TileMapQuadrant {
 		navigation_regions = q.navigation_regions;
 	}
 
-	TileMapQuadrant(const TileMapQuadrant &q) :
+	RTileMapQuadrant(const RTileMapQuadrant &q) :
 			dirty_list_element(this) {
 		layer = q.layer;
 		coords = q.coords;
@@ -103,18 +103,18 @@ struct TileMapQuadrant {
 		navigation_regions = q.navigation_regions;
 	}
 
-	TileMapQuadrant() :
+	RTileMapQuadrant() :
 			dirty_list_element(this) {
 	}
 };
 
-class TileMap : public Node2D {
-	GDCLASS(TileMap, Node2D);
+class RTileMap : public Node2D {
+	GDCLASS(RTileMap, Node2D);
 
 public:
 	class TerrainConstraint {
 	private:
-		const TileMap *tile_map;
+		const RTileMap *tile_map;
 		Vector2i base_cell_coords = Vector2i();
 		int bit = -1;
 		int terrain = -1;
@@ -128,14 +128,14 @@ public:
 		}
 
 		String to_string() const {
-			return vformat("Constraint {pos:%s, bit:%d, terrain:%d}", base_cell_coords, bit, terrain);
+			return vformat("Constraint {pos:%s, bit:%d, terrain:%d}", Vector2(base_cell_coords), bit, terrain);
 		}
 
 		Vector2i get_base_cell_coords() const {
 			return base_cell_coords;
 		}
 
-		Map<Vector2i, TileSet::CellNeighbor> get_overlapping_coords_and_peering_bits() const;
+		Map<Vector2i, RTileSet::CellNeighbor> get_overlapping_coords_and_peering_bits() const;
 
 		void set_terrain(int p_terrain) {
 			terrain = p_terrain;
@@ -145,7 +145,7 @@ public:
 			return terrain;
 		}
 
-		TerrainConstraint(const TileMap *p_tile_map, const Vector2i &p_position, const TileSet::CellNeighbor &p_bit, int p_terrain);
+		TerrainConstraint(const RTileMap *p_tile_map, const Vector2i &p_position, const RTileSet::CellNeighbor &p_bit, int p_terrain);
 		TerrainConstraint() {}
 	};
 
@@ -169,7 +169,7 @@ private:
 	static constexpr float FP_ADJUST = 0.00001;
 
 	// Properties.
-	Ref<TileSet> tile_set;
+	Ref<RTileSet> tile_set;
 	int quadrant_size = 16;
 	bool collision_animatable = false;
 	VisibilityMode collision_visibility_mode = VISIBILITY_MODE_DEFAULT;
@@ -193,9 +193,9 @@ private:
 		int y_sort_origin = 0;
 		int z_index = 0;
 		RID canvas_item;
-		Map<Vector2i, TileMapCell> tile_map;
-		Map<Vector2i, TileMapQuadrant> quadrant_map;
-		SelfList<TileMapQuadrant>::List dirty_quadrant_list;
+		Map<Vector2i, RTileMapCell> tile_map;
+		Map<Vector2i, RTileMapQuadrant> quadrant_map;
+		SelfList<RTileMapQuadrant>::List dirty_quadrant_list;
 	};
 	LocalVector<TileMapLayer> layers;
 	int selected_layer = -1;
@@ -206,9 +206,9 @@ private:
 	// Quadrants and internals management.
 	Vector2i _coords_to_quadrant_coords(int p_layer, const Vector2i &p_coords) const;
 
-	Map<Vector2i, TileMapQuadrant>::Element *_create_quadrant(int p_layer, const Vector2i &p_qk);
+	Map<Vector2i, RTileMapQuadrant>::Element *_create_quadrant(int p_layer, const Vector2i &p_qk);
 
-	void _make_quadrant_dirty(Map<Vector2i, TileMapQuadrant>::Element *Q);
+	void _make_quadrant_dirty(Map<Vector2i, RTileMapQuadrant>::Element *Q);
 	void _make_all_quadrants_dirty();
 	void _queue_update_dirty_quadrants();
 
@@ -217,7 +217,7 @@ private:
 	void _recreate_layer_internals(int p_layer);
 	void _recreate_internals();
 
-	void _erase_quadrant(Map<Vector2i, TileMapQuadrant>::Element *Q);
+	void _erase_quadrant(Map<Vector2i, RTileMapQuadrant>::Element *Q);
 	void _clear_layer_internals(int p_layer);
 	void _clear_internals();
 
@@ -229,35 +229,35 @@ private:
 	void _rendering_notification(int p_what);
 	void _rendering_update_layer(int p_layer);
 	void _rendering_cleanup_layer(int p_layer);
-	void _rendering_update_dirty_quadrants(SelfList<TileMapQuadrant>::List &r_dirty_quadrant_list);
-	void _rendering_create_quadrant(TileMapQuadrant *p_quadrant);
-	void _rendering_cleanup_quadrant(TileMapQuadrant *p_quadrant);
-	void _rendering_draw_quadrant_debug(TileMapQuadrant *p_quadrant);
+	void _rendering_update_dirty_quadrants(SelfList<RTileMapQuadrant>::List &r_dirty_quadrant_list);
+	void _rendering_create_quadrant(RTileMapQuadrant *p_quadrant);
+	void _rendering_cleanup_quadrant(RTileMapQuadrant *p_quadrant);
+	void _rendering_draw_quadrant_debug(RTileMapQuadrant *p_quadrant);
 
 	Transform2D last_valid_transform;
 	Transform2D new_transform;
 	void _physics_notification(int p_what);
-	void _physics_update_dirty_quadrants(SelfList<TileMapQuadrant>::List &r_dirty_quadrant_list);
-	void _physics_cleanup_quadrant(TileMapQuadrant *p_quadrant);
-	void _physics_draw_quadrant_debug(TileMapQuadrant *p_quadrant);
+	void _physics_update_dirty_quadrants(SelfList<RTileMapQuadrant>::List &r_dirty_quadrant_list);
+	void _physics_cleanup_quadrant(RTileMapQuadrant *p_quadrant);
+	void _physics_draw_quadrant_debug(RTileMapQuadrant *p_quadrant);
 
 	void _navigation_notification(int p_what);
-	void _navigation_update_dirty_quadrants(SelfList<TileMapQuadrant>::List &r_dirty_quadrant_list);
-	void _navigation_cleanup_quadrant(TileMapQuadrant *p_quadrant);
-	void _navigation_draw_quadrant_debug(TileMapQuadrant *p_quadrant);
+	void _navigation_update_dirty_quadrants(SelfList<RTileMapQuadrant>::List &r_dirty_quadrant_list);
+	void _navigation_cleanup_quadrant(RTileMapQuadrant *p_quadrant);
+	void _navigation_draw_quadrant_debug(RTileMapQuadrant *p_quadrant);
 
-	void _scenes_update_dirty_quadrants(SelfList<TileMapQuadrant>::List &r_dirty_quadrant_list);
-	void _scenes_cleanup_quadrant(TileMapQuadrant *p_quadrant);
-	void _scenes_draw_quadrant_debug(TileMapQuadrant *p_quadrant);
+	void _scenes_update_dirty_quadrants(SelfList<RTileMapQuadrant>::List &r_dirty_quadrant_list);
+	void _scenes_cleanup_quadrant(RTileMapQuadrant *p_quadrant);
+	void _scenes_draw_quadrant_debug(RTileMapQuadrant *p_quadrant);
 
 	// Terrains.
-	Set<TileSet::TerrainsPattern> _get_valid_terrains_patterns_for_constraints(int p_terrain_set, const Vector2i &p_position, Set<TerrainConstraint> p_constraints);
+	Set<RTileSet::TerrainsPattern> _get_valid_terrains_patterns_for_constraints(int p_terrain_set, const Vector2i &p_position, Set<TerrainConstraint> p_constraints);
 
 	// Set and get tiles from data arrays.
 	void _set_tile_data(int p_layer, const Vector<int> &p_data);
 	Vector<int> _get_tile_data(int p_layer) const;
 
-	void _build_runtime_update_tile_data(SelfList<TileMapQuadrant>::List &r_dirty_quadrant_list);
+	void _build_runtime_update_tile_data(SelfList<RTileMapQuadrant>::List &r_dirty_quadrant_list);
 
 	void _tile_set_changed();
 	bool _tile_set_changed_deferred_update_needed = false;
@@ -272,7 +272,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	static Vector2i transform_coords_layout(Vector2i p_coords, TileSet::TileOffsetAxis p_offset_axis, TileSet::TileLayout p_from_layout, TileSet::TileLayout p_to_layout);
+	static Vector2i transform_coords_layout(Vector2i p_coords, RTileSet::TileOffsetAxis p_offset_axis, RTileSet::TileLayout p_from_layout, RTileSet::TileLayout p_to_layout);
 
 	enum {
 		INVALID_CELL = -1
@@ -282,13 +282,13 @@ public:
 	virtual Rect2 _edit_get_rect() const override;
 #endif
 
-	void set_tileset(const Ref<TileSet> &p_tileset);
-	Ref<TileSet> get_tileset() const;
+	void set_tileset(const Ref<RTileSet> &p_tileset);
+	Ref<RTileSet> get_tileset() const;
 
 	void set_quadrant_size(int p_size);
 	int get_quadrant_size() const;
 
-	static void draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<TileSet> p_tile_set, int p_atlas_source_id, Vector2i p_atlas_coords, int p_alternative_tile, int p_frame = -1, Color p_modulation = Color(1.0, 1.0, 1.0, 1.0), const TileData *p_tile_data_override = nullptr);
+	static void draw_tile(RID p_canvas_item, Vector2i p_position, const Ref<RTileSet> p_tile_set, int p_atlas_source_id, Vector2i p_atlas_coords, int p_alternative_tile, int p_frame = -1, Color p_modulation = Color(1.0, 1.0, 1.0, 1.0), const RTileData *p_tile_data_override = nullptr);
 
 	// Layers management.
 	int get_layers_count() const;
@@ -321,25 +321,25 @@ public:
 	VisibilityMode get_navigation_visibility_mode();
 
 	// Cells accessors.
-	void set_cell(int p_layer, const Vector2i &p_coords, int p_source_id = -1, const Vector2i p_atlas_coords = TileSetSource::INVALID_ATLAS_COORDS, int p_alternative_tile = TileSetSource::INVALID_TILE_ALTERNATIVE);
+	void set_cell(int p_layer, const Vector2i &p_coords, int p_source_id = -1, const Vector2i p_atlas_coords = RTileSetSource::INVALID_ATLAS_COORDS, int p_alternative_tile = RTileSetSource::INVALID_TILE_ALTERNATIVE);
 	int get_cell_source_id(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
 	Vector2i get_cell_atlas_coords(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
 	int get_cell_alternative_tile(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
 
 	// Patterns.
-	Ref<TileMapPattern> get_pattern(int p_layer, TypedArray<Vector2i> p_coords_array);
-	Vector2i map_pattern(Vector2i p_position_in_tilemap, Vector2i p_coords_in_pattern, Ref<TileMapPattern> p_pattern);
-	void set_pattern(int p_layer, Vector2i p_position, const Ref<TileMapPattern> p_pattern);
+	Ref<RTileMapPattern> get_pattern(int p_layer, TypedArray<Vector2i> p_coords_array);
+	Vector2i map_pattern(Vector2i p_position_in_tilemap, Vector2i p_coords_in_pattern, Ref<RTileMapPattern> p_pattern);
+	void set_pattern(int p_layer, Vector2i p_position, const Ref<RTileMapPattern> p_pattern);
 
 	// Terrains.
 	Set<TerrainConstraint> get_terrain_constraints_from_removed_cells_list(int p_layer, const Set<Vector2i> &p_to_replace, int p_terrain_set, bool p_ignore_empty_terrains = true) const; // Not exposed.
-	Set<TerrainConstraint> get_terrain_constraints_from_added_tile(Vector2i p_position, int p_terrain_set, TileSet::TerrainsPattern p_terrains_pattern) const; // Not exposed.
-	Map<Vector2i, TileSet::TerrainsPattern> terrain_wave_function_collapse(const Set<Vector2i> &p_to_replace, int p_terrain_set, const Set<TerrainConstraint> p_constraints); // Not exposed.
+	Set<TerrainConstraint> get_terrain_constraints_from_added_tile(Vector2i p_position, int p_terrain_set, RTileSet::TerrainsPattern p_terrains_pattern) const; // Not exposed.
+	Map<Vector2i, RTileSet::TerrainsPattern> terrain_wave_function_collapse(const Set<Vector2i> &p_to_replace, int p_terrain_set, const Set<TerrainConstraint> p_constraints); // Not exposed.
 	void set_cells_from_surrounding_terrains(int p_layer, TypedArray<Vector2i> p_coords_array, int p_terrain_set, bool p_ignore_empty_terrains = true);
 
 	// Not exposed to users
-	TileMapCell get_cell(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
-	Map<Vector2i, TileMapQuadrant> *get_quadrant_map(int p_layer);
+	RTileMapCell get_cell(int p_layer, const Vector2i &p_coords, bool p_use_proxies = false) const;
+	Map<Vector2i, RTileMapQuadrant> *get_quadrant_map(int p_layer);
 	int get_effective_quadrant_size(int p_layer) const;
 	//---
 
@@ -348,8 +348,8 @@ public:
 	Vector2 map_to_world(const Vector2i &p_pos) const;
 	Vector2i world_to_map(const Vector2 &p_pos) const;
 
-	bool is_existing_neighbor(TileSet::CellNeighbor p_cell_neighbor) const;
-	Vector2i get_neighbor_cell(const Vector2i &p_coords, TileSet::CellNeighbor p_cell_neighbor) const;
+	bool is_existing_neighbor(RTileSet::CellNeighbor p_cell_neighbor) const;
+	Vector2i get_neighbor_cell(const Vector2i &p_coords, RTileSet::CellNeighbor p_cell_neighbor) const;
 
 	TypedArray<Vector2i> get_used_cells(int p_layer) const;
 	Rect2 get_used_rect(); // Not const because of cache
@@ -380,7 +380,7 @@ public:
 
 	// Virtual function to modify the TileData at runtime
 	GDVIRTUAL2R(bool, _use_tile_data_runtime_update, int, Vector2i);
-	GDVIRTUAL3(_tile_data_runtime_update, int, Vector2i, TileData *);
+	GDVIRTUAL3(_tile_data_runtime_update, int, Vector2i, RTileData *);
 
 	// Configuration warnings.
 	TypedArray<String> get_configuration_warnings() const override;
@@ -389,6 +389,6 @@ public:
 	~TileMap();
 };
 
-VARIANT_ENUM_CAST(TileMap::VisibilityMode);
+VARIANT_ENUM_CAST(RTileMap::VisibilityMode);
 
 #endif // TILE_MAP_H
