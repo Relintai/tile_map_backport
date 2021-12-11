@@ -50,7 +50,7 @@ void RTileSetEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_data,
 
 	if (p_from == sources_list) {
 		// Handle dropping a texture in the list of atlas resources.
-		int source_id = TileSet::INVALID_SOURCE;
+		int source_id = RTileSet::INVALID_SOURCE;
 		int added = 0;
 		Dictionary d = p_data;
 		Vector<String> files = d["files"];
@@ -61,7 +61,7 @@ void RTileSetEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_data,
 				source_id = tile_set->get_next_source_id();
 
 				// Actually create the new source.
-				Ref<TileSetAtlasSource> atlas_source = memnew(TileSetAtlasSource);
+				Ref<RTileSetAtlasSource> atlas_source = memnew(RTileSetAtlasSource);
 				atlas_source->set_texture(resource);
 				undo_redo->create_action(TTR("Add a new atlas source"));
 				undo_redo->add_do_method(*tile_set, "add_source", atlas_source, source_id);
@@ -118,7 +118,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 	ERR_FAIL_COND(!tile_set.is_valid());
 
 	// Get the previously selected id.
-	int old_selected = TileSet::INVALID_SOURCE;
+	int old_selected = RTileSet::INVALID_SOURCE;
 	if (sources_list->get_current() >= 0) {
 		int source_id = sources_list->get_item_metadata(sources_list->get_current());
 		if (tile_set->has_source(source_id)) {
@@ -126,7 +126,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 		}
 	}
 
-	int to_select = TileSet::INVALID_SOURCE;
+	int to_select = RTileSet::INVALID_SOURCE;
 	if (force_selected_id >= 0) {
 		to_select = force_selected_id;
 	} else if (old_selected >= 0) {
@@ -140,7 +140,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 	for (int i = 0; i < tile_set->get_source_count(); i++) {
 		int source_id = tile_set->get_source_id(i);
 
-		TileSetSource *source = *tile_set->get_source(source_id);
+		RTileSetSource *source = *tile_set->get_source(source_id);
 
 		Ref<Texture> texture;
 		String item_text;
@@ -151,7 +151,7 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 		}
 
 		// Atlas source.
-		TileSetAtlasSource *atlas_source = Object::cast_to<TileSetAtlasSource>(source);
+		RTileSetAtlasSource *atlas_source = Object::cast_to<RTileSetAtlasSource>(source);
 		if (atlas_source) {
 			texture = atlas_source->get_texture();
 			if (item_text.is_empty()) {
@@ -164,16 +164,16 @@ void RTileSetEditor::_update_sources_list(int force_selected_id) {
 		}
 
 		// Scene collection source.
-		TileSetScenesCollectionSource *scene_collection_source = Object::cast_to<TileSetScenesCollectionSource>(source);
+		RTileSetScenesCollectionSource *scene_collection_source = Object::cast_to<RTileSetScenesCollectionSource>(source);
 		if (scene_collection_source) {
-			texture = get_theme_icon(("PackedScene"), ("EditorIcons"));
-			if (item_text.is_empty()) {
+			texture = get_icon(("PackedScene"), ("EditorIcons"));
+			if (item_text.empty()) {
 				item_text = vformat(TTR("Scene Collection Source (ID:%d)"), source_id);
 			}
 		}
 
 		// Use default if not valid.
-		if (item_text.is_empty()) {
+		if (item_text.empty()) {
 			item_text = vformat(TTR("Unknown Type Source (ID:%d)"), source_id);
 		}
 		if (!texture.is_valid()) {
@@ -220,8 +220,8 @@ void RTileSetEditor::_source_selected(int p_source_index) {
 
 	if (p_source_index >= 0) {
 		int source_id = sources_list->get_item_metadata(p_source_index);
-		TileSetAtlasSource *atlas_source = Object::cast_to<TileSetAtlasSource>(*tile_set->get_source(source_id));
-		TileSetScenesCollectionSource *scenes_collection_source = Object::cast_to<TileSetScenesCollectionSource>(*tile_set->get_source(source_id));
+		RTileSetAtlasSource *atlas_source = Object::cast_to<RTileSetAtlasSource>(*tile_set->get_source(source_id));
+		RTileSetScenesCollectionSource *scenes_collection_source = Object::cast_to<RTileSetScenesCollectionSource>(*tile_set->get_source(source_id));
 		if (atlas_source) {
 			no_source_selected_label->hide();
 			tile_set_atlas_source_editor->edit(*tile_set, atlas_source, source_id);
@@ -250,7 +250,7 @@ void RTileSetEditor::_source_delete_pressed() {
 	// Update the selected source.
 	int to_delete = sources_list->get_item_metadata(sources_list->get_current());
 
-	Ref<TileSetSource> source = tile_set->get_source(to_delete);
+	Ref<RTileSetSource> source = tile_set->get_source(to_delete);
 
 	// Remove the source.
 	undo_redo->create_action(TTR("Remove source"));
@@ -268,7 +268,7 @@ void RTileSetEditor::_source_add_id_pressed(int p_id_pressed) {
 		case 0: {
 			int source_id = tile_set->get_next_source_id();
 
-			Ref<TileSetAtlasSource> atlas_source = memnew(TileSetAtlasSource);
+			Ref<RTileSetAtlasSource> atlas_source = memnew(RTileSetAtlasSource);
 
 			// Add a new source.
 			undo_redo->create_action(TTR("Add atlas source"));
@@ -282,7 +282,7 @@ void RTileSetEditor::_source_add_id_pressed(int p_id_pressed) {
 		case 1: {
 			int source_id = tile_set->get_next_source_id();
 
-			Ref<TileSetScenesCollectionSource> scene_collection_source = memnew(TileSetScenesCollectionSource);
+			Ref<RTileSetScenesCollectionSource> scene_collection_source = memnew(RTileSetScenesCollectionSource);
 
 			// Add a new source.
 			undo_redo->create_action(TTR("Add atlas source"));
@@ -316,10 +316,10 @@ void RTileSetEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED:
-			sources_delete_button->set_icon(get_theme_icon(("Remove"), ("EditorIcons")));
-			sources_add_button->set_icon(get_theme_icon(("Add"), ("EditorIcons")));
-			sources_advanced_menu_button->set_icon(get_theme_icon(("GuiTabMenuHl"), ("EditorIcons")));
-			missing_texture_texture = get_theme_icon(("TileSet"), ("EditorIcons"));
+			sources_delete_button->set_icon(get_icon(("Remove"), ("EditorIcons")));
+			sources_add_button->set_icon(get_icon(("Add"), ("EditorIcons")));
+			sources_advanced_menu_button->set_icon(get_icon(("GuiTabMenuHl"), ("EditorIcons")));
+			missing_texture_texture = get_icon(("TileSet"), ("EditorIcons"));
 			break;
 		case NOTIFICATION_INTERNAL_PROCESS:
 			if (tile_set_changed_needs_update) {
@@ -352,7 +352,7 @@ void RTileSetEditor::_patterns_item_list_gui_input(const Ref<InputEvent> &p_even
 	}
 }
 
-void RTileSetEditor::_pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture) {
+void RTileSetEditor::_pattern_preview_done(Ref<RTileMapPattern> p_pattern, Ref<Texture> p_texture) {
 	// TODO optimize ?
 	for (int i = 0; i < patterns_item_list->get_item_count(); i++) {
 		if (patterns_item_list->get_item_metadata(i) == p_pattern) {
@@ -390,7 +390,7 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 	UndoRedo *undo_redo = Object::cast_to<UndoRedo>(p_undo_redo);
 	ERR_FAIL_COND(!undo_redo);
 
-	TileSet *tile_set = Object::cast_to<TileSet>(p_edited);
+	RTileSet *tile_set = Object::cast_to<RTileSet>(p_edited);
 	if (!tile_set) {
 		return;
 	}
@@ -459,13 +459,13 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 	for (int i = 0; i < tile_set->get_source_count(); i++) {
 		int source_id = tile_set->get_source_id(i);
 
-		Ref<TileSetAtlasSource> tas = tile_set->get_source(source_id);
+		Ref<RTileSetAtlasSource> tas = tile_set->get_source(source_id);
 		if (tas.is_valid()) {
 			for (int j = 0; j < tas->get_tiles_count(); j++) {
 				Vector2i tile_id = tas->get_tile_id(j);
 				for (int k = 0; k < tas->get_alternative_tiles_count(tile_id); k++) {
 					int alternative_id = tas->get_alternative_tile_id(tile_id, k);
-					TileData *tile_data = Object::cast_to<TileData>(tas->get_tile_data(tile_id, alternative_id));
+					RTileData *tile_data = Object::cast_to<RTileData>(tas->get_tile_data(tile_id, alternative_id));
 					ERR_FAIL_COND(!tile_data);
 
 					// Actually saving stuff.
@@ -485,16 +485,16 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 					} else if (p_array_prefix == "terrain_set_") {
 						ADD_UNDO(tile_data, "terrain_set");
 						for (int terrain_set_index = begin; terrain_set_index < end; terrain_set_index++) {
-							for (int l = 0; l < TileSet::CELL_NEIGHBOR_MAX; l++) {
-								TileSet::CellNeighbor bit = TileSet::CellNeighbor(l);
+							for (int l = 0; l < RTileSet::CELL_NEIGHBOR_MAX; l++) {
+								RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(l);
 								if (tile_data->is_valid_peering_bit_terrain(bit)) {
 									ADD_UNDO(tile_data, "terrains_peering_bit/" + String(TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[l]));
 								}
 							}
 						}
 					} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int() && components[1] == "terrain_") {
-						for (int terrain_index = 0; terrain_index < TileSet::CELL_NEIGHBOR_MAX; terrain_index++) {
-							TileSet::CellNeighbor bit = TileSet::CellNeighbor(terrain_index);
+						for (int terrain_index = 0; terrain_index < RTileSet::CELL_NEIGHBOR_MAX; terrain_index++) {
+							RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(terrain_index);
 							if (tile_data->is_valid_peering_bit_terrain(bit)) {
 								ADD_UNDO(tile_data, "terrains_peering_bit/" + String(TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[terrain_index]));
 							}
@@ -572,31 +572,31 @@ void RTileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *
 	ERR_FAIL_COND(!undo_redo);
 
 #define ADD_UNDO(obj, property) undo_redo->add_undo_property(obj, property, obj->get(property));
-	TileSet *tile_set = Object::cast_to<TileSet>(p_edited);
+	RTileSet *tile_set = Object::cast_to<RTileSet>(p_edited);
 	if (tile_set) {
 		Vector<String> components = p_property.split("/", true, 3);
 		for (int i = 0; i < tile_set->get_source_count(); i++) {
 			int source_id = tile_set->get_source_id(i);
 
-			Ref<TileSetAtlasSource> tas = tile_set->get_source(source_id);
+			Ref<RTileSetAtlasSource> tas = tile_set->get_source(source_id);
 			if (tas.is_valid()) {
 				for (int j = 0; j < tas->get_tiles_count(); j++) {
 					Vector2i tile_id = tas->get_tile_id(j);
 					for (int k = 0; k < tas->get_alternative_tiles_count(tile_id); k++) {
 						int alternative_id = tas->get_alternative_tile_id(tile_id, k);
-						TileData *tile_data = Object::cast_to<TileData>(tas->get_tile_data(tile_id, alternative_id));
+						RTileData *tile_data = Object::cast_to<RTileData>(tas->get_tile_data(tile_id, alternative_id));
 						ERR_FAIL_COND(!tile_data);
 
 						if (components.size() == 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int() && components[1] == "mode") {
 							ADD_UNDO(tile_data, "terrain_set");
-							for (int l = 0; l < TileSet::CELL_NEIGHBOR_MAX; l++) {
-								TileSet::CellNeighbor bit = TileSet::CellNeighbor(l);
+							for (int l = 0; l < RTileSet::CELL_NEIGHBOR_MAX; l++) {
+								RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(l);
 								if (tile_data->is_valid_peering_bit_terrain(bit)) {
-									ADD_UNDO(tile_data, "terrains_peering_bit/" + String(TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[l]));
+									ADD_UNDO(tile_data, "terrains_peering_bit/" + String(RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[l]));
 								}
 							}
 						} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_int() && components[1] == "type") {
-							int custom_data_layer = components[0].trim_prefix("custom_data_layer_").is_valid_int();
+							int custom_data_layer = components[0].trim_prefix("custom_data_layer_").is_valid_integer();
 							ADD_UNDO(tile_data, vformat("custom_data_%d", custom_data_layer));
 						}
 					}
@@ -612,7 +612,7 @@ void RTileSetEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_drop_data_fw"), &RTileSetEditor::_drop_data_fw);
 }
 
-void RTileSetEditor::edit(Ref<TileSet> p_tile_set) {
+void RTileSetEditor::edit(Ref<RTileSet> p_tile_set) {
 	if (p_tile_set == tile_set) {
 		return;
 	}
@@ -677,7 +677,7 @@ RTileSetEditor::RTileSetEditor() {
 	sources_list->connect("item_selected", callable_mp(this, &RTileSetEditor::_source_selected));
 	sources_list->connect("item_selected", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::set_sources_lists_current));
 	sources_list->connect("visibility_changed", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::synchronize_sources_list), varray(sources_list));
-	sources_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
+	//sources_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	sources_list->set_drag_forwarding(this);
 	split_container_left_side->add_child(sources_list);
 

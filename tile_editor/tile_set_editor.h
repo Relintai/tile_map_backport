@@ -50,7 +50,7 @@ private:
 
 	// TabBar.
 	HBoxContainer *tile_set_toolbar;
-	TabBar *tabs_bar;
+	Tabs *tabs_bar;
 
 	// Tiles.
 	Label *no_source_selected_label;
@@ -99,7 +99,7 @@ protected:
 public:
 	_FORCE_INLINE_ static RTileSetEditor *get_singleton() { return singleton; }
 
-	void edit(Ref<TileSet> p_tile_set);
+	void edit(Ref<RTileSet> p_tile_set);
 
 	RTileSetEditor();
 	~RTileSetEditor();

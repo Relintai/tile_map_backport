@@ -294,7 +294,7 @@ class REditorPropertyTilePolygon : public EditorProperty {
 
 	void _add_focusable_children(Node *p_node);
 
-	GenericTilePolygonEditor *generic_tile_polygon_editor;
+	RGenericTilePolygonEditor *generic_tile_polygon_editor;
 	void _polygons_changed();
 
 public:
@@ -312,7 +312,7 @@ class REditorInspectorPluginTileData : public EditorInspectorPlugin {
 
 public:
 	virtual bool can_handle(Object *p_object) override;
-	virtual bool parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const uint32_t p_usage, const bool p_wide = false) override;
+	virtual bool parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const uint32_t p_usage, const bool p_wide = false);
 };
 
 #endif // TILE_SET_ATLAS_SOURCE_EDITOR_H

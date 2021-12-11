@@ -58,7 +58,7 @@ private:
 		void set_id(int p_id);
 		int get_id();
 
-		void edit(Ref<RTileSet> p_tile_set, TileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
+		void edit(Ref<RTileSet> p_tile_set, RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id);
 	};
 
 	// -- Proxy object for a tile, needed by the inspector --

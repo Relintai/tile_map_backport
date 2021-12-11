@@ -38,7 +38,7 @@
 #include "editor/editor_node.h"
 #include "../rtile_map.h"
 #include "scene/gui/box_container.h"
-#include "scene/gui/tab_bar.h"
+#include "scene/gui/tabs.h"
 
 class RTileMapEditorPlugin : public Object {
 public:
@@ -122,10 +122,10 @@ private:
 
 	///// Selection system. /////
 	Set<Vector2i> tile_map_selection;
-	Ref<TileMapPattern> tile_map_clipboard;
-	Ref<TileMapPattern> selection_pattern;
-	void _set_tile_map_selection(const TypedArray<Vector2i> &p_selection);
-	TypedArray<Vector2i> _get_tile_map_selection() const;
+	Ref<RTileMapPattern> tile_map_clipboard;
+	Ref<RTileMapPattern> selection_pattern;
+	void _set_tile_map_selection(const Vector<Vector2i> &p_selection);
+	Vector<Vector2i> _get_tile_map_selection() const;
 
 	Set<RTileMapCell> tile_set_selection;
 
@@ -184,7 +184,7 @@ private:
 	ItemList *patterns_item_list;
 	Label *patterns_help_label;
 	void _patterns_item_list_gui_input(const Ref<InputEvent> &p_event);
-	void _pattern_preview_done(Ref<TileMapPattern> p_pattern, Ref<Texture> p_texture);
+	void _pattern_preview_done(Ref<RTileMapPattern> p_pattern, Ref<Texture> p_texture);
 	bool select_last_pattern = false;
 	void _update_patterns_list();
 
@@ -322,7 +322,7 @@ private:
 
 	// Bottom panel.
 	Label *missing_tileset_label;
-	TabBar *tabs_bar;
+	Tabs *tabs_bar;
 	LocalVector<RTileMapEditorPlugin::TabData> tabs_data;
 	LocalVector<RTileMapEditorPlugin *> tabs_plugins;
 	void _update_bottom_panel();

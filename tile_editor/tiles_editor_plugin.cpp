@@ -48,7 +48,7 @@
 RTilesEditorPlugin *RTilesEditorPlugin::singleton = nullptr;
 
 void RTilesEditorPlugin::_preview_frame_started() {
-	RS::get_singleton()->request_frame_drawn_callback(callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_pattern_preview_done));
+	VS::get_singleton()->request_frame_drawn_callback(callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_pattern_preview_done));
 }
 
 void RTilesEditorPlugin::_pattern_preview_done() {
@@ -83,7 +83,7 @@ void RTilesEditorPlugin::_thread() {
 				viewport->set_transparent_background(true);
 				viewport->set_update_mode(SubViewport::UPDATE_ONCE);
 
-				TileMap *tile_map = memnew(TileMap);
+				RTileMap *tile_map = memnew(RTileMap);
 				tile_map->set_tileset(item.tile_set);
 				tile_map->set_pattern(0, Vector2(), item.pattern);
 				viewport->add_child(tile_map);
@@ -163,7 +163,7 @@ void RTilesEditorPlugin::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_INTERNAL_PROCESS: {
 			if (tile_map_changed_needs_update) {
-				TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
+				RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 				if (tile_map) {
 					tile_set = tile_map->get_tileset();
 				}
@@ -177,7 +177,7 @@ void RTilesEditorPlugin::_notification(int p_what) {
 void RTilesEditorPlugin::make_visible(bool p_visible) {
 	if (p_visible) {
 		// Disable and hide invalid editors.
-		TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
+		RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 		tileset_editor_button->set_visible(tile_set.is_valid());
 		tilemap_editor_button->set_visible(tile_map);
 		if (tile_map) {
@@ -237,7 +237,7 @@ void RTilesEditorPlugin::synchronize_atlas_view(Object *p_current) {
 
 void RTilesEditorPlugin::edit(Object *p_object) {
 	// Disconnect to changes.
-	TileMap *tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
+	RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 	if (tile_map) {
 		tile_map->disconnect("changed", callable_mp(this, &RTilesEditorPlugin::_tile_map_changed));
 	}
@@ -247,7 +247,7 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 	if (p_object) {
 		if (p_object->is_class("TileMap")) {
 			tile_map_id = p_object->get_instance_id();
-			tile_map = Object::cast_to<TileMap>(ObjectDB::get_instance(tile_map_id));
+			tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 			tile_set = tile_map->get_tileset();
 			editor_node->make_bottom_panel_item_visible(tilemap_editor);
 		} else if (p_object->is_class("RTileSet")) {
