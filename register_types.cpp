@@ -26,11 +26,12 @@ SOFTWARE.
 #include "rtile_map.h"
 
 #ifdef TOOLS_ENABLED
+#include "tile_editor/tiles_editor_plugin.h"
 #endif
 
 void register_rtile_map_types() {
 #ifdef TOOLS_ENABLED
-//	EditorPlugins::add_by_type<ModuleSkeletonEditorPlugin>();
+	EditorPlugins::add_by_type<RTilesEditorPlugin>();
 #endif
 
     ClassDB::register_class<RTileMapPattern>();
