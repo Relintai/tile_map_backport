@@ -174,6 +174,10 @@ void RTilesEditorPlugin::_notification(int p_what) {
 	}
 }
 
+void RTilesEditorPlugin::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_atlas_view_transform"), &RTilesEditorPlugin::set_atlas_view_transform);
+}
+
 void RTilesEditorPlugin::make_visible(bool p_visible) {
 	if (p_visible) {
 		// Disable and hide invalid editors.

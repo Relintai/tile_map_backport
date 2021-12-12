@@ -297,6 +297,9 @@ class REditorPropertyTilePolygon : public EditorProperty {
 	RGenericTilePolygonEditor *generic_tile_polygon_editor;
 	void _polygons_changed();
 
+protected:
+	static void _bind_methods();
+
 public:
 	virtual void update_property() override;
 	void setup_single_mode(const StringName &p_property, const String &p_base_type);
