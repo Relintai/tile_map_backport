@@ -71,6 +71,7 @@ void RTileProxiesManagerDialog::_delete_selected_bindings() {
 		Array val = tile_set->get_coords_level_tile_proxy(key[0], key[1]);
 		//TODO
 		//undo_redo->add_do_method(*tile_set, "remove_alternative_level_tile_proxy", key[0], key[1], key[2]);
+		tile_set->remove_alternative_level_tile_proxy(key[0], key[1], key[2]);
 		//undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", key[0], key[1], key[2], val[0], val[1], val[2]);
 	}
 	undo_redo->add_do_method(this, "_update_lists");
