@@ -323,9 +323,9 @@ void RTileSetEditor::_notification(int p_what) {
 			break;
 		case NOTIFICATION_INTERNAL_PROCESS:
 			if (tile_set_changed_needs_update) {
-				if (tile_set.is_valid()) {
-					tile_set->set_edited(true);
-				}
+				//if (tile_set.is_valid()) {
+				//	tile_set->set_edited(true);
+				//}
 				_update_sources_list();
 				_update_patterns_list();
 				tile_set_changed_needs_update = false;
@@ -368,9 +368,10 @@ void RTileSetEditor::_update_patterns_list() {
 	// Recreate the items.
 	patterns_item_list->clear();
 	for (int i = 0; i < tile_set->get_patterns_count(); i++) {
-		int id = patterns_item_list->add_item("");
+		patterns_item_list->add_item("");
+		int id = patterns_item_list->get_item_count() - 1;
 		patterns_item_list->set_item_metadata(id, tile_set->get_pattern(i));
-		RTilesEditorPlugin::get_singleton()->queue_pattern_preview(tile_set, tile_set->get_pattern(i), callable_mp(this, &RTileSetEditor::_pattern_preview_done));
+		RTilesEditorPlugin::get_singleton()->queue_pattern_preview(tile_set, tile_set->get_pattern(i), this, "_pattern_preview_done");
 	}
 
 	// Update the label visibility.
@@ -406,7 +407,7 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 		end = tile_set->get_physics_layers_count();
 	} else if (p_array_prefix == "terrain_set_") {
 		end = tile_set->get_terrain_sets_count();
-	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int() && components[1] == "terrain_") {
+	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_integer() && components[1] == "terrain_") {
 		int terrain_set = components[0].trim_prefix("terrain_set_").to_int();
 		end = tile_set->get_terrains_count(terrain_set);
 	} else if (p_array_prefix == "navigation_layer_") {
@@ -436,9 +437,10 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 	// Save layers' properties.
 	List<PropertyInfo> properties;
 	tile_set->get_property_list(&properties);
-	for (PropertyInfo pi : properties) {
-		if (pi.name.begins_with(p_array_prefix)) {
-			String str = pi.name.trim_prefix(p_array_prefix);
+
+	for (List<PropertyInfo>::Element *pi = properties.front(); pi; pi = pi->next()) {
+		if (pi->get().name.begins_with(p_array_prefix)) {
+			String str = pi->get().name.trim_prefix(p_array_prefix);
 			int to_char_index = 0;
 			while (to_char_index < str.length()) {
 				if (str[to_char_index] < '0' || str[to_char_index] > '9') {
@@ -449,7 +451,7 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 			if (to_char_index > 0) {
 				int array_index = str.left(to_char_index).to_int();
 				if (array_index >= begin && array_index < end) {
-					ADD_UNDO(tile_set, pi.name);
+					ADD_UNDO(tile_set, pi->get().name);
 				}
 			}
 		}
@@ -488,15 +490,15 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 							for (int l = 0; l < RTileSet::CELL_NEIGHBOR_MAX; l++) {
 								RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(l);
 								if (tile_data->is_valid_peering_bit_terrain(bit)) {
-									ADD_UNDO(tile_data, "terrains_peering_bit/" + String(TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[l]));
+									ADD_UNDO(tile_data, "terrains_peering_bit/" + String(RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[l]));
 								}
 							}
 						}
-					} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int() && components[1] == "terrain_") {
+					} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_integer() && components[1] == "terrain_") {
 						for (int terrain_index = 0; terrain_index < RTileSet::CELL_NEIGHBOR_MAX; terrain_index++) {
 							RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(terrain_index);
 							if (tile_data->is_valid_peering_bit_terrain(bit)) {
-								ADD_UNDO(tile_data, "terrains_peering_bit/" + String(TileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[terrain_index]));
+								ADD_UNDO(tile_data, "terrains_peering_bit/" + String(RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[terrain_index]));
 							}
 						}
 					} else if (p_array_prefix == "navigation_layer_") {
@@ -539,7 +541,7 @@ void RTileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p
 		} else {
 			undo_redo->add_do_method(tile_set, "move_terrain_set", p_from_index, p_to_pos);
 		}
-	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int() && components[1] == "terrain_") {
+	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_integer() && components[1] == "terrain_") {
 		int terrain_set = components[0].trim_prefix("terrain_set_").to_int();
 		if (p_from_index < 0) {
 			undo_redo->add_do_method(tile_set, "add_terrain", terrain_set, p_to_pos);
@@ -587,7 +589,7 @@ void RTileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *
 						RTileData *tile_data = Object::cast_to<RTileData>(tas->get_tile_data(tile_id, alternative_id));
 						ERR_FAIL_COND(!tile_data);
 
-						if (components.size() == 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int() && components[1] == "mode") {
+						if (components.size() == 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_integer() && components[1] == "mode") {
 							ADD_UNDO(tile_data, "terrain_set");
 							for (int l = 0; l < RTileSet::CELL_NEIGHBOR_MAX; l++) {
 								RTileSet::CellNeighbor bit = RTileSet::CellNeighbor(l);
@@ -595,7 +597,7 @@ void RTileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *
 									ADD_UNDO(tile_data, "terrains_peering_bit/" + String(RTileSet::CELL_NEIGHBOR_ENUM_TO_TEXT[l]));
 								}
 							}
-						} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_int() && components[1] == "type") {
+						} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_integer() && components[1] == "type") {
 							int custom_data_layer = components[0].trim_prefix("custom_data_layer_").is_valid_integer();
 							ADD_UNDO(tile_data, vformat("custom_data_%d", custom_data_layer));
 						}
@@ -610,6 +612,17 @@ void RTileSetEditor::_undo_redo_inspector_callback(Object *p_undo_redo, Object *
 void RTileSetEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_can_drop_data_fw"), &RTileSetEditor::_can_drop_data_fw);
 	ClassDB::bind_method(D_METHOD("_drop_data_fw"), &RTileSetEditor::_drop_data_fw);
+
+	ClassDB::bind_method(D_METHOD("_tile_set_changed"), &RTileSetEditor::_tile_set_changed);
+	ClassDB::bind_method(D_METHOD("_tab_changed"), &RTileSetEditor::_tab_changed);
+	ClassDB::bind_method(D_METHOD("_source_selected"), &RTileSetEditor::_source_selected);
+	ClassDB::bind_method(D_METHOD("_source_delete_pressed"), &RTileSetEditor::_source_delete_pressed);
+	ClassDB::bind_method(D_METHOD("_source_add_id_pressed"), &RTileSetEditor::_source_add_id_pressed);
+	ClassDB::bind_method(D_METHOD("_sources_advanced_menu_id_pressed"), &RTileSetEditor::_sources_advanced_menu_id_pressed);
+	ClassDB::bind_method(D_METHOD("_update_sources_list"), &RTileSetEditor::_update_sources_list);
+	ClassDB::bind_method(D_METHOD("_patterns_item_list_gui_input"), &RTileSetEditor::_patterns_item_list_gui_input);
+
+	ClassDB::bind_method(D_METHOD("_pattern_preview_done"), &RTileSetEditor::_pattern_preview_done);
 }
 
 void RTileSetEditor::edit(Ref<RTileSet> p_tile_set) {
@@ -619,7 +632,7 @@ void RTileSetEditor::edit(Ref<RTileSet> p_tile_set) {
 
 	// Remove listener.
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &RTileSetEditor::_tile_set_changed));
+		tile_set->disconnect("changed", this, "_tile_set_changed");
 	}
 
 	// Change the edited object.
@@ -627,7 +640,7 @@ void RTileSetEditor::edit(Ref<RTileSet> p_tile_set) {
 
 	// Add the listener again.
 	if (tile_set.is_valid()) {
-		tile_set->connect("changed", callable_mp(this, &RTileSetEditor::_tile_set_changed));
+		tile_set->connect("changed", this, "_tile_set_changed");
 		_update_sources_list();
 		_update_patterns_list();
 	}
@@ -643,11 +656,11 @@ RTileSetEditor::RTileSetEditor() {
 	set_process_internal(true);
 
 	// TabBar.
-	tabs_bar = memnew(TabBar);
-	tabs_bar->set_clip_tabs(false);
+	tabs_bar = memnew(Tabs);
+	//tabs_bar->set_clip_tabs(false);
 	tabs_bar->add_tab(TTR("Tiles"));
 	tabs_bar->add_tab(TTR("Patterns"));
-	tabs_bar->connect("tab_changed", callable_mp(this, &RTileSetEditor::_tab_changed));
+	tabs_bar->connect("tab_changed", this, "_tab_changed");
 
 	tile_set_toolbar = memnew(HBoxContainer);
 	tile_set_toolbar->set_h_size_flags(SIZE_EXPAND_FILL);
@@ -674,35 +687,38 @@ RTileSetEditor::RTileSetEditor() {
 	sources_list->set_fixed_icon_size(Size2i(60, 60) * EDSCALE);
 	sources_list->set_h_size_flags(SIZE_EXPAND_FILL);
 	sources_list->set_v_size_flags(SIZE_EXPAND_FILL);
-	sources_list->connect("item_selected", callable_mp(this, &RTileSetEditor::_source_selected));
-	sources_list->connect("item_selected", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::set_sources_lists_current));
-	sources_list->connect("visibility_changed", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::synchronize_sources_list), varray(sources_list));
+	sources_list->connect("item_selected", this, "_source_selected");
+	sources_list->connect("item_selected", RTilesEditorPlugin::get_singleton(), "set_sources_lists_current");
+
+	Vector<Variant> sources_list_arr;
+	sources_list_arr.push_back(sources_list);
+	sources_list->connect("visibility_changed", RTilesEditorPlugin::get_singleton(), "synchronize_sources_list", sources_list_arr);
 	//sources_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	sources_list->set_drag_forwarding(this);
 	split_container_left_side->add_child(sources_list);
 
 	HBoxContainer *sources_bottom_actions = memnew(HBoxContainer);
-	sources_bottom_actions->set_alignment(BoxContainer::ALIGNMENT_END);
+	sources_bottom_actions->set_alignment(BoxContainer::ALIGN_END);
 	split_container_left_side->add_child(sources_bottom_actions);
 
 	sources_delete_button = memnew(Button);
 	sources_delete_button->set_flat(true);
 	sources_delete_button->set_disabled(true);
-	sources_delete_button->connect("pressed", callable_mp(this, &RTileSetEditor::_source_delete_pressed));
+	sources_delete_button->connect("pressed", this, "_source_delete_pressed");
 	sources_bottom_actions->add_child(sources_delete_button);
 
 	sources_add_button = memnew(MenuButton);
 	sources_add_button->set_flat(true);
 	sources_add_button->get_popup()->add_item(TTR("Atlas"));
 	sources_add_button->get_popup()->add_item(TTR("Scenes Collection"));
-	sources_add_button->get_popup()->connect("id_pressed", callable_mp(this, &RTileSetEditor::_source_add_id_pressed));
+	sources_add_button->get_popup()->connect("id_pressed", this, "_source_add_id_pressed");
 	sources_bottom_actions->add_child(sources_add_button);
 
 	sources_advanced_menu_button = memnew(MenuButton);
 	sources_advanced_menu_button->set_flat(true);
 	sources_advanced_menu_button->get_popup()->add_item(TTR("Open Atlas Merging Tool"));
 	sources_advanced_menu_button->get_popup()->add_item(TTR("Manage Tile Proxies"));
-	sources_advanced_menu_button->get_popup()->connect("id_pressed", callable_mp(this, &RTileSetEditor::_sources_advanced_menu_id_pressed));
+	sources_advanced_menu_button->get_popup()->connect("id_pressed", this, "_sources_advanced_menu_id_pressed");
 	sources_bottom_actions->add_child(sources_advanced_menu_button);
 
 	atlas_merging_dialog = memnew(RAtlasMergingDialog);
@@ -722,15 +738,15 @@ RTileSetEditor::RTileSetEditor() {
 	no_source_selected_label->set_text(TTR("No TileSet source selected. Select or create a TileSet source."));
 	no_source_selected_label->set_h_size_flags(SIZE_EXPAND_FILL);
 	no_source_selected_label->set_v_size_flags(SIZE_EXPAND_FILL);
-	no_source_selected_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
-	no_source_selected_label->set_vertical_alignment(VERTICAL_ALIGNMENT_CENTER);
+	no_source_selected_label->set_align(Label::ALIGN_CENTER);
+	no_source_selected_label->set_valign(Label::VALIGN_CENTER);
 	split_container_right_side->add_child(no_source_selected_label);
 
 	// Atlases editor.
 	tile_set_atlas_source_editor = memnew(RTileSetAtlasSourceEditor);
 	tile_set_atlas_source_editor->set_h_size_flags(SIZE_EXPAND_FILL);
 	tile_set_atlas_source_editor->set_v_size_flags(SIZE_EXPAND_FILL);
-	tile_set_atlas_source_editor->connect("source_id_changed", callable_mp(this, &RTileSetEditor::_update_sources_list));
+	tile_set_atlas_source_editor->connect("source_id_changed", this, "_update_sources_list");
 	split_container_right_side->add_child(tile_set_atlas_source_editor);
 	tile_set_atlas_source_editor->hide();
 
@@ -738,7 +754,7 @@ RTileSetEditor::RTileSetEditor() {
 	tile_set_scenes_collection_source_editor = memnew(RTileSetScenesCollectionSourceEditor);
 	tile_set_scenes_collection_source_editor->set_h_size_flags(SIZE_EXPAND_FILL);
 	tile_set_scenes_collection_source_editor->set_v_size_flags(SIZE_EXPAND_FILL);
-	tile_set_scenes_collection_source_editor->connect("source_id_changed", callable_mp(this, &RTileSetEditor::_update_sources_list));
+	tile_set_scenes_collection_source_editor->connect("source_id_changed", this, "_update_sources_list");
 	split_container_right_side->add_child(tile_set_scenes_collection_source_editor);
 	tile_set_scenes_collection_source_editor->hide();
 
@@ -751,22 +767,22 @@ RTileSetEditor::RTileSetEditor() {
 	patterns_item_list->set_max_text_lines(2);
 	patterns_item_list->set_fixed_icon_size(Size2(thumbnail_size, thumbnail_size));
 	patterns_item_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	patterns_item_list->connect("gui_input", callable_mp(this, &RTileSetEditor::_patterns_item_list_gui_input));
+	patterns_item_list->connect("gui_input", this, "_patterns_item_list_gui_input");
 	add_child(patterns_item_list);
 	patterns_item_list->hide();
 
 	patterns_help_label = memnew(Label);
 	patterns_help_label->set_text(TTR("Add new patterns in the TileMap editing mode."));
-	patterns_help_label->set_anchors_and_offsets_preset(Control::PRESET_CENTER);
+	patterns_help_label->set_anchors_and_margins_preset(Control::PRESET_CENTER);
 	patterns_item_list->add_child(patterns_help_label);
 
 	// Registers UndoRedo inspector callback.
-	EditorNode::get_singleton()->get_editor_data().add_move_array_element_function(("TileSet"), callable_mp(this, &RTileSetEditor::_move_tile_set_array_element));
-	EditorNode::get_singleton()->get_editor_data().add_undo_redo_inspector_hook_callback(callable_mp(this, &RTileSetEditor::_undo_redo_inspector_callback));
+	//EditorNode::get_singleton()->get_editor_data().add_move_array_element_function(("TileSet"), callable_mp(this, &RTileSetEditor::_move_tile_set_array_element));
+	//EditorNode::get_singleton()->get_editor_data().add_undo_redo_inspector_hook_callback(callable_mp(this, &RTileSetEditor::_undo_redo_inspector_callback));
 }
 
 RTileSetEditor::~RTileSetEditor() {
 	if (tile_set.is_valid()) {
-		tile_set->disconnect("changed", callable_mp(this, &RTileSetEditor::_tile_set_changed));
+		tile_set->disconnect("changed", this, "_tile_set_changed");
 	}
 }

@@ -176,6 +176,11 @@ void RTilesEditorPlugin::_notification(int p_what) {
 
 void RTilesEditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_atlas_view_transform"), &RTilesEditorPlugin::set_atlas_view_transform);
+
+	ClassDB::bind_method(D_METHOD("set_sources_lists_current"), &RTilesEditorPlugin::set_sources_lists_current);
+	ClassDB::bind_method(D_METHOD("synchronize_sources_list"), &RTilesEditorPlugin::synchronize_sources_list);
+
+	ClassDB::bind_method(D_METHOD("_tile_map_changed"), &RTilesEditorPlugin::_tile_map_changed);
 }
 
 void RTilesEditorPlugin::make_visible(bool p_visible) {
@@ -197,12 +202,12 @@ void RTilesEditorPlugin::make_visible(bool p_visible) {
 	}
 }
 
-void RTilesEditorPlugin::queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<RTileMapPattern> p_pattern, Callable p_callback) {
+void RTilesEditorPlugin::queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<RTileMapPattern> p_pattern, Object *obj, String p_callback) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_pattern.is_valid());
 	{
 		MutexLock lock(pattern_preview_mutex);
-		pattern_preview_queue.push_back({ p_tile_set, p_pattern, p_callback });
+		pattern_preview_queue.push_back({ p_tile_set, p_pattern, obj, p_callback });
 	}
 	pattern_preview_sem.post();
 }
@@ -243,7 +248,7 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 	// Disconnect to changes.
 	RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 	if (tile_map) {
-		tile_map->disconnect("changed", callable_mp(this, &RTilesEditorPlugin::_tile_map_changed));
+		tile_map->disconnect("changed", this, "_tile_map_changed");
 	}
 
 	// Update edited objects.

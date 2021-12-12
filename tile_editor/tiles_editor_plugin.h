@@ -69,7 +69,8 @@ private:
 	struct QueueItem {
 		Ref<RTileSet> tile_set;
 		Ref<RTileMapPattern> pattern;
-		Callable callback;
+		Object *obj;
+		String callback;
 	};
 	List<QueueItem> pattern_preview_queue;
 	Mutex pattern_preview_mutex;
@@ -94,7 +95,7 @@ public:
 	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) override { tilemap_editor->forward_canvas_draw_over_viewport(p_overlay); }
 
 	// Pattern preview API.
-	void queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<RTileMapPattern> p_pattern, Callable p_callback);
+	void queue_pattern_preview(Ref<RTileSet> p_tile_set, Ref<RTileMapPattern> p_pattern, Object *obj, String p_callback);
 
 	// To synchronize the atlas sources lists.
 	void set_sources_lists_current(int p_current);
