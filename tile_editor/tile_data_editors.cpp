@@ -679,7 +679,7 @@ int RGenericTilePolygonEditor::add_polygon(Vector<Point2> p_polygon, int p_index
 	}
 }
 
-int RGenericTilePolygonEditor::add_polygon_poolvector(PoolVector2Array p_polygon, int p_index = -1) {
+int RGenericTilePolygonEditor::add_polygon_poolvector(PoolVector2Array p_polygon, int p_index) {
 	Vector<Point2> v;
 
 	v.resize(p_polygon.size());
