@@ -68,6 +68,8 @@ public:
 
 	// Used to draw the tile data property value over a tile.
 	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false){};
+
+	virtual void _property_value_changed(StringName p_property, Variant p_value, StringName p_field) {};
 };
 
 class RDummyObject : public Object {
@@ -113,7 +115,7 @@ private:
 	int drag_polygon_index;
 	int drag_point_index;
 	Vector2 drag_last_pos;
-	PoolVector2Array drag_old_polygon;
+	Vector<Vector2> drag_old_polygon;
 
 	HBoxContainer *toolbar;
 	Ref<ButtonGroup> tools_button_group;
@@ -173,10 +175,12 @@ public:
 
 	int get_polygon_count();
 	int add_polygon(Vector<Point2> p_polygon, int p_index = -1);
+	int add_polygon_poolvector(PoolVector2Array p_polygon, int p_index = -1);
 	void remove_polygon(int p_index);
 	void clear_polygons();
 	void set_polygon(int p_polygon_index, Vector<Point2> p_polygon);
 	Vector<Point2> get_polygon(int p_polygon_index);
+	PoolVector2Array get_polygon_poolvector(int p_polygon_index);
 
 	void set_polygons_color(Color p_color);
 	void set_multiple_polygon_mode(bool p_multiple_polygon_mode);
@@ -237,6 +241,8 @@ public:
 	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
 
 	void setup_property_editor(Variant::Type p_type, String p_property, String p_label = "", Variant p_default_value = Variant());
+
+	static EditorProperty *get_editor_for_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const uint32_t p_usage, const bool p_wide = false);
 
 	RTileDataDefaultEditor();
 	~RTileDataDefaultEditor();
@@ -320,6 +326,7 @@ protected:
 	virtual void _tile_set_changed() override;
 
 	void _notification(int p_what);
+	static void _bind_methods();
 
 public:
 	virtual void draw_over_tile(CanvasItem *p_canvas_item, Transform2D p_transform, RTileMapCell p_cell, bool p_selected = false) override;
