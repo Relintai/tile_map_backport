@@ -44,11 +44,11 @@
 #include "scene/gui/split_container.h"
 #include "scene/gui/tab_container.h"
 
-#include "core/core_string_names.h"
 #include "../geometry_2d.h"
-#include "core/os/keyboard.h"
-#include "core/os/input.h"
 #include "../math_ext.h"
+#include "core/core_string_names.h"
+#include "core/os/input.h"
+#include "core/os/keyboard.h"
 
 void RTileSetAtlasSourceEditor::RTileSetAtlasSourceProxyObject::set_id(int p_id) {
 	ERR_FAIL_COND(p_id < 0);
@@ -485,38 +485,38 @@ void RTileSetAtlasSourceEditor::AtlasTileProxyObject::edit(RTileSetAtlasSource *
 		ERR_FAIL_COND(E->get().alternative < 0);
 	}
 
-/*
-	// Disconnect to changes.
-	for (Set<TileSelection>::Element *E = tiles.front(); E; E = E->next()) {
-		const Vector2i &coords = E->get().tile;
-		const int &alternative = E->get().alternative;
+	/*
+		// Disconnect to changes.
+		for (Set<TileSelection>::Element *E = tiles.front(); E; E = E->next()) {
+			const Vector2i &coords = E->get().tile;
+			const int &alternative = E->get().alternative;
 
-		if (tile_set_atlas_source && tile_set_atlas_source->has_tile(coords) && tile_set_atlas_source->has_alternative_tile(coords, alternative)) {
-			RTileData *tile_data = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(coords, alternative));
-			if (tile_data->is_connected(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed))) {
-				tile_data->disconnect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
+			if (tile_set_atlas_source && tile_set_atlas_source->has_tile(coords) && tile_set_atlas_source->has_alternative_tile(coords, alternative)) {
+				RTileData *tile_data = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(coords, alternative));
+				if (tile_data->is_connected(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed))) {
+					tile_data->disconnect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
+				}
 			}
 		}
-	}
-*/
+	*/
 
-/*
-	tile_set_atlas_source = p_tile_set_atlas_source;
-	tiles = Set<TileSelection>(p_tiles);
+	/*
+		tile_set_atlas_source = p_tile_set_atlas_source;
+		tiles = Set<TileSelection>(p_tiles);
 
-	// Connect to changes.
-	for (Set<TileSelection>::Element *E = p_tiles.front(); E; E = E->next()) {
-		const Vector2i &coords = E->get().tile;
-		const int &alternative = E->get().alternative;
+		// Connect to changes.
+		for (Set<TileSelection>::Element *E = p_tiles.front(); E; E = E->next()) {
+			const Vector2i &coords = E->get().tile;
+			const int &alternative = E->get().alternative;
 
-		if (tile_set_atlas_source->has_tile(coords) && tile_set_atlas_source->has_alternative_tile(coords, alternative)) {
-			RTileData *tile_data = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(coords, alternative));
-			if (!tile_data->is_connected(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed))) {
-				tile_data->connect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
+			if (tile_set_atlas_source->has_tile(coords) && tile_set_atlas_source->has_alternative_tile(coords, alternative)) {
+				RTileData *tile_data = Object::cast_to<RTileData>(tile_set_atlas_source->get_tile_data(coords, alternative));
+				if (!tile_data->is_connected(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed))) {
+					tile_data->connect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
+				}
 			}
 		}
-	}
-*/
+	*/
 	property_list_changed_notify();
 }
 
@@ -530,7 +530,7 @@ void RTileSetAtlasSourceEditor::_inspector_property_selected(String p_property) 
 	_update_current_tile_data_editor();
 }
 
-void RTileSetAtlasSourceEditor::_update_tile_id_label() {
+void RTileSetAtlasSourceEditor::_update_tile_id_label(Node *button) {
 	if (selection.size() == 1) {
 		TileSelection selected = selection.front()->get();
 		tool_tile_id_label->set_text(vformat("%d, %s, %d", tile_set_atlas_source_id, Vector2(selected.tile), selected.alternative));
@@ -546,7 +546,7 @@ void RTileSetAtlasSourceEditor::_update_source_inspector() {
 	atlas_source_proxy_object->edit(tile_set, tile_set_atlas_source, tile_set_atlas_source_id);
 }
 
-void RTileSetAtlasSourceEditor::_update_fix_selected_and_hovered_tiles() {
+void RTileSetAtlasSourceEditor::_update_fix_selected_and_hovered_tiles(Node *button) {
 	// Fix selected.
 	for (Set<TileSelection>::Element *E = selection.front(); E; E = E->next()) {
 		TileSelection selected = E->get();
@@ -566,14 +566,14 @@ void RTileSetAtlasSourceEditor::_update_fix_selected_and_hovered_tiles() {
 	}
 }
 
-void RTileSetAtlasSourceEditor::_update_atlas_source_inspector() {
+void RTileSetAtlasSourceEditor::_update_atlas_source_inspector(Node *button) {
 	// Update visibility.
 	bool visible = tools_button_group->get_pressed_button() == tool_setup_atlas_source_button;
 	atlas_source_inspector_label->set_visible(visible);
 	atlas_source_inspector->set_visible(visible);
 }
 
-void RTileSetAtlasSourceEditor::_update_tile_inspector() {
+void RTileSetAtlasSourceEditor::_update_tile_inspector(Node *button) {
 	// Update visibility.
 	if (tools_button_group->get_pressed_button() == tool_select_button) {
 		if (!selection.empty()) {
@@ -589,7 +589,7 @@ void RTileSetAtlasSourceEditor::_update_tile_inspector() {
 	}
 }
 
-void RTileSetAtlasSourceEditor::_update_tile_data_editors() {
+void RTileSetAtlasSourceEditor::_update_tile_data_editors(Node *button) {
 	String previously_selected;
 	if (tile_data_editors_tree && tile_data_editors_tree->get_selected()) {
 		previously_selected = tile_data_editors_tree->get_selected()->get_metadata(0);
@@ -862,10 +862,10 @@ void RTileSetAtlasSourceEditor::_tile_data_editor_dropdown_button_draw() {
 
 	Point2 ofs;
 	//if (is_layout_rtl()) {
-//		ofs = Point2(get_constant(("arrow_margin"), ("OptionButton")), int(Math::abs((size.height - arrow->get_height()) / 2)));
+	//		ofs = Point2(get_constant(("arrow_margin"), ("OptionButton")), int(Math::abs((size.height - arrow->get_height()) / 2)));
 	//} else {
-		ofs = Point2(size.width - arrow->get_width() - get_constant(("arrow_margin"), ("OptionButton")), int(Math::abs((size.height - arrow->get_height()) / 2)));
-//	}
+	ofs = Point2(size.width - arrow->get_width() - get_constant(("arrow_margin"), ("OptionButton")), int(Math::abs((size.height - arrow->get_height()) / 2)));
+	//	}
 	arrow->draw(ci, ofs, clr);
 }
 
@@ -885,7 +885,7 @@ void RTileSetAtlasSourceEditor::_tile_data_editors_tree_selected() {
 	alternative_tiles_control_unscaled->update();
 }
 
-void RTileSetAtlasSourceEditor::_update_atlas_view() {
+void RTileSetAtlasSourceEditor::_update_atlas_view(Node *p_button) {
 	// Update the atlas display.
 	tile_atlas_view->set_atlas_source(*tile_set, tile_set_atlas_source, tile_set_atlas_source_id);
 
@@ -947,7 +947,7 @@ void RTileSetAtlasSourceEditor::_update_atlas_view() {
 	RTilesEditorPlugin::get_singleton()->synchronize_atlas_view(tile_atlas_view);
 }
 
-void RTileSetAtlasSourceEditor::_update_toolbar() {
+void RTileSetAtlasSourceEditor::_update_toolbar(Node *button) {
 	// Show the tools and settings.
 	if (tools_button_group->get_pressed_button() == tool_setup_atlas_source_button) {
 		if (current_tile_data_editor_toolbar) {
@@ -1404,7 +1404,6 @@ void RTileSetAtlasSourceEditor::_end_dragging() {
 
 			MathExt::rect2i_set_end(&area, MathExt::vector2i_min((MathExt::rect2i_get_end(area) + Vector2i(1, 1)), tile_set_atlas_source->get_atlas_grid_size()));
 			//area.set_end((area.get_end() + Vector2i(1, 1)).min(tile_set_atlas_source->get_atlas_grid_size()));
-
 
 			List<PropertyInfo> list;
 			tile_set_atlas_source->get_property_list(&list);
@@ -2363,7 +2362,6 @@ void RTileSetAtlasSourceEditor::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("source_id_changed", PropertyInfo(Variant::INT, "source_id")));
 
-
 	ClassDB::bind_method(D_METHOD("_update_fix_selected_and_hovered_tiles"), &RTileSetAtlasSourceEditor::_update_fix_selected_and_hovered_tiles);
 	ClassDB::bind_method(D_METHOD("_update_tile_id_label"), &RTileSetAtlasSourceEditor::_update_tile_id_label);
 	ClassDB::bind_method(D_METHOD("_update_atlas_source_inspector"), &RTileSetAtlasSourceEditor::_update_atlas_source_inspector);
@@ -2492,11 +2490,10 @@ RTileSetAtlasSourceEditor::RTileSetAtlasSourceEditor() {
 
 	// -- Toolbox --
 	tools_button_group.instance();
-	tools_button_group->connect("pressed",this, "_update_fix_selected_and_hovered_tiles");
+	tools_button_group->connect("pressed", this, "_update_fix_selected_and_hovered_tiles");
 	tools_button_group->connect("pressed", this, "_update_tile_id_label");
 	tools_button_group->connect("pressed", this, "_update_atlas_source_inspector");
 	tools_button_group->connect("pressed", this, "_update_tile_inspector");
-	tools_button_group->connect("pressed", this, "_update_tile_data_editors");
 	tools_button_group->connect("pressed", this, "_update_tile_data_editors");
 	tools_button_group->connect("pressed", this, "_update_atlas_view");
 	tools_button_group->connect("pressed", this, "_update_toolbar");

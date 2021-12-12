@@ -261,7 +261,7 @@ void RTileSetScenesCollectionSourceEditor::_update_source_inspector() {
 	scenes_collection_source_proxy_object->edit(tile_set, tile_set_scenes_collection_source, tile_set_source_id);
 }
 
-void RTileSetScenesCollectionSourceEditor::_update_tile_inspector() {
+void RTileSetScenesCollectionSourceEditor::_update_tile_inspector(const int index) {
 	Vector<int> selected_indices = scene_tiles_list->get_selected_items();
 	bool has_atlas_tile_selected = (selected_indices.size() > 0);
 
@@ -276,12 +276,16 @@ void RTileSetScenesCollectionSourceEditor::_update_tile_inspector() {
 	tile_inspector->set_visible(has_atlas_tile_selected);
 }
 
-void RTileSetScenesCollectionSourceEditor::_update_action_buttons() {
+void RTileSetScenesCollectionSourceEditor::_update_action_buttons(const int index) {
 	Vector<int> selected_indices = scene_tiles_list->get_selected_items();
 	scene_tile_delete_button->set_disabled(selected_indices.size() <= 0);
 }
 
-void RTileSetScenesCollectionSourceEditor::_update_scenes_list() {
+void RTileSetScenesCollectionSourceEditor::_update_action_buttons_str(const String &a) {
+	_update_action_buttons();
+}
+
+void RTileSetScenesCollectionSourceEditor::_update_scenes_list(const int index) {
 	if (!tile_set_scenes_collection_source) {
 		return;
 	}
@@ -325,6 +329,10 @@ void RTileSetScenesCollectionSourceEditor::_update_scenes_list() {
 	// Icon size update.
 	int int_size = int(EditorSettings::get_singleton()->get("filesystem/file_dialog/thumbnail_size")) * EDSCALE;
 	scene_tiles_list->set_fixed_icon_size(Vector2(int_size, int_size));
+}
+
+void RTileSetScenesCollectionSourceEditor::_update_scenes_list_str(const String &a) {
+	_update_scenes_list();
 }
 
 void RTileSetScenesCollectionSourceEditor::_notification(int p_what) {
@@ -453,8 +461,6 @@ void RTileSetScenesCollectionSourceEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_drop_data_fw"), &RTileSetScenesCollectionSourceEditor::_drop_data_fw);
 
 	ClassDB::bind_method(D_METHOD("_tile_set_scenes_collection_source_changed"), &RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_changed);
-
-
 	ClassDB::bind_method(D_METHOD("_scenes_collection_source_proxy_object_changed"), &RTileSetScenesCollectionSourceEditor::_scenes_collection_source_proxy_object_changed);
 	ClassDB::bind_method(D_METHOD("_update_scenes_list"), &RTileSetScenesCollectionSourceEditor::_update_scenes_list);
 	ClassDB::bind_method(D_METHOD("_update_action_buttons"), &RTileSetScenesCollectionSourceEditor::_update_action_buttons);
@@ -462,7 +468,8 @@ void RTileSetScenesCollectionSourceEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_scenes_list_item_activated"), &RTileSetScenesCollectionSourceEditor::_scenes_list_item_activated);
 	ClassDB::bind_method(D_METHOD("_source_add_pressed"), &RTileSetScenesCollectionSourceEditor::_source_add_pressed);
 	ClassDB::bind_method(D_METHOD("_source_delete_pressed"), &RTileSetScenesCollectionSourceEditor::_source_delete_pressed);
-	ClassDB::bind_method(D_METHOD("_tile_set_scenes_collection_source_changed"), &RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_changed);
+	ClassDB::bind_method(D_METHOD("_update_action_buttons_str"), &RTileSetScenesCollectionSourceEditor::_update_action_buttons_str);
+	ClassDB::bind_method(D_METHOD("_update_scenes_list_str"), &RTileSetScenesCollectionSourceEditor::_update_scenes_list_str);
 }
 
 RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
@@ -502,8 +509,8 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 	middle_vbox_container->add_child(tile_inspector_label);
 
 	tile_proxy_object = memnew(SceneTileProxyObject(this));
-	tile_proxy_object->connect("changed", this, "_update_scenes_list");
-	tile_proxy_object->connect("changed", this, "_update_action_buttons");
+	tile_proxy_object->connect("changed", this, "_update_scenes_list_str");
+	tile_proxy_object->connect("changed", this, "_update_action_buttons_str");
 
 	tile_inspector = memnew(EditorInspector);
 	tile_inspector->set_undo_redo(undo_redo);

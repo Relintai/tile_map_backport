@@ -248,16 +248,16 @@ private:
 	void _tile_alternatives_control_gui_input(const Ref<InputEvent> &p_event);
 
 	// -- Update functions --
-	void _update_tile_id_label();
+	void _update_tile_id_label(Node * button = nullptr);
 	void _update_source_inspector();
-	void _update_fix_selected_and_hovered_tiles();
-	void _update_atlas_source_inspector();
-	void _update_tile_inspector();
-	void _update_tile_data_editors();
+	void _update_fix_selected_and_hovered_tiles(Node * button = nullptr);
+	void _update_atlas_source_inspector(Node * button = nullptr);
+	void _update_tile_inspector(Node * button = nullptr);
+	void _update_tile_data_editors(Node * button = nullptr);
 	void _update_current_tile_data_editor();
 	void _update_manage_tile_properties_button();
-	void _update_atlas_view();
-	void _update_toolbar();
+	void _update_atlas_view(Node * button = nullptr);
+	void _update_toolbar(Node * button = nullptr);
 
 	// -- input events --
 	void _unhandled_key_input(const Ref<InputEvent> &p_event);

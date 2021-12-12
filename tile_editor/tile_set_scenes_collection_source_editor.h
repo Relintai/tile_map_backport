@@ -121,9 +121,11 @@ private:
 
 	// Update methods.
 	void _update_source_inspector();
-	void _update_tile_inspector();
-	void _update_scenes_list();
-	void _update_action_buttons();
+	void _update_tile_inspector(const int index = 0);
+	void _update_scenes_list(const int index = 0);
+	void _update_action_buttons(const int index = 0);
+	void _update_scenes_list_str(const String &a);
+	void _update_action_buttons_str(const String &a);
 
 	void _drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
 	bool _can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;

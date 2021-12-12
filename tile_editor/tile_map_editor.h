@@ -133,7 +133,7 @@ private:
 	void _update_selection_pattern_from_tileset_tiles_selection();
 	void _update_selection_pattern_from_tileset_pattern_selection();
 	void _update_tileset_selection_from_selection_pattern();
-	void _update_fix_selected_and_hovered();
+	void _update_fix_selected_and_hovered(const int index = 0);
 	void _fix_invalid_tiles_in_tile_map_selection();
 
 	///// Bottom panel common ////
@@ -149,7 +149,7 @@ private:
 	Ref<Texture> missing_atlas_texture_icon;
 	void _update_tile_set_sources_list();
 
-	void _update_source_display();
+	void _update_source_display(const int index = 0);
 
 	// Atlas sources.
 	RTileMapCell hovered_tile;

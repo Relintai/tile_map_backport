@@ -198,7 +198,7 @@ void RTileMapEditorTilesPlugin::_update_tile_set_sources_list() {
 	RTilesEditorPlugin::get_singleton()->set_sources_lists_current(sources_list->get_current());
 }
 
-void RTileMapEditorTilesPlugin::_update_source_display() {
+void RTileMapEditorTilesPlugin::_update_source_display(const int index) {
 	// Update the atlas display.
 	RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 	if (!tile_map) {
@@ -1412,7 +1412,7 @@ void RTileMapEditorTilesPlugin::_stop_dragging() {
 	drag_type = DRAG_TYPE_NONE;
 }
 
-void RTileMapEditorTilesPlugin::_update_fix_selected_and_hovered() {
+void RTileMapEditorTilesPlugin::_update_fix_selected_and_hovered(int i) {
 	RTileMap *tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 	if (!tile_map) {
 		hovered_tile.source_id = RTileSet::INVALID_SOURCE;
@@ -2139,7 +2139,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	// --- Bottom panel tiles ---
 	tiles_bottom_panel = memnew(VBoxContainer);
 	tiles_bottom_panel->connect("tree_entered", this, "_update_theme");
-	tiles_bottom_panel->connect("theme_changed", this, "_update_theme");
+	//tiles_bottom_panel->connect("theme_changed", this, "_update_theme");
 	tiles_bottom_panel->connect("visibility_changed", this, "_stop_dragging");
 	tiles_bottom_panel->connect("visibility_changed", this, "_tab_changed");
 	tiles_bottom_panel->set_name(TTR("Tiles"));
@@ -3256,7 +3256,7 @@ void RTileMapEditorTerrainsPlugin::edit(ObjectID p_tile_map_id, int p_tile_map_l
 RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	main_vbox_container = memnew(VBoxContainer);
 	main_vbox_container->connect("tree_entered", this, "_update_theme");
-	main_vbox_container->connect("theme_changed", this, "_update_theme");
+	//main_vbox_container->connect("theme_changed", this, "_update_theme");
 	main_vbox_container->set_name("Terrains");
 
 	HSplitContainer *tilemap_tab_terrains = memnew(HSplitContainer);
@@ -3363,6 +3363,7 @@ RTileMapEditorTerrainsPlugin::~RTileMapEditorTerrainsPlugin() {
 
 void RTileMapEditorTerrainsPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_update_tiles_list"), &RTileMapEditorTerrainsPlugin::_update_tiles_list);
+	ClassDB::bind_method(D_METHOD("_update_theme"), &RTileMapEditorTerrainsPlugin::_update_theme);
 }
 
 void RTileMapEditor::_notification(int p_what) {
