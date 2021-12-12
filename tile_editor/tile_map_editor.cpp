@@ -1985,10 +1985,31 @@ void RTileMapEditorTilesPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_tile_map_selection", "selection"), &RTileMapEditorTilesPlugin::_set_tile_map_selection);
 	ClassDB::bind_method(D_METHOD("_get_tile_map_selection"), &RTileMapEditorTilesPlugin::_get_tile_map_selection);
 	ClassDB::bind_method(D_METHOD("_pattern_preview_done"), &RTileMapEditorTilesPlugin::_pattern_preview_done);
+
+	ClassDB::bind_method(D_METHOD("_mouse_exited_viewport"), &RTileMapEditorTilesPlugin::_mouse_exited_viewport);
+	ClassDB::bind_method(D_METHOD("_update_toolbar"), &RTileMapEditorTilesPlugin::_update_toolbar);
+	ClassDB::bind_method(D_METHOD("_on_random_tile_checkbox_toggled"), &RTileMapEditorTilesPlugin::_on_random_tile_checkbox_toggled);
+	ClassDB::bind_method(D_METHOD("_on_scattering_spinbox_changed"), &RTileMapEditorTilesPlugin::_on_scattering_spinbox_changed);
+	ClassDB::bind_method(D_METHOD("_update_theme"), &RTileMapEditorTilesPlugin::_update_theme);
+	ClassDB::bind_method(D_METHOD("_stop_dragging"), &RTileMapEditorTilesPlugin::_stop_dragging);
+	ClassDB::bind_method(D_METHOD("_tab_changed"), &RTileMapEditorTilesPlugin::_tab_changed);
+	ClassDB::bind_method(D_METHOD("_update_fix_selected_and_hovered"), &RTileMapEditorTilesPlugin::_update_fix_selected_and_hovered);
+	ClassDB::bind_method(D_METHOD("_update_source_display"), &RTileMapEditorTilesPlugin::_update_source_display);
+
+	ClassDB::bind_method(D_METHOD("_tile_atlas_control_draw"), &RTileMapEditorTilesPlugin::_tile_atlas_control_draw);
+	ClassDB::bind_method(D_METHOD("_tile_atlas_control_mouse_exited"), &RTileMapEditorTilesPlugin::_tile_atlas_control_mouse_exited);
+	ClassDB::bind_method(D_METHOD("_tile_atlas_control_gui_input"), &RTileMapEditorTilesPlugin::_tile_atlas_control_gui_input);
+	ClassDB::bind_method(D_METHOD("_tile_alternatives_control_draw"), &RTileMapEditorTilesPlugin::_tile_alternatives_control_draw);
+	ClassDB::bind_method(D_METHOD("_tile_alternatives_control_mouse_exited"), &RTileMapEditorTilesPlugin::_tile_alternatives_control_mouse_exited);
+	ClassDB::bind_method(D_METHOD("_tile_alternatives_control_gui_input"), &RTileMapEditorTilesPlugin::_tile_alternatives_control_gui_input);
+	ClassDB::bind_method(D_METHOD("_scenes_list_multi_selected"), &RTileMapEditorTilesPlugin::_scenes_list_multi_selected);
+	ClassDB::bind_method(D_METHOD("_scenes_list_nothing_selected"), &RTileMapEditorTilesPlugin::_scenes_list_nothing_selected);
+	ClassDB::bind_method(D_METHOD("_patterns_item_list_gui_input"), &RTileMapEditorTilesPlugin::_patterns_item_list_gui_input);
+	ClassDB::bind_method(D_METHOD("_update_selection_pattern_from_tileset_pattern_selection"), &RTileMapEditorTilesPlugin::_update_selection_pattern_from_tileset_pattern_selection);
 }
 
 RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
-	CanvasItemEditor::get_singleton()->get_viewport_control()->connect("mouse_exited", callable_mp(this, &RTileMapEditorTilesPlugin::_mouse_exited_viewport));
+	CanvasItemEditor::get_singleton()->get_viewport_control()->connect("mouse_exited", this, "_mouse_exited_viewport");
 
 	// --- Shortcuts ---
 	ED_SHORTCUT("tiles_editor/cut", TTR("Cut"), KEY_MASK_CMD | KEY_X);
@@ -2014,7 +2035,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	select_tool_button->set_toggle_mode(true);
 	select_tool_button->set_button_group(tool_buttons_group);
 	select_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/selection_tool", "Selection", KEY_S));
-	select_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTilesPlugin::_update_toolbar));
+	select_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(select_tool_button);
 
 	paint_tool_button = memnew(Button);
@@ -2022,8 +2043,8 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	paint_tool_button->set_toggle_mode(true);
 	paint_tool_button->set_button_group(tool_buttons_group);
 	paint_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/paint_tool", "Paint", KEY_D));
-	paint_tool_button->set_tooltip(TTR("Shift: Draw line.") + "\n" + TTR("Shift+Ctrl: Draw rectangle."));
-	paint_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTilesPlugin::_update_toolbar));
+	paint_tool_button->set_tooltip(("Shift: Draw line. \nShift+Ctrl: Draw rectangle."));
+	paint_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(paint_tool_button);
 
 	line_tool_button = memnew(Button);
@@ -2031,7 +2052,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	line_tool_button->set_toggle_mode(true);
 	line_tool_button->set_button_group(tool_buttons_group);
 	line_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/line_tool", "Line", KEY_L));
-	line_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTilesPlugin::_update_toolbar));
+	line_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(line_tool_button);
 
 	rect_tool_button = memnew(Button);
@@ -2039,7 +2060,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	rect_tool_button->set_toggle_mode(true);
 	rect_tool_button->set_button_group(tool_buttons_group);
 	rect_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/rect_tool", "Rect", KEY_R));
-	rect_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTilesPlugin::_update_toolbar));
+	rect_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(rect_tool_button);
 
 	bucket_tool_button = memnew(Button);
@@ -2047,7 +2068,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	bucket_tool_button->set_toggle_mode(true);
 	bucket_tool_button->set_button_group(tool_buttons_group);
 	bucket_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/bucket_tool", "Bucket", KEY_B));
-	bucket_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTilesPlugin::_update_toolbar));
+	bucket_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(bucket_tool_button);
 	toolbar->add_child(tilemap_tiles_tools_buttons);
 
@@ -2064,7 +2085,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	picker_button->set_toggle_mode(true);
 	picker_button->set_shortcut(ED_SHORTCUT("tiles_editor/picker", "Picker", KEY_P));
 	picker_button->set_tooltip(TTR("Alternatively hold Ctrl with other tools to pick tile."));
-	picker_button->connect("pressed", callable_mp(CanvasItemEditor::get_singleton(), &CanvasItemEditor::update_viewport));
+	picker_button->connect("pressed", CanvasItemEditor::get_singleton(), "update_viewport");
 	tools_settings->add_child(picker_button);
 
 	// Erase button.
@@ -2073,7 +2094,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	erase_button->set_toggle_mode(true);
 	erase_button->set_shortcut(ED_SHORTCUT("tiles_editor/eraser", "Eraser", KEY_E));
 	erase_button->set_tooltip(TTR("Alternatively use RMB to erase tiles."));
-	erase_button->connect("pressed", callable_mp(CanvasItemEditor::get_singleton(), &CanvasItemEditor::update_viewport));
+	erase_button->connect("pressed", CanvasItemEditor::get_singleton(), "update_viewport");
 	tools_settings->add_child(erase_button);
 
 	// Separator 2.
@@ -2091,7 +2112,7 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	random_tile_checkbox = memnew(CheckBox);
 	random_tile_checkbox->set_flat(true);
 	random_tile_checkbox->set_text(TTR("Place Random Tile"));
-	random_tile_checkbox->connect("toggled", callable_mp(this, &RTileMapEditorTilesPlugin::_on_random_tile_checkbox_toggled));
+	random_tile_checkbox->connect("toggled", this, "_on_random_tile_checkbox_toggled");
 	tools_settings->add_child(random_tile_checkbox);
 
 	// Random tile scattering.
@@ -2105,8 +2126,8 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	scatter_spinbox->set_max(1000);
 	scatter_spinbox->set_step(0.001);
 	scatter_spinbox->set_tooltip(TTR("Defines the probability of painting nothing instead of a randomly selected tile."));
-	scatter_spinbox->get_line_edit()->add_theme_constant_override("minimum_character_width", 4);
-	scatter_spinbox->connect("value_changed", callable_mp(this, &RTileMapEditorTilesPlugin::_on_scattering_spinbox_changed));
+	scatter_spinbox->get_line_edit()->add_constant_override("minimum_character_width", 4);
+	scatter_spinbox->connect("value_changed", this, "_on_scattering_spinbox_changed");
 	tools_settings->add_child(scatter_spinbox);
 
 	_on_random_tile_checkbox_toggled(false);
@@ -2117,18 +2138,18 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 
 	// --- Bottom panel tiles ---
 	tiles_bottom_panel = memnew(VBoxContainer);
-	tiles_bottom_panel->connect("tree_entered", callable_mp(this, &RTileMapEditorTilesPlugin::_update_theme));
-	tiles_bottom_panel->connect("theme_changed", callable_mp(this, &RTileMapEditorTilesPlugin::_update_theme));
-	tiles_bottom_panel->connect("visibility_changed", callable_mp(this, &RTileMapEditorTilesPlugin::_stop_dragging));
-	tiles_bottom_panel->connect("visibility_changed", callable_mp(this, &RTileMapEditorTilesPlugin::_tab_changed));
+	tiles_bottom_panel->connect("tree_entered", this, "_update_theme");
+	tiles_bottom_panel->connect("theme_changed", this, "_update_theme");
+	tiles_bottom_panel->connect("visibility_changed", this, "_stop_dragging");
+	tiles_bottom_panel->connect("visibility_changed", this, "_tab_changed");
 	tiles_bottom_panel->set_name(TTR("Tiles"));
 
 	missing_source_label = memnew(Label);
 	missing_source_label->set_text(TTR("This TileMap's RTileSet has no source configured. Edit the RTileSet resource to add one."));
 	missing_source_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	missing_source_label->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	missing_source_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
-	missing_source_label->set_vertical_alignment(VERTICAL_ALIGNMENT_CENTER);
+	missing_source_label->set_align(Label::ALIGN_CENTER);
+	missing_source_label->set_valign(Label::VALIGN_CENTER);
 	missing_source_label->hide();
 	tiles_bottom_panel->add_child(missing_source_label);
 
@@ -2143,10 +2164,12 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	sources_list->set_stretch_ratio(0.25);
 	sources_list->set_custom_minimum_size(Size2i(70, 0) * EDSCALE);
 	//sources_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
-	sources_list->connect("item_selected", callable_mp(this, &RTileMapEditorTilesPlugin::_update_fix_selected_and_hovered).unbind(1));
-	sources_list->connect("item_selected", callable_mp(this, &RTileMapEditorTilesPlugin::_update_source_display).unbind(1));
-	sources_list->connect("item_selected", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::set_sources_lists_current));
-	sources_list->connect("visibility_changed", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::synchronize_sources_list), varray(sources_list));
+	sources_list->connect("item_selected", this, "_update_fix_selected_and_hovered");
+	sources_list->connect("item_selected", this, "_update_source_display");
+	sources_list->connect("item_selected", RTilesEditorPlugin::get_singleton(), "set_sources_lists_current");
+	Vector<Variant> sources_list_arr;
+	sources_list_arr.push_back(sources_list);
+	sources_list->connect("visibility_changed", RTilesEditorPlugin::get_singleton(), "synchronize_sources_list", sources_list_arr);
 	atlas_sources_split_container->add_child(sources_list);
 
 	// Tile atlas source.
@@ -2155,29 +2178,29 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	tile_atlas_view->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	tile_atlas_view->set_texture_grid_visible(false);
 	tile_atlas_view->set_tile_shape_grid_visible(false);
-	tile_atlas_view->connect("transform_changed", callable_mp(RTilesEditorPlugin::get_singleton(), &RTilesEditorPlugin::set_atlas_view_transform));
+	tile_atlas_view->connect("transform_changed", RTilesEditorPlugin::get_singleton(), "set_atlas_view_transform");
 	atlas_sources_split_container->add_child(tile_atlas_view);
 
 	tile_atlas_control = memnew(Control);
-	tile_atlas_control->connect("draw", callable_mp(this, &RTileMapEditorTilesPlugin::_tile_atlas_control_draw));
-	tile_atlas_control->connect("mouse_exited", callable_mp(this, &RTileMapEditorTilesPlugin::_tile_atlas_control_mouse_exited));
-	tile_atlas_control->connect("gui_input", callable_mp(this, &RTileMapEditorTilesPlugin::_tile_atlas_control_gui_input));
+	tile_atlas_control->connect("draw", this, "_tile_atlas_control_draw");
+	tile_atlas_control->connect("mouse_exited", this, "_tile_atlas_control_mouse_exited");
+	tile_atlas_control->connect("gui_input", this, "_tile_atlas_control_gui_input");
 	tile_atlas_view->add_control_over_atlas_tiles(tile_atlas_control);
 
 	alternative_tiles_control = memnew(Control);
-	alternative_tiles_control->connect("draw", callable_mp(this, &RTileMapEditorTilesPlugin::_tile_alternatives_control_draw));
-	alternative_tiles_control->connect("mouse_exited", callable_mp(this, &RTileMapEditorTilesPlugin::_tile_alternatives_control_mouse_exited));
-	alternative_tiles_control->connect("gui_input", callable_mp(this, &RTileMapEditorTilesPlugin::_tile_alternatives_control_gui_input));
+	alternative_tiles_control->connect("draw", this, "_tile_alternatives_control_draw");
+	alternative_tiles_control->connect("mouse_exited", this, "_tile_alternatives_control_mouse_exited");
+	alternative_tiles_control->connect("gui_input", this, "_tile_alternatives_control_gui_input");
 	tile_atlas_view->add_control_over_alternative_tiles(alternative_tiles_control);
 
 	// Scenes collection source.
 	scene_tiles_list = memnew(ItemList);
 	scene_tiles_list->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	scene_tiles_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	scene_tiles_list->set_drag_forwarding(this);
+	//scene_tiles_list->set_drag_forwarding(this);
 	scene_tiles_list->set_select_mode(ItemList::SELECT_MULTI);
-	scene_tiles_list->connect("multi_selected", callable_mp(this, &RTileMapEditorTilesPlugin::_scenes_list_multi_selected));
-	scene_tiles_list->connect("nothing_selected", callable_mp(this, &RTileMapEditorTilesPlugin::_scenes_list_nothing_selected));
+	scene_tiles_list->connect("multi_selected", this, "_scenes_list_multi_selected");
+	scene_tiles_list->connect("nothing_selected", this, "_scenes_list_nothing_selected");
 	//scene_tiles_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	atlas_sources_split_container->add_child(scene_tiles_list);
 
@@ -2186,15 +2209,15 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	invalid_source_label->set_text(TTR("Invalid source selected."));
 	invalid_source_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	invalid_source_label->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	invalid_source_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
-	invalid_source_label->set_vertical_alignment(VERTICAL_ALIGNMENT_CENTER);
+	invalid_source_label->set_align(Label::ALIGN_CENTER);
+	invalid_source_label->set_valign(Label::VALIGN_CENTER);
 	invalid_source_label->hide();
 	atlas_sources_split_container->add_child(invalid_source_label);
 
 	// --- Bottom panel patterns ---
 	patterns_bottom_panel = memnew(VBoxContainer);
 	patterns_bottom_panel->set_name(TTR("Patterns"));
-	patterns_bottom_panel->connect("visibility_changed", callable_mp(this, &RTileMapEditorTilesPlugin::_tab_changed));
+	patterns_bottom_panel->connect("visibility_changed", this, "_tab_changed");
 
 	int thumbnail_size = 64;
 	patterns_item_list = memnew(ItemList);
@@ -2204,15 +2227,15 @@ RTileMapEditorTilesPlugin::RTileMapEditorTilesPlugin() {
 	patterns_item_list->set_max_text_lines(2);
 	patterns_item_list->set_fixed_icon_size(Size2(thumbnail_size, thumbnail_size));
 	patterns_item_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	patterns_item_list->connect("gui_input", callable_mp(this, &RTileMapEditorTilesPlugin::_patterns_item_list_gui_input));
-	patterns_item_list->connect("item_selected", callable_mp(this, &RTileMapEditorTilesPlugin::_update_selection_pattern_from_tileset_pattern_selection).unbind(1));
-	patterns_item_list->connect("item_activated", callable_mp(this, &RTileMapEditorTilesPlugin::_update_selection_pattern_from_tileset_pattern_selection));
-	patterns_item_list->connect("nothing_selected", callable_mp(this, &RTileMapEditorTilesPlugin::_update_selection_pattern_from_tileset_pattern_selection));
+	patterns_item_list->connect("gui_input", this, "_patterns_item_list_gui_input");
+	patterns_item_list->connect("item_selected", this, "_update_selection_pattern_from_tileset_pattern_selection");
+	patterns_item_list->connect("item_activated", this, "_update_selection_pattern_from_tileset_pattern_selection");
+	patterns_item_list->connect("nothing_selected", this, "_update_selection_pattern_from_tileset_pattern_selection");
 	patterns_bottom_panel->add_child(patterns_item_list);
 
 	patterns_help_label = memnew(Label);
 	patterns_help_label->set_text(TTR("Drag and drop or paste a TileMap selection here to store a pattern."));
-	patterns_help_label->set_anchors_and_offsets_preset(Control::PRESET_CENTER);
+	patterns_help_label->set_anchors_and_margins_preset(Control::PRESET_CENTER);
 	patterns_item_list->add_child(patterns_help_label);
 
 	// Update.
@@ -2574,7 +2597,7 @@ Map<Vector2i, RTileMapCell> RTileMapEditorTerrainsPlugin::_draw_bucket_fill(Vect
 	Set<Vector2i> cells_to_draw = _get_cells_for_bucket_fill(p_coords, p_contiguous);
 	Map<Vector2i, RTileSet::TerrainsPattern> to_draw;
 	for (Set<Vector2i>::Element *coords = cells_to_draw.front(); coords; coords = coords->next()) {
-		to_draw[coords] = terrains_pattern;
+		to_draw[coords->get()] = terrains_pattern;
 	}
 
 	return _draw_terrains(to_draw, selected_terrain_set);
@@ -2626,7 +2649,7 @@ void RTileMapEditorTerrainsPlugin::_stop_dragging() {
 				}
 
 				if (need_tree_item_switch) {
-					for (tree_item = terrains_tree->get_root()->get_first_child(); tree_item; tree_item = tree_item->get_next_visible()) {
+					for (tree_item = terrains_tree->get_root()->get_children(); tree_item; tree_item = tree_item->get_next_visible()) {
 						Dictionary metadata_dict = tree_item->get_metadata(0);
 						if (metadata_dict.has("terrain_set") && metadata_dict.has("terrain_id")) {
 							int terrain_set = metadata_dict["terrain_set"];
@@ -3169,15 +3192,15 @@ void RTileMapEditorTerrainsPlugin::_update_tiles_list() {
 				bool transpose = false;
 
 				double max_probability = -1.0;
-				for (const RTileMapCell &cell : tile_set->get_tiles_for_terrains_pattern(selected_terrain_set, terrains_pattern)) {
-					Ref<RTileSetSource> source = tile_set->get_source(cell.source_id);
+				for (Set<RTileMapCell>::Element *cell = tile_set->get_tiles_for_terrains_pattern(selected_terrain_set, terrains_pattern).front(); cell; cell = cell->next()) {
+					Ref<RTileSetSource> source = tile_set->get_source(cell->get().source_id);
 
 					Ref<RTileSetAtlasSource> atlas_source = source;
 					if (atlas_source.is_valid()) {
-						RTileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(cell.get_atlas_coords(), cell.alternative_tile));
+						RTileData *tile_data = Object::cast_to<RTileData>(atlas_source->get_tile_data(cell->get().get_atlas_coords(), cell->get().alternative_tile));
 						if (tile_data->get_probability() > max_probability) {
 							icon = atlas_source->get_texture();
-							region = atlas_source->get_tile_texture_region(cell.get_atlas_coords());
+							region = atlas_source->get_tile_texture_region(cell->get().get_atlas_coords());
 							if (tile_data->get_flip_h()) {
 								region.position.x += region.size.x;
 								region.size.x = -region.size.x;
@@ -3232,8 +3255,8 @@ void RTileMapEditorTerrainsPlugin::edit(ObjectID p_tile_map_id, int p_tile_map_l
 
 RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	main_vbox_container = memnew(VBoxContainer);
-	main_vbox_container->connect("tree_entered", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_theme));
-	main_vbox_container->connect("theme_changed", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_theme));
+	main_vbox_container->connect("tree_entered", this, "_update_theme");
+	main_vbox_container->connect("theme_changed", this, "_update_theme");
 	main_vbox_container->set_name("Terrains");
 
 	HSplitContainer *tilemap_tab_terrains = memnew(HSplitContainer);
@@ -3247,7 +3270,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	terrains_tree->set_custom_minimum_size(Size2i(70, 0) * EDSCALE);
 	//terrains_tree->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	terrains_tree->set_hide_root(true);
-	terrains_tree->connect("item_selected", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_tiles_list));
+	terrains_tree->connect("item_selected", this, "_update_tiles_list");
 	tilemap_tab_terrains->add_child(terrains_tree);
 
 	terrains_tile_list = memnew(ItemList);
@@ -3271,7 +3294,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	paint_tool_button->set_button_group(tool_buttons_group);
 	paint_tool_button->set_pressed(true);
 	paint_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/paint_tool", "Paint", KEY_D));
-	paint_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_toolbar));
+	paint_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(paint_tool_button);
 
 	line_tool_button = memnew(Button);
@@ -3279,7 +3302,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	line_tool_button->set_toggle_mode(true);
 	line_tool_button->set_button_group(tool_buttons_group);
 	line_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/line_tool", "Line", KEY_L));
-	line_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_toolbar));
+	line_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(line_tool_button);
 
 	rect_tool_button = memnew(Button);
@@ -3287,7 +3310,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	rect_tool_button->set_toggle_mode(true);
 	rect_tool_button->set_button_group(tool_buttons_group);
 	rect_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/rect_tool", "Rect", KEY_R));
-	rect_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_toolbar));
+	rect_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(rect_tool_button);
 
 	bucket_tool_button = memnew(Button);
@@ -3295,7 +3318,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	bucket_tool_button->set_toggle_mode(true);
 	bucket_tool_button->set_button_group(tool_buttons_group);
 	bucket_tool_button->set_shortcut(ED_SHORTCUT("tiles_editor/bucket_tool", "Bucket", KEY_B));
-	bucket_tool_button->connect("pressed", callable_mp(this, &RTileMapEditorTerrainsPlugin::_update_toolbar));
+	bucket_tool_button->connect("pressed", this, "_update_toolbar");
 	tilemap_tiles_tools_buttons->add_child(bucket_tool_button);
 
 	toolbar->add_child(tilemap_tiles_tools_buttons);
@@ -3312,7 +3335,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	picker_button->set_flat(true);
 	picker_button->set_toggle_mode(true);
 	picker_button->set_shortcut(ED_SHORTCUT("tiles_editor/picker", "Picker", KEY_P));
-	picker_button->connect("pressed", callable_mp(CanvasItemEditor::get_singleton(), &CanvasItemEditor::update_viewport));
+	picker_button->connect("pressed", CanvasItemEditor::get_singleton(), "update_viewport");
 	tools_settings->add_child(picker_button);
 
 	// Erase button.
@@ -3320,7 +3343,7 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 	erase_button->set_flat(true);
 	erase_button->set_toggle_mode(true);
 	erase_button->set_shortcut(ED_SHORTCUT("tiles_editor/eraser", "Eraser", KEY_E));
-	erase_button->connect("pressed", callable_mp(CanvasItemEditor::get_singleton(), &CanvasItemEditor::update_viewport));
+	erase_button->connect("pressed", CanvasItemEditor::get_singleton(), "update_viewport");
 	tools_settings->add_child(erase_button);
 
 	// Separator 2.
@@ -3336,6 +3359,10 @@ RTileMapEditorTerrainsPlugin::RTileMapEditorTerrainsPlugin() {
 }
 
 RTileMapEditorTerrainsPlugin::~RTileMapEditorTerrainsPlugin() {
+}
+
+void RTileMapEditorTerrainsPlugin::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_update_tiles_list"), &RTileMapEditorTerrainsPlugin::_update_tiles_list);
 }
 
 void RTileMapEditor::_notification(int p_what) {
@@ -3424,9 +3451,9 @@ void RTileMapEditor::_layers_selection_button_draw() {
 
 void RTileMapEditor::_layers_selection_button_pressed() {
 	if (!layers_selection_popup->is_visible()) {
-		Size2 size = layers_selection_popup->get_contents_minimum_size();
+		Size2 size = layers_selection_popup->get_combined_minimum_size();
 		size.x = MAX(size.x, layers_selection_button->get_size().x);
-		layers_selection_popup->set_position(layers_selection_button->get_screen_position() - Size2(0, size.y * get_global_transform().get_scale().y));
+		layers_selection_popup->set_position(layers_selection_button->get_global_position() - Size2(0, size.y * get_global_transform().get_scale().y));
 		layers_selection_popup->set_size(size);
 		layers_selection_popup->popup();
 	} else {
@@ -3512,7 +3539,7 @@ Vector<Vector2i> RTileMapEditor::get_line(RTileMap *p_tile_map, Vector2i p_from_
 
 		Vector2i delta = p_to_cell - p_from_cell;
 		delta = Vector2i(2 * delta.x + ABS(p_to_cell.y % 2) - ABS(p_from_cell.y % 2), delta.y);
-		Vector2i sign = delta.sign();
+		Vector2i sign = MathExt::vector2i_sign(delta);
 
 		Vector2i current = p_from_cell;
 		points.push_back(RTileMap::transform_coords_layout(transposed ? Vector2i(current.y, current.x) : current, tile_set->get_tile_offset_axis(), RTileSet::TILE_LAYOUT_STACKED, tile_set->get_tile_layout()));
@@ -3665,7 +3692,7 @@ void RTileMapEditor::_update_layers_selection() {
 	}
 
 	// Set button minimum width.
-	Size2 min_button_size = Size2(layers_selection_popup->get_contents_minimum_size().x, 0);
+	Size2 min_button_size = Size2(layers_selection_popup->get_combined_minimum_size().x, 0);
 	if (has_icon(("arrow"), ("OptionButton"))) {
 		Ref<Texture> arrow = Control::get_icon(("arrow"), ("OptionButton"));
 		min_button_size.x += arrow->get_size().x;
@@ -3824,7 +3851,7 @@ void RTileMapEditor::forward_canvas_draw_over_viewport(Control *p_overlay) {
 					}
 
 					// Draw the warning icon.
-					Vector2::Axis min_axis = missing_tile_texture->get_size().min_axis_index();
+					int min_axis = missing_tile_texture->get_size().min_axis();
 					Vector2 icon_size;
 					icon_size[min_axis] = tile_set->get_tile_size()[min_axis] / 3;
 					icon_size[(min_axis + 1) % 2] = (icon_size[min_axis] * missing_tile_texture->get_size()[(min_axis + 1) % 2] / missing_tile_texture->get_size()[min_axis]);
@@ -3849,7 +3876,8 @@ void RTileMapEditor::forward_canvas_draw_over_viewport(Control *p_overlay) {
 
 	Rect2i tilemap_used_rect = tile_map->get_used_rect();
 
-	Rect2i displayed_rect = tilemap_used_rect.intersection(screen_rect);
+	//Rect2i displayed_rect = tilemap_used_rect.intersection(screen_rect);
+	Rect2i displayed_rect = MathExt::rect2i_intersection(tilemap_used_rect, screen_rect);
 	displayed_rect = displayed_rect.grow(fading);
 
 	// Reduce the drawn area to avoid crashes if needed.
@@ -3911,7 +3939,7 @@ void RTileMapEditor::edit(RTileMap *p_tile_map) {
 		}
 
 		// Disconnect to changes.
-		tile_map->disconnect("changed", callable_mp(this, &RTileMapEditor::_tile_map_changed));
+		tile_map->disconnect("changed", this, "_tile_map_changed");
 	}
 
 	if (p_tile_map) {
@@ -3919,8 +3947,8 @@ void RTileMapEditor::edit(RTileMap *p_tile_map) {
 		tile_map_id = p_tile_map->get_instance_id();
 		tile_map = Object::cast_to<RTileMap>(ObjectDB::get_instance(tile_map_id));
 		// Connect to changes.
-		if (!tile_map->is_connected("changed", callable_mp(this, &RTileMapEditor::_tile_map_changed))) {
-			tile_map->connect("changed", callable_mp(this, &RTileMapEditor::_tile_map_changed));
+		if (!tile_map->is_connected("changed", this, "_tile_map_changed")) {
+			tile_map->connect("changed", this, "_tile_map_changed");
 		}
 	} else {
 		tile_map_id = ObjectID();
@@ -3932,6 +3960,18 @@ void RTileMapEditor::edit(RTileMap *p_tile_map) {
 	tabs_plugins[tabs_bar->get_current_tab()]->edit(tile_map_id, tile_map_layer);
 
 	_tile_map_changed();
+}
+
+void RTileMapEditor::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_tile_map_changed"), &RTileMapEditor::_tile_map_changed);
+	ClassDB::bind_method(D_METHOD("_tab_changed"), &RTileMapEditor::_tab_changed);
+
+	ClassDB::bind_method(D_METHOD("_layers_selection_id_pressed"), &RTileMapEditor::_layers_selection_id_pressed);
+	ClassDB::bind_method(D_METHOD("_layers_selection_button_draw"), &RTileMapEditor::_layers_selection_button_draw);
+	ClassDB::bind_method(D_METHOD("_layers_selection_button_pressed"), &RTileMapEditor::_layers_selection_button_pressed);
+	ClassDB::bind_method(D_METHOD("_update_layers_selection"), &RTileMapEditor::_update_layers_selection);
+	ClassDB::bind_method(D_METHOD("_on_grid_toggled"), &RTileMapEditor::_on_grid_toggled);
+	ClassDB::bind_method(D_METHOD("_advanced_menu_button_id_pressed"), &RTileMapEditor::_advanced_menu_button_id_pressed);
 }
 
 RTileMapEditor::RTileMapEditor() {
@@ -3956,7 +3996,7 @@ RTileMapEditor::RTileMapEditor() {
 			tabs_plugins.push_back(tile_map_editor_plugins[plugin_index]);
 		}
 	}
-	tabs_bar->connect("tab_changed", callable_mp(this, &RTileMapEditor::_tab_changed));
+	tabs_bar->connect("tab_changed", this, "_tab_changed");
 
 	// --- TileMap toolbar ---
 	tile_map_toolbar = memnew(HBoxContainer);
@@ -3981,14 +4021,14 @@ RTileMapEditor::RTileMapEditor() {
 
 	// Layer selector.
 	layers_selection_popup = memnew(PopupMenu);
-	layers_selection_popup->connect("id_pressed", callable_mp(this, &RTileMapEditor::_layers_selection_id_pressed));
-	layers_selection_popup->set_close_on_parent_focus(false);
+	layers_selection_popup->connect("id_pressed", this, "_layers_selection_id_pressed");
+	layers_selection_popup->set_hide_on_window_lose_focus(false);
 
 	layers_selection_button = memnew(Button);
 	layers_selection_button->set_toggle_mode(true);
-	layers_selection_button->connect("draw", callable_mp(this, &RTileMapEditor::_layers_selection_button_draw));
-	layers_selection_button->connect("pressed", callable_mp(this, &RTileMapEditor::_layers_selection_button_pressed));
-	layers_selection_button->connect("hidden", callable_mp((Window *)layers_selection_popup, &Popup::hide));
+	layers_selection_button->connect("draw", this, "_layers_selection_button_draw");
+	layers_selection_button->connect("pressed", this, "_layers_selection_button_pressed");
+	layers_selection_button->connect("hidden", layers_selection_popup, "hide");
 	layers_selection_button->set_tooltip(TTR("Tile Map Layer"));
 	layers_selection_button->add_child(layers_selection_popup);
 	tile_map_toolbar->add_child(layers_selection_button);
@@ -3997,7 +4037,7 @@ RTileMapEditor::RTileMapEditor() {
 	toogle_highlight_selected_layer_button->set_flat(true);
 	toogle_highlight_selected_layer_button->set_toggle_mode(true);
 	toogle_highlight_selected_layer_button->set_pressed(true);
-	toogle_highlight_selected_layer_button->connect("pressed", callable_mp(this, &RTileMapEditor::_update_layers_selection));
+	toogle_highlight_selected_layer_button->connect("pressed", this, "_update_layers_selection");
 	toogle_highlight_selected_layer_button->set_tooltip(TTR("Highlight Selected TileMap Layer"));
 	tile_map_toolbar->add_child(toogle_highlight_selected_layer_button);
 
@@ -4008,22 +4048,22 @@ RTileMapEditor::RTileMapEditor() {
 	toggle_grid_button->set_flat(true);
 	toggle_grid_button->set_toggle_mode(true);
 	toggle_grid_button->set_tooltip(TTR("Toggle grid visibility."));
-	toggle_grid_button->connect("toggled", callable_mp(this, &RTileMapEditor::_on_grid_toggled));
+	toggle_grid_button->connect("toggled", this, "_on_grid_toggled");
 	tile_map_toolbar->add_child(toggle_grid_button);
 
 	// Advanced settings menu button.
 	advanced_menu_button = memnew(MenuButton);
 	advanced_menu_button->set_flat(true);
 	advanced_menu_button->get_popup()->add_item(TTR("Automatically Replace Tiles with Proxies"));
-	advanced_menu_button->get_popup()->connect("id_pressed", callable_mp(this, &RTileMapEditor::_advanced_menu_button_id_pressed));
+	advanced_menu_button->get_popup()->connect("id_pressed", this, "_advanced_menu_button_id_pressed");
 	tile_map_toolbar->add_child(advanced_menu_button);
 
 	missing_tileset_label = memnew(Label);
 	missing_tileset_label->set_text(TTR("The edited TileMap node has no RTileSet resource."));
 	missing_tileset_label->set_h_size_flags(SIZE_EXPAND_FILL);
 	missing_tileset_label->set_v_size_flags(SIZE_EXPAND_FILL);
-	missing_tileset_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
-	missing_tileset_label->set_vertical_alignment(VERTICAL_ALIGNMENT_CENTER);
+	missing_tileset_label->set_align(Label::ALIGN_CENTER);
+	missing_tileset_label->set_valign(Label::VALIGN_CENTER);
 	missing_tileset_label->hide();
 	add_child(missing_tileset_label);
 

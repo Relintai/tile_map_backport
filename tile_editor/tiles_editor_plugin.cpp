@@ -176,7 +176,6 @@ void RTilesEditorPlugin::_notification(int p_what) {
 
 void RTilesEditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_atlas_view_transform"), &RTilesEditorPlugin::set_atlas_view_transform);
-
 	ClassDB::bind_method(D_METHOD("set_sources_lists_current"), &RTilesEditorPlugin::set_sources_lists_current);
 	ClassDB::bind_method(D_METHOD("synchronize_sources_list"), &RTilesEditorPlugin::synchronize_sources_list);
 

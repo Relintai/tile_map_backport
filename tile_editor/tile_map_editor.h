@@ -290,6 +290,9 @@ public:
 
 	RTileMapEditorTerrainsPlugin();
 	~RTileMapEditorTerrainsPlugin();
+
+protected:
+	static void _bind_methods();
 };
 
 class RTileMapEditor : public VBoxContainer {
@@ -345,6 +348,8 @@ private:
 protected:
 	void _notification(int p_what);
 	void _draw_shape(Control *p_control, Rect2 p_region, RTileSet::TileShape p_shape, RTileSet::TileOffsetAxis p_offset_axis, Color p_color);
+
+	static void _bind_methods();
 
 public:
 	bool forward_canvas_gui_input(const Ref<InputEvent> &p_event);
