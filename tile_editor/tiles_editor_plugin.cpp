@@ -290,6 +290,9 @@ bool RTilesEditorPlugin::handles(Object *p_object) const {
 RTilesEditorPlugin::RTilesEditorPlugin(EditorNode *p_node) {
 	set_process_internal(true);
 
+	EDITOR_DEF("editors/tiles_editor/display_grid", true);
+	EDITOR_DEF("editors/tiles_editor/grid_color", Color(1, 0.5, 0.2, 0.5));
+
 	// Update the singleton.
 	singleton = this;
 
