@@ -34,7 +34,7 @@
 
 void RTileProxiesManagerDialog::_right_clicked(int p_item, Vector2 p_local_mouse_pos, Object *p_item_list) {
 	ItemList *item_list = Object::cast_to<ItemList>(p_item_list);
-	popup_menu->reset_size();
+	//popup_menu->reset_size();
 	popup_menu->set_position(get_position() + item_list->get_global_mouse_position());
 	popup_menu->popup();
 }
@@ -69,8 +69,9 @@ void RTileProxiesManagerDialog::_delete_selected_bindings() {
 	for (int i = 0; i < alternative_level_selected.size(); i++) {
 		Array key = alternative_level_list->get_item_metadata(alternative_level_selected[i]);
 		Array val = tile_set->get_coords_level_tile_proxy(key[0], key[1]);
-		undo_redo->add_do_method(*tile_set, "remove_alternative_level_tile_proxy", key[0], key[1], key[2]);
-		undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", key[0], key[1], key[2], val[0], val[1], val[2]);
+		//TODO
+		//undo_redo->add_do_method(*tile_set, "remove_alternative_level_tile_proxy", key[0], key[1], key[2]);
+		//undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", key[0], key[1], key[2], val[0], val[1], val[2]);
 	}
 	undo_redo->add_do_method(this, "_update_lists");
 	undo_redo->add_undo_method(this, "_update_lists");
@@ -88,7 +89,8 @@ void RTileProxiesManagerDialog::_update_lists() {
 	for (int i = 0; i < proxies.size(); i++) {
 		Array proxy = proxies[i];
 		String text = vformat("%s", proxy[0]).rpad(5) + "-> " + vformat("%s", proxy[1]);
-		int id = source_level_list->add_item(text);
+		source_level_list->add_item(text);
+		int id = source_level_list->get_item_count() - 1;
 		source_level_list->set_item_metadata(id, proxy[0]);
 	}
 
@@ -96,7 +98,8 @@ void RTileProxiesManagerDialog::_update_lists() {
 	for (int i = 0; i < proxies.size(); i++) {
 		Array proxy = proxies[i];
 		String text = vformat("%s, %s", proxy[0], proxy[1]).rpad(17) + "-> " + vformat("%s, %s", proxy[2], proxy[3]);
-		int id = coords_level_list->add_item(text);
+		coords_level_list->add_item(text);
+		int id = coords_level_list->get_item_count() - 1;
 		coords_level_list->set_item_metadata(id, proxy.slice(0, 2));
 	}
 
@@ -104,7 +107,8 @@ void RTileProxiesManagerDialog::_update_lists() {
 	for (int i = 0; i < proxies.size(); i++) {
 		Array proxy = proxies[i];
 		String text = vformat("%s, %s, %s", proxy[0], proxy[1], proxy[2]).rpad(24) + "-> " + vformat("%s, %s, %s", proxy[3], proxy[4], proxy[5]);
-		int id = alternative_level_list->add_item(text);
+		alternative_level_list->add_item(text);
+		int id = alternative_level_list->get_item_count() - 1;
 		alternative_level_list->set_item_metadata(id, proxy.slice(0, 3));
 	}
 }
@@ -152,12 +156,15 @@ void RTileProxiesManagerDialog::_add_button_pressed() {
 		if (from_coords.x >= 0 && from_coords.y >= 0 && to_coords.x >= 0 && to_coords.y >= 0) {
 			if (from.alternative_tile != RTileSetSource::INVALID_TILE_ALTERNATIVE && to.alternative_tile != RTileSetSource::INVALID_TILE_ALTERNATIVE) {
 				undo_redo->create_action(TTR("Create Alternative-level Tile Proxy"));
-				undo_redo->add_do_method(*tile_set, "set_alternative_level_tile_proxy", from.source_id, from.get_atlas_coords(), from.alternative_tile, to.source_id, to.get_atlas_coords(), to.alternative_tile);
+				//TODO
+				//undo_redo->add_do_method(*tile_set, "set_alternative_level_tile_proxy", from.source_id, from.get_atlas_coords(), from.alternative_tile, to.source_id, to.get_atlas_coords(), to.alternative_tile);
 				if (tile_set->has_alternative_level_tile_proxy(from.source_id, from.get_atlas_coords(), from.alternative_tile)) {
 					Array a = tile_set->get_alternative_level_tile_proxy(from.source_id, from.get_atlas_coords(), from.alternative_tile);
-					undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", to.source_id, to.get_atlas_coords(), to.alternative_tile, a[0], a[1], a[2]);
+					//TODO
+					//undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", to.source_id, to.get_atlas_coords(), to.alternative_tile, a[0], a[1], a[2]);
 				} else {
-					undo_redo->add_undo_method(*tile_set, "remove_alternative_level_tile_proxy", from.source_id, from.get_atlas_coords(), from.alternative_tile);
+					//TODO
+					//undo_redo->add_undo_method(*tile_set, "remove_alternative_level_tile_proxy", from.source_id, from.get_atlas_coords(), from.alternative_tile);
 				}
 			} else {
 				undo_redo->create_action(TTR("Create Coords-level Tile Proxy"));
@@ -205,7 +212,8 @@ void RTileProxiesManagerDialog::_clear_invalid_button_pressed() {
 	proxies = tile_set->get_alternative_level_tile_proxies();
 	for (int i = 0; i < proxies.size(); i++) {
 		Array proxy = proxies[i];
-		undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", proxy[0], proxy[1], proxy[2], proxy[3], proxy[4], proxy[5]);
+		//TODO
+		//undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", proxy[0], proxy[1], proxy[2], proxy[3], proxy[4], proxy[5]);
 	}
 	undo_redo->add_do_method(this, "_update_lists");
 	undo_redo->add_undo_method(this, "_update_lists");
@@ -232,7 +240,8 @@ void RTileProxiesManagerDialog::_clear_all_button_pressed() {
 	proxies = tile_set->get_alternative_level_tile_proxies();
 	for (int i = 0; i < proxies.size(); i++) {
 		Array proxy = proxies[i];
-		undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", proxy[0], proxy[1], proxy[2], proxy[3], proxy[4], proxy[5]);
+		//TODO
+		//undo_redo->add_undo_method(*tile_set, "set_alternative_level_tile_proxy", proxy[0], proxy[1], proxy[2], proxy[3], proxy[4], proxy[5]);
 	}
 	undo_redo->add_do_method(this, "_update_lists");
 	undo_redo->add_undo_method(this, "_update_lists");
@@ -243,13 +252,17 @@ bool RTileProxiesManagerDialog::_set(const StringName &p_name, const Variant &p_
 	if (p_name == "from_source") {
 		from.source_id = MAX(int(p_value), -1);
 	} else if (p_name == "from_coords") {
-		from.set_atlas_coords(Vector2i(p_value).max(Vector2i(-1, -1)));
+		Vector2i v = Vector2i(Vector2(p_value));
+
+		from.set_atlas_coords(Vector2i(MAX(v.x, -1), MAX(v.y, -1)));
 	} else if (p_name == "from_alternative") {
 		from.alternative_tile = MAX(int(p_value), -1);
 	} else if (p_name == "to_source") {
 		to.source_id = MAX(int(p_value), 0);
 	} else if (p_name == "to_coords") {
-		to.set_atlas_coords(Vector2i(p_value).max(Vector2i(0, 0)));
+		Vector2i v = Vector2i(Vector2(p_value));
+
+		to.set_atlas_coords(Vector2i(MAX(v.x, 0), MAX(v.y, 0)));
 	} else if (p_name == "to_alternative") {
 		to.alternative_tile = MAX(int(p_value), 0);
 	} else {
@@ -287,7 +300,7 @@ void RTileProxiesManagerDialog::_unhandled_key_input(Ref<InputEvent> p_event) {
 		}
 
 		if (popup_menu->activate_item_by_event(p_event, false)) {
-			set_input_as_handled();
+			get_tree()->set_input_as_handled();
 		}
 	}
 }
@@ -302,6 +315,13 @@ void RTileProxiesManagerDialog::cancel_pressed() {
 void RTileProxiesManagerDialog::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_update_lists"), &RTileProxiesManagerDialog::_update_lists);
 	ClassDB::bind_method(D_METHOD("_unhandled_key_input"), &RTileProxiesManagerDialog::_unhandled_key_input);
+	ClassDB::bind_method(D_METHOD("_right_clicked"), &RTileProxiesManagerDialog::_right_clicked);
+	ClassDB::bind_method(D_METHOD("_menu_id_pressed"), &RTileProxiesManagerDialog::_menu_id_pressed);
+	ClassDB::bind_method(D_METHOD("_property_changed"), &RTileProxiesManagerDialog::_property_changed);
+
+	ClassDB::bind_method(D_METHOD("_add_button_pressed"), &RTileProxiesManagerDialog::_add_button_pressed);
+	ClassDB::bind_method(D_METHOD("_clear_invalid_button_pressed"), &RTileProxiesManagerDialog::_clear_invalid_button_pressed);
+	ClassDB::bind_method(D_METHOD("_clear_all_button_pressed"), &RTileProxiesManagerDialog::_clear_all_button_pressed);
 }
 
 void RTileProxiesManagerDialog::update_tile_set(Ref<RTileSet> p_tile_set) {
@@ -333,7 +353,9 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	source_level_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	source_level_list->set_select_mode(ItemList::SELECT_MULTI);
 	source_level_list->set_allow_rmb_select(true);
-	source_level_list->connect("item_rmb_selected", callable_mp(this, &RTileProxiesManagerDialog::_right_clicked), varray(source_level_list));
+	Vector<Variant> source_level_list_arr;
+	source_level_list_arr.push_back(source_level_list);
+	source_level_list->connect("item_rmb_selected", this, "_right_clicked", source_level_list_arr);
 	vbox_container->add_child(source_level_list);
 
 	Label *coords_level_label = memnew(Label);
@@ -344,7 +366,9 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	coords_level_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	coords_level_list->set_select_mode(ItemList::SELECT_MULTI);
 	coords_level_list->set_allow_rmb_select(true);
-	coords_level_list->connect("item_rmb_selected", callable_mp(this, &RTileProxiesManagerDialog::_right_clicked), varray(coords_level_list));
+	Vector<Variant> coords_level_list_arr;
+	coords_level_list_arr.push_back(coords_level_list);
+	coords_level_list->connect("item_rmb_selected", this, "_right_clicked", coords_level_list_arr);
 	vbox_container->add_child(coords_level_list);
 
 	Label *alternative_level_label = memnew(Label);
@@ -355,12 +379,14 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	alternative_level_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	alternative_level_list->set_select_mode(ItemList::SELECT_MULTI);
 	alternative_level_list->set_allow_rmb_select(true);
-	alternative_level_list->connect("item_rmb_selected", callable_mp(this, &RTileProxiesManagerDialog::_right_clicked), varray(alternative_level_list));
+	Vector<Variant> alternative_level_list_arr;
+	alternative_level_list_arr.push_back(alternative_level_list);
+	alternative_level_list->connect("item_rmb_selected", this, "_right_clicked", alternative_level_list_arr);
 	vbox_container->add_child(alternative_level_list);
 
 	popup_menu = memnew(PopupMenu);
 	popup_menu->add_shortcut(ED_GET_SHORTCUT("ui_text_delete"));
-	popup_menu->connect("id_pressed", callable_mp(this, &RTileProxiesManagerDialog::_menu_id_pressed));
+	popup_menu->connect("id_pressed", this, "_menu_id_pressed");
 	add_child(popup_menu);
 
 	// Add proxy panel.
@@ -382,7 +408,7 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	source_from_property_editor = memnew(EditorPropertyInteger);
 	source_from_property_editor->set_label(TTR("From Source"));
 	source_from_property_editor->set_object_and_property(this, "from_source");
-	source_from_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
+	source_from_property_editor->connect("property_changed", this, "_property_changed");
 	source_from_property_editor->set_selectable(false);
 	source_from_property_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	source_from_property_editor->setup(-1, 99999, 1, true, false);
@@ -391,17 +417,17 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	coords_from_property_editor = memnew(EditorPropertyVector2);
 	coords_from_property_editor->set_label(TTR("From Coords"));
 	coords_from_property_editor->set_object_and_property(this, "from_coords");
-	coords_from_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
+	coords_from_property_editor->connect("property_changed", this, "_property_changed");
 	coords_from_property_editor->set_selectable(false);
 	coords_from_property_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	coords_from_property_editor->setup(-1, 99999, true);
+	coords_from_property_editor->setup(-1, 99999, 1, true);
 	coords_from_property_editor->hide();
 	vboxcontainer_from->add_child(coords_from_property_editor);
 
 	alternative_from_property_editor = memnew(EditorPropertyInteger);
 	alternative_from_property_editor->set_label(TTR("From Alternative"));
 	alternative_from_property_editor->set_object_and_property(this, "from_alternative");
-	alternative_from_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
+	alternative_from_property_editor->connect("property_changed", this, "_property_changed");
 	alternative_from_property_editor->set_selectable(false);
 	alternative_from_property_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	alternative_from_property_editor->setup(-1, 99999, 1, true, false);
@@ -416,7 +442,7 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	source_to_property_editor = memnew(EditorPropertyInteger);
 	source_to_property_editor->set_label(TTR("To Source"));
 	source_to_property_editor->set_object_and_property(this, "to_source");
-	source_to_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
+	source_to_property_editor->connect("property_changed", this, "_property_changed");
 	source_to_property_editor->set_selectable(false);
 	source_to_property_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	source_to_property_editor->setup(-1, 99999, 1, true, false);
@@ -425,17 +451,17 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	coords_to_property_editor = memnew(EditorPropertyVector2);
 	coords_to_property_editor->set_label(TTR("To Coords"));
 	coords_to_property_editor->set_object_and_property(this, "to_coords");
-	coords_to_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
+	coords_to_property_editor->connect("property_changed", this, "_property_changed");
 	coords_to_property_editor->set_selectable(false);
 	coords_to_property_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	coords_to_property_editor->setup(-1, 99999, true);
+	coords_to_property_editor->setup(-1, 99999, 1, true);
 	coords_to_property_editor->hide();
 	vboxcontainer_to->add_child(coords_to_property_editor);
 
 	alternative_to_property_editor = memnew(EditorPropertyInteger);
 	alternative_to_property_editor->set_label(TTR("To Alternative"));
 	alternative_to_property_editor->set_object_and_property(this, "to_alternative");
-	alternative_to_property_editor->connect("property_changed", callable_mp(this, &RTileProxiesManagerDialog::_property_changed));
+	alternative_to_property_editor->connect("property_changed", this, "_property_changed");
 	alternative_to_property_editor->set_selectable(false);
 	alternative_to_property_editor->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	alternative_to_property_editor->setup(-1, 99999, 1, true, false);
@@ -445,7 +471,7 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	Button *add_button = memnew(Button);
 	add_button->set_text(TTR("Add"));
 	add_button->set_h_size_flags(Control::SIZE_SHRINK_CENTER);
-	add_button->connect("pressed", callable_mp(this, &RTileProxiesManagerDialog::_add_button_pressed));
+	add_button->connect("pressed", this, "_add_button_pressed");
 	vbox_container->add_child(add_button);
 
 	h_separator = memnew(HSeparator);
@@ -462,13 +488,13 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	Button *clear_invalid_button = memnew(Button);
 	clear_invalid_button->set_text(TTR("Clear Invalid"));
 	clear_invalid_button->set_h_size_flags(Control::SIZE_SHRINK_CENTER);
-	clear_invalid_button->connect("pressed", callable_mp(this, &RTileProxiesManagerDialog::_clear_invalid_button_pressed));
+	clear_invalid_button->connect("pressed", this, "_clear_invalid_button_pressed");
 	hboxcontainer->add_child(clear_invalid_button);
 
 	Button *clear_all_button = memnew(Button);
 	clear_all_button->set_text(TTR("Clear All"));
 	clear_all_button->set_h_size_flags(Control::SIZE_SHRINK_CENTER);
-	clear_all_button->connect("pressed", callable_mp(this, &RTileProxiesManagerDialog::_clear_all_button_pressed));
+	clear_all_button->connect("pressed", this, "_clear_all_button_pressed");
 	hboxcontainer->add_child(clear_all_button);
 
 	h_separator = memnew(HSeparator);
