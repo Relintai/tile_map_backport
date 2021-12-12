@@ -234,7 +234,7 @@ private:
 	void _tile_atlas_control_unscaled_draw();
 	void _tile_atlas_control_mouse_exited();
 	void _tile_atlas_control_gui_input(const Ref<InputEvent> &p_event);
-	void _tile_atlas_view_transform_changed();
+	void _tile_atlas_view_transform_changed(const float zoom = 0, const Vector2 &scroll = Vector2());
 
 	// A control over the alternative tiles.
 	Vector3i hovered_alternative_tile_coords = Vector3i(RTileSetSource::INVALID_ATLAS_COORDS.x, RTileSetSource::INVALID_ATLAS_COORDS.y, RTileSetSource::INVALID_TILE_ALTERNATIVE);

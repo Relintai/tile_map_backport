@@ -174,7 +174,7 @@ void RTileAtlasView::_update_zoom_and_panning(bool p_zoom_on_mouse_pos) {
 	center_container->set_size(center_container->get_minimum_size());
 }
 
-void RTileAtlasView::_zoom_widget_changed() {
+void RTileAtlasView::_zoom_widget_changed(const float zoom) {
 	_update_zoom_and_panning();
 	emit_signal(("transform_changed"), zoom_widget->get_zoom(), panning);
 }

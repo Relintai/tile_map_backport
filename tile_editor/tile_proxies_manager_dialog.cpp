@@ -386,7 +386,7 @@ RTileProxiesManagerDialog::RTileProxiesManagerDialog() {
 	vbox_container->add_child(alternative_level_list);
 
 	popup_menu = memnew(PopupMenu);
-	popup_menu->add_shortcut(ED_GET_SHORTCUT("ui_text_delete"));
+	//popup_menu->add_shortcut(ED_GET_SHORTCUT("ui_text_delete"));
 	popup_menu->connect("id_pressed", this, "_menu_id_pressed");
 	add_child(popup_menu);
 

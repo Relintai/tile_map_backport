@@ -3926,7 +3926,7 @@ void RTileSetAtlasSource::_get_property_list(List<PropertyInfo> *p_list) const {
 
 			for (List<PropertyInfo>::Element *E = alternative_property_list.front(); E; E = E->next()) {
 				PropertyInfo &alternative_property_info = E->get();
-				Variant default_value = ClassDB::class_get_default_property_value("TileData", alternative_property_info.name);
+				Variant default_value = ClassDB::class_get_default_property_value("RTileData", alternative_property_info.name);
 				Variant value = E_alternative->value()->get(alternative_property_info.name);
 				if (default_value.get_type() != Variant::NIL && bool(Variant::evaluate(Variant::OP_EQUAL, value, default_value))) {
 					alternative_property_info.usage ^= PROPERTY_USAGE_STORAGE;

@@ -63,7 +63,7 @@ private:
 	CenterContainer *center_container;
 	Vector2 panning;
 	void _update_zoom_and_panning(bool p_zoom_on_mouse_pos = false);
-	void _zoom_widget_changed();
+	void _zoom_widget_changed(const float zoom = 0);
 	void _center_view();
 	virtual void gui_input(const Ref<InputEvent> &p_event);
 

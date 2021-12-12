@@ -165,7 +165,7 @@ void EditorZoomWidget::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_button_zoom_minus"), &EditorZoomWidget::_button_zoom_minus);
 	ClassDB::bind_method(D_METHOD("_button_zoom_reset"), &EditorZoomWidget::_button_zoom_reset);
-	ClassDB::bind_method(D_METHOD("_button_zoom_reset"), &EditorZoomWidget::_button_zoom_reset);
+	ClassDB::bind_method(D_METHOD("_button_zoom_plus"), &EditorZoomWidget::_button_zoom_plus);
 
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "zoom"), "set_zoom", "get_zoom");
 

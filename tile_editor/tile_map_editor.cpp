@@ -993,6 +993,9 @@ Map<Vector2i, RTileMapCell> RTileMapEditorTilesPlugin::_draw_line(Vector2 p_star
 	Ref<RTileMapPattern> pattern = p_erase ? erase_pattern : selection_pattern;
 
 	Map<Vector2i, RTileMapCell> output;
+
+	ERR_FAIL_COND_V(!pattern.is_valid(), output);
+
 	if (!pattern->is_empty()) {
 		// Paint the tiles on the tile map.
 		if (!p_erase && random_tile_checkbox->is_pressed()) {
@@ -4029,7 +4032,7 @@ RTileMapEditor::RTileMapEditor() {
 	layers_selection_button->set_toggle_mode(true);
 	layers_selection_button->connect("draw", this, "_layers_selection_button_draw");
 	layers_selection_button->connect("pressed", this, "_layers_selection_button_pressed");
-	layers_selection_button->connect("hidden", layers_selection_popup, "hide");
+	layers_selection_button->connect("hide", layers_selection_popup, "hide");
 	layers_selection_button->set_tooltip(TTR("Tile Map Layer"));
 	layers_selection_button->add_child(layers_selection_popup);
 	tile_map_toolbar->add_child(layers_selection_button);

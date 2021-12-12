@@ -980,7 +980,7 @@ void RTileSetAtlasSourceEditor::_tile_atlas_control_mouse_exited() {
 	tile_atlas_view->update();
 }
 
-void RTileSetAtlasSourceEditor::_tile_atlas_view_transform_changed() {
+void RTileSetAtlasSourceEditor::_tile_atlas_view_transform_changed(const float zoom, const Vector2 &scroll) {
 	tile_atlas_control->update();
 	tile_atlas_control_unscaled->update();
 }
