@@ -38,7 +38,7 @@
 
 #include "core/core_string_names.h"
 
-void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::set_id(int p_id) {
+void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::set_id(int p_id) {
 	ERR_FAIL_COND(p_id < 0);
 	if (source_id == p_id) {
 		return;
@@ -51,11 +51,11 @@ void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::
 	emit_signal(("changed"), "id");
 }
 
-int RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::get_id() {
+int RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::get_id() {
 	return source_id;
 }
 
-bool RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_set(const StringName &p_name, const Variant &p_value) {
+bool RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_set(const StringName &p_name, const Variant &p_value) {
 	String name = p_name;
 	if (name == "name") {
 		// Use the resource_name property to store the source's name.
@@ -69,7 +69,7 @@ bool RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::
 	return valid;
 }
 
-bool RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_get(const StringName &p_name, Variant &r_ret) const {
+bool RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_get(const StringName &p_name, Variant &r_ret) const {
 	if (!tile_set_scenes_collection_source) {
 		return false;
 	}
@@ -83,21 +83,21 @@ bool RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::
 	return valid;
 }
 
-void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_get_property_list(List<PropertyInfo> *p_list) const {
+void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::STRING, "name", PROPERTY_HINT_NONE, ""));
 }
 
-void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::_bind_methods() {
+void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::_bind_methods() {
 	// -- Shape and layout --
-	ClassDB::bind_method(D_METHOD("set_id", "id"), &RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::set_id);
-	ClassDB::bind_method(D_METHOD("get_id"), &RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::get_id);
+	ClassDB::bind_method(D_METHOD("set_id", "id"), &RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::set_id);
+	ClassDB::bind_method(D_METHOD("get_id"), &RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::get_id);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "id"), "set_id", "get_id");
 
 	ADD_SIGNAL(MethodInfo("changed", PropertyInfo(Variant::STRING, "what")));
 }
 
-void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::edit(Ref<RTileSet> p_tile_set, RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id) {
+void RTileSetScenesCollectionSourceEditor::TileSetScenesCollectionProxyObject::edit(Ref<RTileSet> p_tile_set, RTileSetScenesCollectionSource *p_tile_set_scenes_collection_source, int p_source_id) {
 	ERR_FAIL_COND(!p_tile_set.is_valid());
 	ERR_FAIL_COND(!p_tile_set_scenes_collection_source);
 	ERR_FAIL_COND(p_source_id < 0);
@@ -108,22 +108,22 @@ void RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionProxyObject::
 	}
 
 	// Disconnect to changes.
-	if (tile_set_scenes_collection_source) {
-		tile_set_scenes_collection_source->disconnect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
-	}
+	//if (tile_set_scenes_collection_source) {
+	//	tile_set_scenes_collection_source->disconnect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
+	//}
 
 	tile_set = p_tile_set;
 	tile_set_scenes_collection_source = p_tile_set_scenes_collection_source;
 	source_id = p_source_id;
 
 	// Connect to changes.
-	if (tile_set_scenes_collection_source) {
-		if (!tile_set_scenes_collection_source->is_connected(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed))) {
-			tile_set_scenes_collection_source->connect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
-		}
-	}
+	//if (tile_set_scenes_collection_source) {
+	//	if (!tile_set_scenes_collection_source->is_connected(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed))) {
+	//		tile_set_scenes_collection_source->connect(CoreStringNames::get_singleton()->property_list_changed, callable_mp((Object *)this, &Object::notify_property_list_changed));
+	//	}
+	//}
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 }
 
 // -- Proxy object used by the tile inspector --
@@ -199,7 +199,7 @@ void RTileSetScenesCollectionSourceEditor::SceneTileProxyObject::edit(RTileSetSc
 	tile_set_scenes_collection_source = p_tile_set_scenes_collection_source;
 	scene_id = p_scene_id;
 
-	notify_property_list_changed();
+	property_list_changed_notify();
 }
 
 void RTileSetScenesCollectionSourceEditor::SceneTileProxyObject::_bind_methods() {
@@ -302,11 +302,13 @@ void RTileSetScenesCollectionSourceEditor::_update_scenes_list() {
 
 		int item_index = 0;
 		if (scene.is_valid()) {
-			item_index = scene_tiles_list->add_item(vformat("%s (path:%s id:%d)", scene->get_path().get_file().get_basename(), scene->get_path(), scene_id));
+			scene_tiles_list->add_item(vformat("%s (path:%s id:%d)", scene->get_path().get_file().get_basename(), scene->get_path(), scene_id));
+			item_index = scene_tiles_list->get_item_count() - 1;
 			Variant udata = i;
 			EditorResourcePreview::get_singleton()->queue_edited_resource_preview(scene, this, "_scene_thumbnail_done", udata);
 		} else {
-			item_index = scene_tiles_list->add_item(TTR("Tile with Invalid Scene"), get_theme_icon(("PackedScene"), ("EditorIcons")));
+			scene_tiles_list->add_item(TTR("Tile with Invalid Scene"), get_icon(("PackedScene"), ("EditorIcons")));
+			item_index = scene_tiles_list->get_item_count() - 1;
 		}
 		scene_tiles_list->set_item_metadata(item_index, scene_id);
 
@@ -329,8 +331,8 @@ void RTileSetScenesCollectionSourceEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED:
-			scene_tile_add_button->set_icon(get_theme_icon(("Add"), ("EditorIcons")));
-			scene_tile_delete_button->set_icon(get_theme_icon(("Remove"), ("EditorIcons")));
+			scene_tile_add_button->set_icon(get_icon(("Add"), ("EditorIcons")));
+			scene_tile_delete_button->set_icon(get_icon(("Remove"), ("EditorIcons")));
 			_update_scenes_list();
 			break;
 		case NOTIFICATION_INTERNAL_PROCESS:
@@ -365,7 +367,7 @@ void RTileSetScenesCollectionSourceEditor::edit(Ref<RTileSet> p_tile_set, RTileS
 
 	// Remove listener for old objects.
 	if (tile_set_scenes_collection_source) {
-		tile_set_scenes_collection_source->disconnect("changed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_changed));
+		tile_set_scenes_collection_source->disconnect("changed", this, "_tile_set_scenes_collection_source_changed");
 	}
 
 	// Change the edited object.
@@ -375,7 +377,7 @@ void RTileSetScenesCollectionSourceEditor::edit(Ref<RTileSet> p_tile_set, RTileS
 
 	// Add the listener again.
 	if (tile_set_scenes_collection_source) {
-		tile_set_scenes_collection_source->connect("changed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_changed));
+		tile_set_scenes_collection_source->connect("changed", this, "_tile_set_scenes_collection_source_changed");
 	}
 
 	// Update everything.
@@ -449,6 +451,18 @@ void RTileSetScenesCollectionSourceEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_scene_thumbnail_done"), &RTileSetScenesCollectionSourceEditor::_scene_thumbnail_done);
 	ClassDB::bind_method(D_METHOD("_can_drop_data_fw"), &RTileSetScenesCollectionSourceEditor::_can_drop_data_fw);
 	ClassDB::bind_method(D_METHOD("_drop_data_fw"), &RTileSetScenesCollectionSourceEditor::_drop_data_fw);
+
+	ClassDB::bind_method(D_METHOD("_tile_set_scenes_collection_source_changed"), &RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_changed);
+
+
+	ClassDB::bind_method(D_METHOD("_scenes_collection_source_proxy_object_changed"), &RTileSetScenesCollectionSourceEditor::_scenes_collection_source_proxy_object_changed);
+	ClassDB::bind_method(D_METHOD("_update_scenes_list"), &RTileSetScenesCollectionSourceEditor::_update_scenes_list);
+	ClassDB::bind_method(D_METHOD("_update_action_buttons"), &RTileSetScenesCollectionSourceEditor::_update_action_buttons);
+	ClassDB::bind_method(D_METHOD("_update_tile_inspector"), &RTileSetScenesCollectionSourceEditor::_update_tile_inspector);
+	ClassDB::bind_method(D_METHOD("_scenes_list_item_activated"), &RTileSetScenesCollectionSourceEditor::_scenes_list_item_activated);
+	ClassDB::bind_method(D_METHOD("_source_add_pressed"), &RTileSetScenesCollectionSourceEditor::_source_add_pressed);
+	ClassDB::bind_method(D_METHOD("_source_delete_pressed"), &RTileSetScenesCollectionSourceEditor::_source_delete_pressed);
+	ClassDB::bind_method(D_METHOD("_tile_set_scenes_collection_source_changed"), &RTileSetScenesCollectionSourceEditor::_tile_set_scenes_collection_source_changed);
 }
 
 RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
@@ -459,7 +473,7 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 
 	// Middle panel.
 	ScrollContainer *middle_panel = memnew(ScrollContainer);
-	middle_panel->set_horizontal_scroll_mode(ScrollContainer::SCROLL_MODE_DISABLED);
+	middle_panel->set_enable_h_scroll(false);
 	middle_panel->set_custom_minimum_size(Size2i(200, 0) * EDSCALE);
 	split_container_right_side->add_child(middle_panel);
 
@@ -472,12 +486,12 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 	scenes_collection_source_inspector_label->set_text(TTR("Scenes collection properties:"));
 	middle_vbox_container->add_child(scenes_collection_source_inspector_label);
 
-	scenes_collection_source_proxy_object = memnew(RTileSetScenesCollectionProxyObject());
-	scenes_collection_source_proxy_object->connect("changed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_scenes_collection_source_proxy_object_changed));
+	scenes_collection_source_proxy_object = memnew(TileSetScenesCollectionProxyObject());
+	scenes_collection_source_proxy_object->connect("changed", this, "_scenes_collection_source_proxy_object_changed");
 
 	scenes_collection_source_inspector = memnew(EditorInspector);
 	scenes_collection_source_inspector->set_undo_redo(undo_redo);
-	scenes_collection_source_inspector->set_vertical_scroll_mode(ScrollContainer::SCROLL_MODE_DISABLED);
+	scenes_collection_source_inspector->set_enable_v_scroll(false);
 	scenes_collection_source_inspector->edit(scenes_collection_source_proxy_object);
 	middle_vbox_container->add_child(scenes_collection_source_inspector);
 
@@ -488,12 +502,12 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 	middle_vbox_container->add_child(tile_inspector_label);
 
 	tile_proxy_object = memnew(SceneTileProxyObject(this));
-	tile_proxy_object->connect("changed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_update_scenes_list).unbind(1));
-	tile_proxy_object->connect("changed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_update_action_buttons).unbind(1));
+	tile_proxy_object->connect("changed", this, "_update_scenes_list");
+	tile_proxy_object->connect("changed", this, "_update_action_buttons");
 
 	tile_inspector = memnew(EditorInspector);
 	tile_inspector->set_undo_redo(undo_redo);
-	tile_inspector->set_vertical_scroll_mode(ScrollContainer::SCROLL_MODE_DISABLED);
+	tile_inspector->set_enable_v_scroll(false);
 	tile_inspector->edit(tile_proxy_object);
 	tile_inspector->set_use_folding(true);
 	middle_vbox_container->add_child(tile_inspector);
@@ -506,10 +520,10 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 	scene_tiles_list->set_h_size_flags(SIZE_EXPAND_FILL);
 	scene_tiles_list->set_v_size_flags(SIZE_EXPAND_FILL);
 	scene_tiles_list->set_drag_forwarding(this);
-	scene_tiles_list->connect("item_selected", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_update_tile_inspector).unbind(1));
-	scene_tiles_list->connect("item_selected", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_update_action_buttons).unbind(1));
-	scene_tiles_list->connect("item_activated", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_scenes_list_item_activated));
-	scene_tiles_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
+	scene_tiles_list->connect("item_selected", this, "_update_tile_inspector");
+	scene_tiles_list->connect("item_selected", this, "_update_action_buttons");
+	scene_tiles_list->connect("item_activated", this, "_scenes_list_item_activated");
+	//scene_tiles_list->set_texture_filter(CanvasItem::TEXTURE_FILTER_NEAREST);
 	right_vbox_container->add_child(scene_tiles_list);
 
 	HBoxContainer *scenes_bottom_actions = memnew(HBoxContainer);
@@ -517,13 +531,13 @@ RTileSetScenesCollectionSourceEditor::RTileSetScenesCollectionSourceEditor() {
 
 	scene_tile_add_button = memnew(Button);
 	scene_tile_add_button->set_flat(true);
-	scene_tile_add_button->connect("pressed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_source_add_pressed));
+	scene_tile_add_button->connect("pressed", this, "_source_add_pressed");
 	scenes_bottom_actions->add_child(scene_tile_add_button);
 
 	scene_tile_delete_button = memnew(Button);
 	scene_tile_delete_button->set_flat(true);
 	scene_tile_delete_button->set_disabled(true);
-	scene_tile_delete_button->connect("pressed", callable_mp(this, &RTileSetScenesCollectionSourceEditor::_source_delete_pressed));
+	scene_tile_delete_button->connect("pressed", this, "_source_delete_pressed");
 	scenes_bottom_actions->add_child(scene_tile_delete_button);
 }
 
