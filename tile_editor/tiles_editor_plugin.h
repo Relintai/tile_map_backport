@@ -37,6 +37,7 @@
 #include "tile_atlas_view.h"
 #include "tile_map_editor.h"
 #include "tile_set_editor.h"
+#include "core/os/semaphore.h"
 
 class RTilesEditorPlugin : public EditorPlugin {
 	GDCLASS(RTilesEditorPlugin, EditorPlugin);
@@ -80,7 +81,7 @@ private:
 	SafeFlag pattern_thread_exited;
 	Semaphore pattern_preview_done;
 	void _preview_frame_started();
-	void _pattern_preview_done();
+	void _pattern_preview_done(const Variant &p_userdata);
 	static void _thread_func(void *ud);
 	void _thread();
 

@@ -35,6 +35,7 @@
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
+#include "scene/main/viewport.h"
 
 #include "../rtile_map.h"
 #include "scene/gui/box_container.h"
@@ -48,10 +49,10 @@
 RTilesEditorPlugin *RTilesEditorPlugin::singleton = nullptr;
 
 void RTilesEditorPlugin::_preview_frame_started() {
-	VS::get_singleton()->request_frame_drawn_callback(callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_pattern_preview_done));
+	VS::get_singleton()->request_frame_drawn_callback(this, "_pattern_preview_done", Variant());
 }
 
-void RTilesEditorPlugin::_pattern_preview_done() {
+void RTilesEditorPlugin::_pattern_preview_done(const Variant &p_userdata) {
 	pattern_preview_done.post();
 }
 
@@ -77,18 +78,18 @@ void RTilesEditorPlugin::_thread() {
 
 			if (item.pattern.is_valid() && !item.pattern->is_empty()) {
 				// Generate the pattern preview
-				SubViewport *viewport = memnew(SubViewport);
+				Viewport *viewport = memnew(Viewport);
 				viewport->set_size(thumbnail_size2);
 				viewport->set_disable_input(true);
 				viewport->set_transparent_background(true);
-				viewport->set_update_mode(SubViewport::UPDATE_ONCE);
+				viewport->set_update_mode(Viewport::UPDATE_ONCE);
 
 				RTileMap *tile_map = memnew(RTileMap);
 				tile_map->set_tileset(item.tile_set);
 				tile_map->set_pattern(0, Vector2(), item.pattern);
 				viewport->add_child(tile_map);
 
-				TypedArray<Vector2i> used_cells = tile_map->get_used_cells(0);
+				Vector<Vector2> used_cells = tile_map->get_used_cells(0);
 
 				Rect2 encompassing_rect = Rect2();
 				encompassing_rect.set_position(tile_map->map_to_world(used_cells[0]));
@@ -116,11 +117,11 @@ void RTilesEditorPlugin::_thread() {
 				// Add the viewport at the lasst moment to avoid rendering too early.
 				EditorNode::get_singleton()->add_child(viewport);
 
-				RS::get_singleton()->connect(("frame_pre_draw"), callable_mp(const_cast<RTilesEditorPlugin *>(this), &RTilesEditorPlugin::_preview_frame_started), Vector<Variant>(), Object::CONNECT_ONESHOT);
+				VS::get_singleton()->connect(("frame_pre_draw"), this, "_preview_frame_started", Vector<Variant>(), Object::CONNECT_ONESHOT);
 
 				pattern_preview_done.wait();
 
-				Ref<Image> image = viewport->get_texture()->get_image();
+				Ref<Image> image = viewport->get_texture()->get_data();
 				Ref<ImageTexture> image_texture;
 				image_texture.instance();
 				image_texture->create_from_image(image);
@@ -129,8 +130,8 @@ void RTilesEditorPlugin::_thread() {
 				Variant args[] = { item.pattern, image_texture };
 				const Variant *args_ptr[] = { &args[0], &args[1] };
 				Variant r;
-				Callable::CallError error;
-				item.callback.call(args_ptr, 2, r, error);
+				Variant::CallError error;
+				r = item.obj->call(item.callback, args_ptr, 2, error);
 
 				viewport->queue_delete();
 			} else {
@@ -180,6 +181,9 @@ void RTilesEditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("synchronize_sources_list"), &RTilesEditorPlugin::synchronize_sources_list);
 
 	ClassDB::bind_method(D_METHOD("_tile_map_changed"), &RTilesEditorPlugin::_tile_map_changed);
+	ClassDB::bind_method(D_METHOD("_pattern_preview_done"), &RTilesEditorPlugin::_pattern_preview_done);
+
+	ClassDB::bind_method(D_METHOD("_preview_frame_started"), &RTilesEditorPlugin::_preview_frame_started);
 }
 
 void RTilesEditorPlugin::make_visible(bool p_visible) {
@@ -221,7 +225,7 @@ void RTilesEditorPlugin::synchronize_sources_list(Object *p_current) {
 
 	if (item_list->is_visible_in_tree()) {
 		if (atlas_sources_lists_current < 0 || atlas_sources_lists_current >= item_list->get_item_count()) {
-			item_list->deselect_all();
+			item_list->unselect_all();
 		} else {
 			item_list->set_current(atlas_sources_lists_current);
 			item_list->emit_signal(("item_selected"), atlas_sources_lists_current);
@@ -275,7 +279,7 @@ void RTilesEditorPlugin::edit(Object *p_object) {
 
 	// Add change listener.
 	if (tile_map) {
-		tile_map->connect("changed", callable_mp(this, &RTilesEditorPlugin::_tile_map_changed));
+		tile_map->connect("changed", this, "_tile_map_changed");
 	}
 }
 
@@ -324,7 +328,7 @@ RTilesEditorPlugin::~RTilesEditorPlugin() {
 		pattern_preview_sem.post();
 		while (!pattern_thread_exited.is_set()) {
 			OS::get_singleton()->delay_usec(10000);
-			RenderingServer::get_singleton()->sync(); //sync pending stuff, as thread may be blocked on visual server
+			VisualServer::get_singleton()->sync(); //sync pending stuff, as thread may be blocked on visual server
 		}
 		pattern_preview_thread.wait_to_finish();
 	}
