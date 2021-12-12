@@ -23,7 +23,9 @@ cd ./godot/modules/
 3. Clone this repository
 
 ```
-git clone https://github.com/Relintai/rtile_map rtile_map
+git clone https://github.com/Relintai/tile_map_backport.git rtile_map
 ```
+
+The folder needs to be named `rtile_map`!
 
 4. Build Godot. [Tutorial](https://docs.godotengine.org/en/latest/development/compiling/index.html)
