@@ -7,6 +7,7 @@ env.add_source_files(env.modules_sources,"geometry_2d.cpp")
 env.add_source_files(env.modules_sources,"array_lt_op.cpp")
 env.add_source_files(env.modules_sources,"rtile_set.cpp")
 env.add_source_files(env.modules_sources,"rtile_map.cpp")
+env.add_source_files(env.modules_sources,"math_ext.cpp")
 
 if env["tools"]:
     env.add_source_files(env.modules_sources, "tile_editor/*.cpp")
