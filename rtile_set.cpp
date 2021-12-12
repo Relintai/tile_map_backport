@@ -1782,6 +1782,9 @@ Vector<Vector<Ref<Texture>>> RTileSet::generate_terrains_icons(Size2i p_size) {
 		for (int terrain = 0; terrain < get_terrains_count(terrain_set); terrain++) {
 			Ref<Image> image;
 			image.instance();
+
+			
+
 			if (counts[terrain_set][terrain].count > 0) {
 				// Get the best tile.
 				Ref<Texture> texture = counts[terrain_set][terrain].texture;
@@ -1791,8 +1794,11 @@ Vector<Vector<Ref<Texture>>> RTileSet::generate_terrains_icons(Size2i p_size) {
 				image->resize(p_size.x, p_size.y, Image::INTERPOLATE_NEAREST);
 			} else {
 				image->create(1, 1, false, Image::FORMAT_RGBA8);
+				image->lock();
 				image->set_pixel(0, 0, get_terrain_color(terrain_set, terrain));
+				image->unlock();
 			}
+
 			Ref<ImageTexture> icon;
 			icon.instance();
 			icon->create_from_image(image);
@@ -4539,7 +4545,6 @@ void RTileSetAtlasSource::_update_padded_texture() {
 	Ref<Image> image;
 	image.instance();
 	image->create(size.x, size.y, false, Image::FORMAT_RGBA8);
-	image->lock();
 
 	for (const Map<Vector2i, TileAlternativesData>::Element *kv = tiles.front(); kv; kv = kv->next()) {
 		for (int frame = 0; frame < (int)kv->value().animation_frames_durations.size(); frame++) {
@@ -4562,14 +4567,16 @@ void RTileSetAtlasSource::_update_padded_texture() {
 			image->blit_rect(*src, left_src_rect, base_pos + Vector2i(-1, 0));
 			image->blit_rect(*src, right_src_rect, base_pos + Vector2i(src_rect.size.x, 0));
 
+			src->lock();
+			image->lock();
 			image->set_pixelv(base_pos + Vector2i(-1, -1), src->get_pixelv(src_rect.position));
 			image->set_pixelv(base_pos + Vector2i(src_rect.size.x, -1), src->get_pixelv(src_rect.position + Vector2i(src_rect.size.x - 1, 0)));
 			image->set_pixelv(base_pos + Vector2i(-1, src_rect.size.y), src->get_pixelv(src_rect.position + Vector2i(0, src_rect.size.y - 1)));
 			image->set_pixelv(base_pos + Vector2i(src_rect.size.x, src_rect.size.y), src->get_pixelv(src_rect.position + Vector2i(src_rect.size.x - 1, src_rect.size.y - 1)));
+			image->unlock();
+			src->unlock();
 		}
 	}
-
-	image->unlock();
 
 	if (!padded_texture.is_valid()) {
 		padded_texture.instance();
