@@ -4539,6 +4539,7 @@ void RTileSetAtlasSource::_update_padded_texture() {
 	Ref<Image> image;
 	image.instance();
 	image->create(size.x, size.y, false, Image::FORMAT_RGBA8);
+	image->lock();
 
 	for (const Map<Vector2i, TileAlternativesData>::Element *kv = tiles.front(); kv; kv = kv->next()) {
 		for (int frame = 0; frame < (int)kv->value().animation_frames_durations.size(); frame++) {
@@ -4567,6 +4568,8 @@ void RTileSetAtlasSource::_update_padded_texture() {
 			image->set_pixelv(base_pos + Vector2i(src_rect.size.x, src_rect.size.y), src->get_pixelv(src_rect.position + Vector2i(src_rect.size.x - 1, src_rect.size.y - 1)));
 		}
 	}
+
+	image->unlock();
 
 	if (!padded_texture.is_valid()) {
 		padded_texture.instance();
