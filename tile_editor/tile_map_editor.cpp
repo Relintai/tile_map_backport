@@ -1011,12 +1011,22 @@ Map<Vector2i, RTileMapCell> RTileMapEditorTilesPlugin::_draw_line(Vector2 p_star
 			Vector2i last_hovered_cell = tile_map->world_to_map(p_from_mouse_pos - mouse_offset);
 			Vector2i new_hovered_cell = tile_map->world_to_map(p_to_mouse_pos - mouse_offset);
 			Vector2i drag_start_cell = tile_map->world_to_map(p_start_drag_mouse_pos - mouse_offset);
+			Vector2i pattern_size = pattern->get_size();
+
+			#warning TODO
+			if (pattern_size.x == 0) {
+				pattern_size.x = 1;
+			}
+
+			if (pattern_size.y == 0) {
+				pattern_size.y = 1;
+			}
 
 			PoolVector2Array used_cells = pattern->get_used_cells();
-			Vector2i offset = Vector2i(Math::posmod(drag_start_cell.x, pattern->get_size().x), Math::posmod(drag_start_cell.y, pattern->get_size().y)); // Note: no posmodv for Vector2i for now. Meh.s
-			Vector<Vector2i> line = RTileMapEditor::get_line(tile_map, (last_hovered_cell - offset) / pattern->get_size(), (new_hovered_cell - offset) / pattern->get_size());
+			Vector2i offset = Vector2i(Math::posmod(drag_start_cell.x, pattern_size.x), Math::posmod(drag_start_cell.y, pattern_size.y)); // Note: no posmodv for Vector2i for now. Meh.s
+			Vector<Vector2i> line = RTileMapEditor::get_line(tile_map, (last_hovered_cell - offset) / pattern_size, (new_hovered_cell - offset) / pattern_size);
 			for (int i = 0; i < line.size(); i++) {
-				Vector2i top_left = line[i] * pattern->get_size() + offset;
+				Vector2i top_left = line[i] * pattern_size + offset;
 				for (int j = 0; j < used_cells.size(); j++) {
 					Vector2i coords = tile_map->map_pattern(top_left, used_cells[j], pattern);
 					output.insert(coords, RTileMapCell(pattern->get_cell_source_id(used_cells[j]), pattern->get_cell_atlas_coords(used_cells[j]), pattern->get_cell_alternative_tile(used_cells[j])));
