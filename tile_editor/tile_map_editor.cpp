@@ -1982,8 +1982,8 @@ void RTileMapEditorTilesPlugin::edit(ObjectID p_tile_map_id, int p_tile_map_laye
 
 void RTileMapEditorTilesPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_scene_thumbnail_done"), &RTileMapEditorTilesPlugin::_scene_thumbnail_done);
-	ClassDB::bind_method(D_METHOD("_set_tile_map_selection", "selection"), &RTileMapEditorTilesPlugin::_set_tile_map_selection);
-	ClassDB::bind_method(D_METHOD("_get_tile_map_selection"), &RTileMapEditorTilesPlugin::_get_tile_map_selection);
+	//ClassDB::bind_method(D_METHOD("_set_tile_map_selection", "selection"), &RTileMapEditorTilesPlugin::_set_tile_map_selection);
+	//ClassDB::bind_method(D_METHOD("_get_tile_map_selection"), &RTileMapEditorTilesPlugin::_get_tile_map_selection);
 	ClassDB::bind_method(D_METHOD("_pattern_preview_done"), &RTileMapEditorTilesPlugin::_pattern_preview_done);
 
 	ClassDB::bind_method(D_METHOD("_mouse_exited_viewport"), &RTileMapEditorTilesPlugin::_mouse_exited_viewport);
